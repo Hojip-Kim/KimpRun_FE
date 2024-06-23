@@ -1,0 +1,18 @@
+.table-wrapped {
+  margin: 70px 0 0 0;
+  padding: 15px;
+  width: 900px;
+  border: 2px solid gray;
+  border-radius: 15px;
+}
+
+.table-m1 {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.column {
+  text-align: center;
+  font-size: 0.8rem;
+  /* border: 1px solid white; */
+}
