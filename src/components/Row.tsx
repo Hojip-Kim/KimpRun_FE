@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect, useState } from 'react';
 import './Row.css';
 
@@ -16,6 +18,10 @@ const Row = ({ title, dataList, dataTypes, dataset }: RowType) => {
   // values가 존재하지 않을 경우 빈 배열을 사용
   //   console.log(dataset);
   const [rowData, setRowData] = useState({});
+  const [sortConfig, setSortConfig] = useState({
+    key: 'rate_change',
+    direction: 'asc',
+  });
   //   console.log(rowData);
 
   const getChangeRateStyle = (change_rate) => {
@@ -36,6 +42,26 @@ const Row = ({ title, dataList, dataTypes, dataset }: RowType) => {
     } else if (rate === 0 || string === 'EVEN') {
       return rate;
     }
+  };
+
+  const sortData = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+
+    const sortedData = Object.entries(rowData).sort((a, b) => {
+      if (a[1][key] < b[1][key]) {
+        return direction === 'asc' ? -1 : 1;
+      } else if (a[1][key] > b[1][key]) {
+        return direction === 'asc' ? 1 : -1;
+      }
+
+      return 0;
+    });
+
+    setRowData(Object.fromEntries(sortedData));
+    setSortConfig({ key, direction });
   };
 
   useEffect(() => {
@@ -85,7 +111,15 @@ const Row = ({ title, dataList, dataTypes, dataset }: RowType) => {
           <thead>
             <tr>
               {title.map((title) => (
-                <th key={title}>{title}</th>
+                <th key={title}>
+                  {title}{' '}
+                  <a
+                    className="sort-button"
+                    onClick={() => sortData('rate_change')}
+                  >
+                    btn
+                  </a>
+                </th>
               ))}
             </tr>
           </thead>
