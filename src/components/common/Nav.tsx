@@ -12,9 +12,8 @@ const Nav = () => {
   // TODO : refactoring - server side, client side hooks 나누기.
 
   const GetTether = async (): Promise<string | undefined> => {
-    // TODO : URL key 환경변수 설정.
-    const URL =
-      'https://quotation-api-cdn.dunamu.com/v1/forex/recent?codes=FRX.KRWUSD';
+    const URL = process.env.NEXT_PUBLIC_TETHER_URL;
+
     const requestInit: RequestInit = {
       method: 'GET',
       headers: { 'Content-type': 'application/json' },
@@ -22,7 +21,6 @@ const Nav = () => {
 
     try {
       const response = await serverFetch(URL, requestInit);
-      // console.debug(response);
 
       if (response.ok) {
         return await response.text;
@@ -33,7 +31,6 @@ const Nav = () => {
   };
 
   useEffect(() => {
-    // console.debug('hello');
     GetTether().then((res) => setDollars(res[0].basePrice));
 
     setUserCount((prevCount) => prevCount + 1);

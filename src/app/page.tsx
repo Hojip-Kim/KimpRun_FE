@@ -1,14 +1,31 @@
 'use client';
 
 import Row from '@/components/Row';
+import { setTokenDataset, setTokenList } from '@/redux/redux';
+import { AppDispatch, RootState } from '@/redux/store';
 import serverFetch from '@/server/fetch/server';
 import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 export const UpbitWebSocket = () => {
+  // state
   const [dataList, setDataList] = useState({});
   const [dataset, setDataset] = useState({});
 
-  const url = 'http://localhost:8080/market/first';
+  // redux
+  const dispatch: AppDispatch = useDispatch();
+  const tokenList = useSelector((state: RootState) => state.token.tokenList);
+  const tokenSet = useSelector((state: RootState) => state.token.tokenSet);
+
+  const updateTokenList = (newTokenList) => {
+    dispatch(setTokenList(newTokenList));
+  };
+
+  const updateTokenDataSet = (newTokenSet) => {
+    dispatch(setTokenDataset(newTokenSet));
+  };
+
+  const url = process.env.NEXT_PUBLIC_MARKET_FIRST_DATA;
   const requestInit: RequestInit = {
     method: 'GET',
     headers: { 'Content-type': 'application/json' },
@@ -34,7 +51,7 @@ export const UpbitWebSocket = () => {
     try {
       const data = await fetchData();
       if (data) {
-        setDataList(data);
+        updateTokenList(data);
       }
     } catch (error) {
       console.error(error);
@@ -44,12 +61,12 @@ export const UpbitWebSocket = () => {
   useEffect(() => {
     fetchDataAsync();
 
-    const ws = new WebSocket('ws://localhost:8080/websocket');
+    const ws = new WebSocket(process.env.NEXT_PUBLIC_WEBSOCKET_URL);
 
     ws.onmessage = (event) => {
       const parsedData = JSON.parse(event.data);
-      if (dataList) {
-        setDataset({
+      if (tokenList) {
+        updateTokenDataSet({
           token: parsedData.token,
           trade_price: parsedData.trade_price,
           trade_volume: parsedData.trade_volume,
@@ -70,10 +87,6 @@ export const UpbitWebSocket = () => {
     // Clean up the connection when component unmounts
     return () => ws.close();
   }, []);
-
-  // console.log(dataList);
-
-  // console.log(dataList);
 
   const dataTypes: String[] = [
     'token',
@@ -100,9 +113,9 @@ export const UpbitWebSocket = () => {
     <div>
       <Row
         title={dataTitle}
-        dataList={dataList}
+        dataList={tokenList}
         dataTypes={dataTypes}
-        dataset={dataset}
+        dataset={tokenSet}
       />
     </div>
   );
