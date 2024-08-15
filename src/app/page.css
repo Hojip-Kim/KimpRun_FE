@@ -1,0 +1,21 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.chart_container {
+  margin-top: 70px;
+  justify-content: center;
+  width: 100%;
+}
+
+#chart {
+  justify-content: center;
+  align-items: center;
+  width: 900px;
+  height: 350px;
+  margin: auto;
+  border: solid white;
+  border-radius: 10px;
+}
