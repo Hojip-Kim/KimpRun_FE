@@ -14,7 +14,7 @@ export const UpbitWebSocket = () => {
   // state
   const [tokenNameList, setTokenNameList] = useState({});
   const [tokenDataList, setTokenDataList] = useState({});
-  const [dataset, setDataset] = useState({});
+  const [dataset, setDataset] = useState<{ [key: string]: any }>({});
 
   // redux
   const dispatch: AppDispatch = useDispatch();
@@ -99,16 +99,13 @@ export const UpbitWebSocket = () => {
       const parsedData = JSON.parse(event.data);
 
       if (tokenList) {
-        setDataset({
-          token: parsedData.token,
-          trade_price: parsedData.trade_price,
-          trade_volume: parsedData.trade_volume,
-          change_rate: parsedData.change_rate,
-          highest_price: parsedData.highest_price,
-          lowest_price: parsedData.lowest_price,
-          opening_price: parsedData.opening_price,
-          rate_change: parsedData.rate_change,
-          acc_trade_price24: parsedData.acc_trade_price24,
+        setDataset((prevState) => {
+          const newState = { ...prevState };
+          Object.entries(parsedData).map(([key, value]) => {
+            newState[key] = value;
+          });
+
+          return newState;
         });
       }
     };
@@ -118,7 +115,6 @@ export const UpbitWebSocket = () => {
       ws.close();
     };
 
-    // Clean up the connection when component unmounts
     return () => ws.close();
   }, []);
 
@@ -145,18 +141,22 @@ export const UpbitWebSocket = () => {
   ];
 
   return (
-    <div>
+    <div className="main_container">
       <div className="chart_container">
         <TradingViewWidget></TradingViewWidget>
       </div>
 
-      <Row
-        title={dataTitle}
-        tokenNameList={tokenNameList.marketNameList}
-        tokenDataList={tokenDataList.marketDataList}
-        dataTypes={dataTypes}
-        dataset={dataset}
-      />
+      <div className="row_container">
+        <Row
+          title={dataTitle}
+          tokenNameList={tokenNameList.marketNameList}
+          tokenDataList={tokenDataList.marketDataList}
+          dataTypes={dataTypes}
+          dataset={dataset}
+        />
+      </div>
+
+      <div className="chat_container"></div>
     </div>
   );
 };
