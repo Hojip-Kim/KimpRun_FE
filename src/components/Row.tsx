@@ -5,7 +5,7 @@ import './Row.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { setTokenList } from '@/redux/redux';
-import { numberToKorean } from '@/method';
+import { numberToKorean, rateCompareByOriginPrice } from '@/method';
 
 /*
     TODO : style component 적용
@@ -32,11 +32,14 @@ const Row = ({
   const [nameList, setNameList] = useState({});
   const [dataList, setDataList] = useState({});
 
+  const [prevRowData, setPrevRowData] = useState({});
   const [rowData, setRowData] = useState({});
   const [sortConfig, setSortConfig] = useState({
     key: 'change_rate',
     direction: 'asc',
   });
+
+  const [fadeOutClass, setFadeOutClass] = useState({});
 
   const dispatch: AppDispatch = useDispatch();
 
@@ -47,10 +50,10 @@ const Row = ({
     dispatch(setTokenList(newTokenList));
   };
 
-  const getChangeRateStyle = (change, rate) => {
-    if (rate > 0 && change === 'RISE') {
-      return { color: 'green' };
-    } else if (rate < 0 && change === 'FALL') {
+  const getChangeRateStyle = (rate, change?) => {
+    if ((rate > 0 && change === 'RISE') || rate > 0) {
+      return { color: '#45E8BC' };
+    } else if ((rate < 0 && change === 'FALL') || rate < 0) {
       return { color: 'red' };
     } else {
       // console.log('change : ' + change);
@@ -97,6 +100,24 @@ const Row = ({
     setRowData(mergeData);
   };
 
+  const priceChangeStyle = (prev: number, cur: number) => {
+    if (prev === undefined)
+      return { transition: 'background-color 0.4s ease-in-out' };
+    if (prev < cur) {
+      return {
+        backgroundColor: 'rgba(0, 255, 0, 0.3)',
+        transition: 'background-color 0.4s ease-in-out',
+      }; // Green with opacity
+    } else if (prev > cur) {
+      return {
+        backgroundColor: 'rgba(255, 0, 0, 0.3)',
+        transition: 'background-color 0.4s ease-in-out',
+      }; // Red with opacity
+    } else {
+      return { transition: 'background-color 0.4s ease-in-out' };
+    }
+  };
+
   useEffect(() => {
     if (tokenNameList && tokenDataList) {
       setNameList(tokenNameList);
@@ -112,48 +133,38 @@ const Row = ({
 
   useEffect(() => {
     if (rowData && dataset) {
-      const token = dataset.token;
-      const change_rate = dataset.change_rate;
-      const highest_price = dataset.highest_price;
-      const lowest_price = dataset.lowest_price;
-      const opening_price = dataset.opening_price;
-      const rate_change = dataset.rate_change;
-      const trade_price = dataset.trade_price;
-      const trade_volume = dataset.trade_volume;
-      const acc_trade_price24 = dataset.acc_trade_price24;
+      setPrevRowData(rowData);
+      setRowData((prevState) => {
+        const newState = { ...prevState };
 
-      setRowData((prevState) => ({
-        ...prevState,
-        [token]: {
-          token,
-          trade_price,
-          trade_volume,
-          change_rate,
-          highest_price,
-          lowest_price,
-          opening_price,
-          rate_change,
-          acc_trade_price24,
-        },
-      }));
+        Object.entries(dataset).forEach(([token, data]) => {
+          newState[token] = data;
+        });
+        return newState;
+      });
+
+      const newFadeOutClass = {};
+      Object.keys(dataset).forEach((token) => {
+        const prev = prevRowData[token]?.trade_price;
+        const cur = dataset[token].trade_price;
+        if (prev !== undefined && prev !== cur) {
+          newFadeOutClass[token] = 'fade-out';
+        }
+      });
+      setFadeOutClass(newFadeOutClass);
+
+      setTimeout(() => {
+        setFadeOutClass({});
+      }, 200);
     }
   }, [dataset]);
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        padding: '8px',
-        borderBottom: '1px solid #ccc',
-        fontSize: '0.8rem',
-        border: '1px solid white',
-      }}
-    >
+    <div className="row-container">
       <div className="table-wrapped">
         <table className="table-m1">
           <thead>
-            <tr>
+            <tr className="tb-header-container">
               <th>코인</th>
               <th>
                 현재가격
@@ -202,21 +213,43 @@ const Row = ({
           </thead>
           <tbody>
             {Object.entries(rowData).map(([token, data]) => (
-              <tr key={token} className="column">
+              <tr
+                key={token}
+                className={`column ${fadeOutClass[token] || ''}`}
+                style={priceChangeStyle(
+                  prevRowData[token]?.trade_price,
+                  data['trade_price']
+                )}
+              >
                 <td>{data['token']}</td>
-                <td>{data['trade_price']}원</td>
+                <td>{data['trade_price']?.toLocaleString()}원</td>
                 {/* <td>{data['trade_volume']}개</td> */}
                 <td
                   style={getChangeRateStyle(
-                    data['rate_change'],
-                    data['change_rate']
+                    data['change_rate'],
+                    data['rate_change']
                   )}
                 >
-                  {data['change_rate']}%
+                  {(data['change_rate'] * 10).toFixed(2)}%
                 </td>
-                <td>{data['highest_price']}원</td>
-                <td>{data['lowest_price']}원</td>
-                <td>{data['opening_price']}원</td>
+                <td>
+                  <div>{data['highest_price']?.toLocaleString()}원</div>
+                  <div
+                    className="rate_per_52week"
+                    style={getChangeRateStyle(
+                      rateCompareByOriginPrice(
+                        data['trade_price'] / data['highest_price']
+                      )
+                    )}
+                  >
+                    {rateCompareByOriginPrice(
+                      data['trade_price'] / data['highest_price']
+                    ).toFixed(2)}
+                    %
+                  </div>
+                </td>
+                <td>{data['lowest_price']?.toLocaleString()}원</td>
+                <td>{data['opening_price']?.toLocaleString()}원</td>
                 <td style={{ fontSize: '0.6rem', color: 'gray' }}>
                   {numberToKorean(data['acc_trade_price24'] / 10000)}
                 </td>

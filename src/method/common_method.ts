@@ -22,3 +22,9 @@ export function numberToKorean(number) {
 
   return resultString;
 }
+
+export function rateCompareByOriginPrice(number: number) {
+  let num = number - 1;
+
+  return num % 100;
+}
