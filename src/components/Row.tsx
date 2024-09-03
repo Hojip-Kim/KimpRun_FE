@@ -4,8 +4,9 @@ import React, { useEffect, useState } from 'react';
 import './Row.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
-import { setTokenList } from '@/redux/redux';
+import { setTokenFirstList } from '@/redux/reducer/tokenReducer';
 import { numberToKorean, rateCompareByOriginPrice } from '@/method';
+import { setTether } from '@/redux/reducer/infoReducer';
 
 /*
     TODO : style component 적용
@@ -13,20 +14,26 @@ import { numberToKorean, rateCompareByOriginPrice } from '@/method';
 
 interface RowType {
   title: any;
-  tokenNameList: any;
-  tokenDataList: any;
+  firstTokenNameList: any;
+  secondTokenNameList: any;
+  firstTokenDataList: any;
+  secondTokenDataList: any;
   dataTypes: any;
-  dataset: any;
+  firstDataset: any;
+  secondDataset: any;
 }
 
 // dataList : 토큰 이름
 // dataset : 실시간 토큰 데이터
 const Row = ({
   title,
-  tokenNameList,
-  tokenDataList,
+  firstTokenNameList,
+  secondTokenNameList,
+  firstTokenDataList,
+  secondTokenDataList,
   dataTypes,
-  dataset,
+  firstDataset,
+  secondDataset,
 }: RowType) => {
   // values가 존재하지 않을 경우 빈 배열을 사용
   const [nameList, setNameList] = useState({});
@@ -34,6 +41,7 @@ const Row = ({
 
   const [prevRowData, setPrevRowData] = useState({});
   const [rowData, setRowData] = useState({});
+  // const [secondRowData, setSecondRowData]
   const [sortConfig, setSortConfig] = useState({
     key: 'change_rate',
     direction: 'asc',
@@ -41,13 +49,17 @@ const Row = ({
 
   const [fadeOutClass, setFadeOutClass] = useState({});
 
+  // Tether 전역상태관리
   const dispatch: AppDispatch = useDispatch();
 
-  const tokenList = useSelector((state: RootState) => state.token.tokenList);
+  // tether 전역상태관리
+  const tether = useSelector((state: RootState) => state.info.tether);
+  const updateTether = (tether) => {
+    dispatch(setTether(tether));
+  };
 
-  //TODO : tokenList (토큰 이름순서 변경) - redux 전역상태관리
-  const updateTokenList = (newTokenList) => {
-    dispatch(setTokenList(newTokenList));
+  const updateTokenFirstList = (newTokenList) => {
+    dispatch(setTokenFirstList(newTokenList));
   };
 
   const getChangeRateStyle = (rate, change?) => {
@@ -56,8 +68,6 @@ const Row = ({
     } else if ((rate < 0 && change === 'FALL') || rate < 0) {
       return { color: 'red' };
     } else {
-      // console.log('change : ' + change);
-      // console.log('rate : ' + rate);
       return { color: 'white' };
     }
   };
@@ -69,7 +79,6 @@ const Row = ({
     }
 
     const sortedData = Object.entries(rowData).sort((a, b) => {
-      console.log(a[1][key], b[1][key]);
       if (a[1][key] < b[1][key]) {
         return direction === 'asc' ? -1 : 1;
       } else if (a[1][key] > b[1][key]) {
@@ -92,9 +101,7 @@ const Row = ({
   const dataMerge = (name: any, data: any) => {
     const mergeData = {};
 
-    const nameKeys = Object.keys(name);
-
-    for (let i = 0; i < nameKeys.length; i++) {
+    for (let i = 0; i < name.length; i++) {
       mergeData[name[i]] = data[i];
     }
     setRowData(mergeData);
@@ -119,11 +126,11 @@ const Row = ({
   };
 
   useEffect(() => {
-    if (tokenNameList && tokenDataList) {
-      setNameList(tokenNameList);
-      setDataList(tokenDataList);
+    if (firstTokenNameList && firstTokenDataList) {
+      setNameList(firstTokenNameList);
+      setDataList(firstTokenDataList);
     }
-  }, [tokenNameList, tokenDataList]);
+  }, [firstTokenNameList, firstTokenDataList]);
 
   useEffect(() => {
     if (nameList.length > 0 && dataList.length > 0) {
@@ -132,23 +139,44 @@ const Row = ({
   }, [nameList, dataList]);
 
   useEffect(() => {
-    if (rowData && dataset) {
+    if (rowData && firstDataset && secondDataset) {
       setPrevRowData(rowData);
       setRowData((prevState) => {
         const newState = { ...prevState };
 
-        Object.entries(dataset).forEach(([token, data]) => {
+        Object.entries(firstDataset).forEach(([token, data]) => {
           newState[token] = data;
         });
         return newState;
       });
 
+      setRowData((prevState) => {
+        const newState = { ...prevState };
+
+        Object.entries(secondDataset).forEach(([token, data]) => {
+          if (newState[token]) {
+            newState[token] = {
+              ...newState[token],
+              secondPrice: (data.trade_price * tether).toLocaleString(),
+            };
+          } else {
+            return;
+          }
+        });
+        return newState;
+      });
+
+
       const newFadeOutClass = {};
-      Object.keys(dataset).forEach((token) => {
-        const prev = prevRowData[token]?.trade_price;
-        const cur = dataset[token].trade_price;
-        if (prev !== undefined && prev !== cur) {
-          newFadeOutClass[token] = 'fade-out';
+      Object.keys(firstDataset).forEach((token) => {
+        if (token != 'USDT') {
+          const prev = prevRowData[token]?.trade_price;
+          const cur = firstDataset[token].trade_price;
+          if (prev !== undefined && prev !== cur) {
+            newFadeOutClass[token] = 'fade-out';
+          }
+        } else {
+          updateTether(firstDataset[token].trade_price);
         }
       });
       setFadeOutClass(newFadeOutClass);
@@ -157,7 +185,7 @@ const Row = ({
         setFadeOutClass({});
       }, 200);
     }
-  }, [dataset]);
+  }, [firstDataset, secondDataset]);
 
   return (
     <div className="row-container">
@@ -198,17 +226,6 @@ const Row = ({
                 </a>
               </th>
 
-              {/* {title.map((title) => (
-                <th key={title}>
-                  {title}{' '}
-                  <a
-                    className="sort-button"
-                    onClick={() => sortData('change_rate')}
-                  >
-                    btn
-                  </a>
-                </th>
-              ))} */}
             </tr>
           </thead>
           <tbody>
@@ -222,7 +239,15 @@ const Row = ({
                 )}
               >
                 <td>{data['token']}</td>
-                <td>{data['trade_price']?.toLocaleString()}원</td>
+                <span>
+                  <td>{data['trade_price']?.toLocaleString()}원</td>
+                  <p className="comparison-group">
+                    {/* {data['secondPrice']
+                      ? data['secondPrice']
+                      : secondTokenDataList[token]['trade_price']} */}
+                    원
+                  </p>
+                </span>
                 {/* <td>{data['trade_volume']}개</td> */}
                 <td
                   style={getChangeRateStyle(
