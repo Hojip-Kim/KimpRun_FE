@@ -82,3 +82,7 @@ tr.column {
 tr.column.fade-out {
   background-color: rgba(0, 0, 0, 0);
 }
+
+.comparison-group {
+  color: gray;
+}

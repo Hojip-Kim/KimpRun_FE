@@ -22,10 +22,10 @@ const serverFetch = async (
     return {
       ok: r.ok,
       status: r.status,
-      text: await r.json(),
+      text: await r.text(),
     };
   });
-  // console.debug(url, init, response);
+
   return response;
 };
 
