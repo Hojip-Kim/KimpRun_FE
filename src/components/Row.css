@@ -72,7 +72,13 @@
 .column {
   text-align: right;
   font-size: 0.8rem;
-  border-bottom: solid rgba(123, 123, 123, 0.4);
+  border-bottom: solid rgba(96, 96, 96, 0.4);
+  transition: background-color 0.1s ease-in;
+}
+
+.column:hover {
+  background-color: #515151;
+  cursor: pointer;
 }
 
 tr.column {
