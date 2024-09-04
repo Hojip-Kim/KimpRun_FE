@@ -7,6 +7,7 @@ import { AppDispatch, RootState } from '@/redux/store';
 import { setTokenFirstList } from '@/redux/reducer/tokenReducer';
 import { numberToKorean, rateCompareByOriginPrice } from '@/method';
 import { setTether } from '@/redux/reducer/infoReducer';
+import { setToken } from '@/redux/reducer/widgetReduce';
 
 /*
     TODO : style component 적용
@@ -49,14 +50,24 @@ const Row = ({
 
   const [fadeOutClass, setFadeOutClass] = useState({});
 
+  const [expandedRow, setExpandedRow] = useState<string | null>(null);
+
   // Tether 전역상태관리
   const dispatch: AppDispatch = useDispatch();
 
-  // tether 전역상태관리
   const tether = useSelector((state: RootState) => state.info.tether);
   const updateTether = (tether) => {
     dispatch(setTether(tether));
   };
+  //************************ */
+
+  // widget token 전역상태관리
+  const widgetToken = useSelector((state: RootState) => state.widget.token);
+
+  const updateWidgetToken = (token) => {
+    dispatch(setToken(token));
+  };
+  //************************ */
 
   const updateTokenFirstList = (newTokenList) => {
     dispatch(setTokenFirstList(newTokenList));
@@ -125,6 +136,17 @@ const Row = ({
     }
   };
 
+  const rowClick = async (token: string) => {
+    if (expandedRow === token) {
+      setExpandedRow(null);
+    } else {
+      await updateWidgetToken(token);
+      setExpandedRow(token);
+    }
+
+    return;
+  };
+
   useEffect(() => {
     if (firstTokenNameList && firstTokenDataList) {
       setNameList(firstTokenNameList);
@@ -165,7 +187,6 @@ const Row = ({
         });
         return newState;
       });
-
 
       const newFadeOutClass = {};
       Object.keys(firstDataset).forEach((token) => {
@@ -225,60 +246,82 @@ const Row = ({
                   btn
                 </a>
               </th>
-
             </tr>
           </thead>
           <tbody>
             {Object.entries(rowData).map(([token, data]) => (
-              <tr
-                key={token}
-                className={`column ${fadeOutClass[token] || ''}`}
-                style={priceChangeStyle(
-                  prevRowData[token]?.trade_price,
-                  data['trade_price']
-                )}
-              >
-                <td>{data['token']}</td>
-                <span>
-                  <td>{data['trade_price']?.toLocaleString()}원</td>
-                  <p className="comparison-group">
-                    {/* {data['secondPrice']
-                      ? data['secondPrice']
-                      : secondTokenDataList[token]['trade_price']} */}
-                    원
-                  </p>
-                </span>
-                {/* <td>{data['trade_volume']}개</td> */}
-                <td
-                  style={getChangeRateStyle(
-                    data['change_rate'],
-                    data['rate_change']
+              <React.Fragment key={token}>
+                <tr
+                  onClick={() => {
+                    rowClick(token);
+                  }}
+                  key={token}
+                  className={`column ${fadeOutClass[token] || ''}`}
+                  style={priceChangeStyle(
+                    prevRowData[token]?.trade_price,
+                    data['trade_price']
                   )}
                 >
-                  {(data['change_rate'] * 10).toFixed(2)}%
-                </td>
-                <td>
-                  <div>{data['highest_price']?.toLocaleString()}원</div>
-                  <div
-                    className="rate_per_52week"
+                  <td>{data['token']}</td>
+                  <span>
+                    <td>{data['trade_price']?.toLocaleString()}원</td>
+                    <p className="comparison-group">
+                      {/* {data['secondPrice']
+                      ? data['secondPrice']
+                      : secondTokenDataList[token]['trade_price']} */}
+                      원
+                    </p>
+                  </span>
+                  {/* <td>{data['trade_volume']}개</td> */}
+                  <td
                     style={getChangeRateStyle(
-                      rateCompareByOriginPrice(
-                        data['trade_price'] / data['highest_price']
-                      )
+                      data['change_rate'],
+                      data['rate_change']
                     )}
                   >
-                    {rateCompareByOriginPrice(
-                      data['trade_price'] / data['highest_price']
-                    ).toFixed(2)}
-                    %
-                  </div>
-                </td>
-                <td>{data['lowest_price']?.toLocaleString()}원</td>
-                <td>{data['opening_price']?.toLocaleString()}원</td>
-                <td style={{ fontSize: '0.6rem', color: 'gray' }}>
-                  {numberToKorean(data['acc_trade_price24'] / 10000)}
-                </td>
-              </tr>
+                    {(data['change_rate'] * 10).toFixed(2)}%
+                  </td>
+                  <td>
+                    <div>{data['highest_price']?.toLocaleString()}원</div>
+                    <div
+                      className="rate_per_52week"
+                      style={getChangeRateStyle(
+                        rateCompareByOriginPrice(
+                          data['trade_price'] / data['highest_price']
+                        )
+                      )}
+                    >
+                      {rateCompareByOriginPrice(
+                        data['trade_price'] / data['highest_price']
+                      ).toFixed(2)}
+                      %
+                    </div>
+                  </td>
+                  <td>{data['lowest_price']?.toLocaleString()}원</td>
+                  <td>{data['opening_price']?.toLocaleString()}원</td>
+                  <td style={{ fontSize: '0.6rem', color: 'gray' }}>
+                    {numberToKorean(data['acc_trade_price24'] / 10000)}
+                  </td>
+                </tr>
+                {expandedRow === token && (
+                  <tr>
+                    <td colSpan={7}>
+                      <div
+                        style={{
+                          backgroundColor: 'gray',
+                          padding: '10px',
+                          border: '1px solid #dee2e6',
+                          borderRadius: '4px',
+                        }}
+                      >
+                        <p>Token : {token}</p>
+                        <p>추가정보 : </p>
+                        <p> Hello world!</p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
             ))}
           </tbody>
         </table>
