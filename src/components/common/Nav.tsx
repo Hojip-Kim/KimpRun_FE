@@ -4,7 +4,7 @@ import serverFetch from '@/server/fetch/server';
 import React, { useEffect, useState } from 'react';
 import './Nav.css';
 import { useSelector } from 'react-redux';
-import { RootState } from '@reduxjs/toolkit/query';
+import { RootState } from '@/redux/store';
 
 const Nav = () => {
   const [dollars, setDollars] = useState('');
