@@ -13,7 +13,8 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import './page.css';
 import TradingViewWidget from '@/components/TradingViewWidget';
-import { error } from 'console';
+import Search from '@/components/Search';
+import Chat from '@/components/Chat';
 
 export type TokenNameList = {
   firstMarketData: any;
@@ -84,8 +85,11 @@ const UpbitWebSocket = () => {
       const nameList = await serverFetch(marketListURL, requestInit);
 
       if (nameList.ok) {
-        const text: tokenNameList = JSON.parse(nameList.text);
-        return text;
+        const text: string = nameList.text;
+
+        const tokenNameList: tokenNameList = JSON.parse(text);
+        console.log(tokenNameList);
+        return tokenNameList;
       } else {
         throw new Error('Data Name parse Error Occured!');
       }
@@ -95,7 +99,10 @@ const UpbitWebSocket = () => {
     }
   };
 
-  const fetchTokenCombinedDatas = async (firstMarket: string, secondMarket) => {
+  const fetchTokenCombinedDatas = async (
+    firstMarket: string,
+    secondMarket: string
+  ) => {
     try {
       const url = new URL(marketDataURL);
       url.searchParams.set('first', firstMarket);
@@ -133,7 +140,6 @@ const UpbitWebSocket = () => {
   const updateNamesAsync = async () => {
     try {
       const tokenNames: tokenNameList = await fetchTokenNames();
-
       if (tokenNames) {
         updateTokenFirstList(tokenNames.firstMarketList);
         updateTokenSecondList(tokenNames.secondMarketList);
@@ -161,7 +167,6 @@ const UpbitWebSocket = () => {
       } else {
         tokenData = await fetchTokenCombinedDatas(market, secondMarket);
         if (tokenData) {
-      
           await updateTokenFirstDataSet(tokenData.firstMarketDataList);
           await updateTokenSecondDataSet(tokenData.secondMarketDataList);
         }
@@ -211,7 +216,6 @@ const UpbitWebSocket = () => {
     // websocket 실시간 마켓데이터 호출
     wsBinance.onmessage = (event) => {
       const parsedData = JSON.parse(event.data);
-      console.log(parsedData);
 
       if (tokenSecondList) {
         setSecondDateset((prevState) => {
@@ -227,7 +231,6 @@ const UpbitWebSocket = () => {
         console.error('Binacne Websocket Error: ', error);
         wsBinance.close();
       };
-
     };
 
     wsBinance.onerror = (error) => {
@@ -266,10 +269,11 @@ const UpbitWebSocket = () => {
   return (
     <div className="main_container">
       <div className="chart_container">
-        <TradingViewWidget></TradingViewWidget>
+        <TradingViewWidget />
       </div>
 
       <div className="row_container">
+        <Search tokenList={tokenFirstList} />
         <Row
           title={dataTitle}
           firstTokenNameList={tokenFirstList}
@@ -282,7 +286,9 @@ const UpbitWebSocket = () => {
         />
       </div>
 
-      <div className="chat_container"></div>
+      <div className="chat_container">
+        <Chat />
+      </div>
     </div>
   );
 };
