@@ -140,7 +140,7 @@ const Row = ({
     if (expandedRow === token) {
       setExpandedRow(null);
     } else {
-      await updateWidgetToken(token);
+      updateWidgetToken(token);
       setExpandedRow(token);
     }
 
@@ -163,30 +163,22 @@ const Row = ({
   useEffect(() => {
     if (rowData && firstDataset && secondDataset) {
       setPrevRowData(rowData);
-      setRowData((prevState) => {
-        const newState = { ...prevState };
 
-        Object.entries(firstDataset).forEach(([token, data]) => {
-          newState[token] = data;
-        });
-        return newState;
+      const updatedRowData = { ...rowData };
+
+      Object.entries(firstDataset).forEach(([token, data]) => {
+        updatedRowData[token] = data;
       });
 
-      setRowData((prevState) => {
-        const newState = { ...prevState };
-
-        Object.entries(secondDataset).forEach(([token, data]) => {
-          if (newState[token]) {
-            newState[token] = {
-              ...newState[token],
-              secondPrice: (data.trade_price * tether).toLocaleString(),
-            };
-          } else {
-            return;
-          }
-        });
-        return newState;
+      Object.entries(secondDataset).forEach(([token, data]) => {
+        if (updatedRowData[token]) {
+          updatedRowData[token] = {
+            ...updatedRowData[token],
+            secondPrice: (data.trade_price * tether).toLocaleString(),
+          };
+        }
       });
+      setRowData(updatedRowData);
 
       const newFadeOutClass = {};
       Object.keys(firstDataset).forEach((token) => {
@@ -307,11 +299,15 @@ const Row = ({
                   <tr>
                     <td colSpan={7}>
                       <div
+                        className={`expandable-content ${
+                          expandedRow === token ? 'expanded' : ''
+                        }`}
                         style={{
                           backgroundColor: 'gray',
                           padding: '10px',
                           border: '1px solid #dee2e6',
                           borderRadius: '4px',
+                          height: expandedRow === token ? 'auto' : '0',
                         }}
                       >
                         <p>Token : {token}</p>

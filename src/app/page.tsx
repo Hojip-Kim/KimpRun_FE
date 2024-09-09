@@ -68,7 +68,7 @@ const UpbitWebSocket = () => {
 
   const upbitMarketDataURL = process.env.NEXT_PUBLIC_MARKET_UPBIT_DATA;
 
-  const marketDataURL = process.env.NEXT_PUBLIC_MARKET_DATA;
+  const marketDataURL = process.env.NEXT_PUBLIC_MARKET_COMBINE_DATA;
 
   const marketListURL = process.env.NEXT_PUBLIC_MARKET_FIRST_NAME;
 
@@ -124,7 +124,6 @@ const UpbitWebSocket = () => {
       const url = new URL(upbitMarketDataURL);
       url.searchParams.set('market', market);
 
-      // console.log(url.toString());
       const result = await serverFetch(url.toString(), requestInit);
       if (result.ok) {
         return result.text;
@@ -156,7 +155,6 @@ const UpbitWebSocket = () => {
         // 이 데이터는 사용되지 않을 데이터입니다.
         tokenData = await fetchTokenDatas(market);
         tokenData = JSON.parse(tokenData);
-        console.log(tokenData);
         if (tokenData) {
           if (market === 'upbit') {
             await updateTokenFirstDataSet(tokenData);
