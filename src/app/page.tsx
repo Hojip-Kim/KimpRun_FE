@@ -26,7 +26,7 @@ export type tokenNameList = {
   secondMarketList: string[];
 };
 
-const UpbitWebSocket = () => {
+const MainPage = () => {
   // state
 
   const [firstDataset, setFirstDataset] = useState<{ [key: string]: any }>({});
@@ -291,4 +291,4 @@ const UpbitWebSocket = () => {
   );
 };
 
-export default UpbitWebSocket;
+export default MainPage;
