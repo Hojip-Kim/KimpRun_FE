@@ -12,6 +12,23 @@ const Nav = () => {
 
   const reduxTether = useSelector((state: RootState) => state.info.tether);
 
+  const isLogined = async () => {
+    const testURL = 'http://127.0.0.1:8080/user/test';
+
+    const requestInit: RequestInit = {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-type': 'application/json' },
+    };
+
+    const response = await serverFetch(testURL, requestInit);
+    if (response.ok) {
+      console.log(response.text);
+    } else {
+      console.log(response);
+    }
+  };
+
   // TODO : refactoring - server side, client side hooks 나누기.
 
   useEffect(() => {
@@ -74,6 +91,20 @@ const Nav = () => {
                 }}
               >
                 내 프로필
+              </li>
+              <li
+                onClick={() => {
+                  window.location.href = 'http://localhost:3000/login';
+                }}
+              >
+                로그인
+              </li>
+              <li
+                onClick={() => {
+                  isLogined();
+                }}
+              >
+                로그인 테스트
               </li>
             </ul>
           </div>
