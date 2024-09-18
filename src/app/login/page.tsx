@@ -14,7 +14,7 @@ const LoginPage = () => {
     const response = await fetchLoginData(username, password);
     if (response) {
       // true면
-      window.location.href = 'http://localhost:3000/';
+      console.log(response);
     } else {
       alert('로그인 실패');
     }
