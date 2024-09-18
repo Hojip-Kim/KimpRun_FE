@@ -1,5 +1,5 @@
 import { AppDispatch, RootState } from '@/redux/store';
-import Script from 'next/script';
+
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -10,9 +10,8 @@ const TradingViewWidget = () => {
 
   useEffect(() => {
     const token = widgetToken ? widgetToken + 'KRW' : 'BTCKRW';
-
     const loadWidget = () => {
-      new TradingView.widget({
+      new window.TradingView.widget({
         autosize: true,
         symbol: `${token}`,
         interval: '240',

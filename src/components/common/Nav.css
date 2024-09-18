@@ -25,11 +25,6 @@
   flex-direction: row;
 }
 
-.nav-category-2 {
-  width: 300px;
-  padding-left: 20px;
-}
-
 .nav-container2 {
   color: black;
 }
@@ -40,6 +35,13 @@
   height: 30px;
   text-align: center;
   font-size: 0.8rem;
+  border: 1px solid black;
+}
+
+.nav-category-2 {
+  width: 1000px;
+  padding-left: 20px;
+  display: flex;
 }
 
 .nav-container1 {
@@ -50,4 +52,19 @@
   color: black;
   font-weight: 900;
   font-size: x-large;
+  padding: 10px;
+  margin-right: 10px;
+  border: 1px solid black;
+}
+
+ul {
+  display: flex;
+  align-items: center;
+}
+li {
+  width: 100px;
+  display: inline;
+  text-align: center;
+  border: 1px solid black;
+  cursor: pointer;
 }

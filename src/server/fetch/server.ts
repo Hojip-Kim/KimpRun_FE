@@ -30,5 +30,3 @@ const serverFetch = async (
 };
 
 export default serverFetch;
-
-// 지역 규모 => 클라이언트에서

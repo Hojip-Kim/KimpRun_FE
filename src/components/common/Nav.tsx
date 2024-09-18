@@ -12,34 +12,29 @@ const Nav = () => {
 
   const reduxTether = useSelector((state: RootState) => state.info.tether);
 
+  const isLogined = async () => {
+    const testURL = 'http://127.0.0.1:8080/user/test';
+
+    const requestInit: RequestInit = {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-type': 'application/json' },
+    };
+
+    const response = await serverFetch(testURL, requestInit);
+    if (response.ok) {
+      console.log(response.text);
+    } else {
+      console.log(response);
+    }
+  };
+
   // TODO : refactoring - server side, client side hooks 나누기.
 
-  // const GetTether = async (): Promise<string | undefined> => {
-  //   const URL = process.env.NEXT_PUBLIC_TETHER_URL;
-
-  //   const requestInit: RequestInit = {
-  //     method: 'GET',
-  //     headers: { 'Content-type': 'application/json' },
-  //   };
-
-  //   try {
-  //     const response = await serverFetch(URL, requestInit);
-
-  //     if (response.ok) {
-  //       return await response.text;
-  //     }
-  //   } catch (e) {
-  //     console.log(e);
-  //   }
-  // };
-
   useEffect(() => {
-    // GetTether().then((res) => setDollars(res[0].basePrice));
-    // setTether(reduxTether)
+    // setUserCount((prevCount) => prevCount + 1);
 
-    setUserCount((prevCount) => prevCount + 1);
-
-    return () => setUserCount((prevCount) => prevCount - 1);
+    return () => {};
   }, []);
 
   return (
@@ -68,6 +63,50 @@ const Nav = () => {
             >
               KIMP-RUN
             </button>
+            <ul>
+              <li
+                onClick={() => {
+                  window.location.href = 'http://localhost:3000/community';
+                }}
+              >
+                커뮤니티
+              </li>
+              <li
+                onClick={() => {
+                  window.location.href = 'http://localhost:3000/statistics';
+                }}
+              >
+                통계
+              </li>
+              <li
+                onClick={() => {
+                  window.location.href = 'http://localhost:3000/news';
+                }}
+              >
+                뉴스
+              </li>
+              <li
+                onClick={() => {
+                  window.location.href = 'http://localhost:3000/profile';
+                }}
+              >
+                내 프로필
+              </li>
+              <li
+                onClick={() => {
+                  window.location.href = 'http://localhost:3000/login';
+                }}
+              >
+                로그인
+              </li>
+              <li
+                onClick={() => {
+                  isLogined();
+                }}
+              >
+                로그인 테스트
+              </li>
+            </ul>
           </div>
         </section>
         {/* <div className="nav-container2"></div> */}
