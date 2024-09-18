@@ -155,8 +155,6 @@ const Row = ({
   useEffect(() => {
     if (firstTokenNameList && firstTokenDataList) {
       setNameList(firstTokenNameList);
-      console.log('firstTokenDataList');
-      console.log(firstTokenDataList);
       setDataList(firstTokenDataList);
     }
   }, [firstTokenNameList, firstTokenDataList]);

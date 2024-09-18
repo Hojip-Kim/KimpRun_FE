@@ -84,12 +84,10 @@ const Chat = () => {
 
     websocket.onopen = () => {
       setWs(websocket);
-      console.log('websocket established');
     };
 
     websocket.onmessage = (event) => {
       const parsedData: ChatMessage = JSON.parse(event.data);
-      console.log(parsedData);
 
       if (parsedData) {
         setMessages((prev) => [...prev, parsedData]);
