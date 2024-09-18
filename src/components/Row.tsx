@@ -8,37 +8,42 @@ import { setTokenFirstList } from '@/redux/reducer/tokenReducer';
 import { numberToKorean, rateCompareByOriginPrice } from '@/method';
 import { setTether } from '@/redux/reducer/infoReducer';
 import { setToken } from '@/redux/reducer/widgetReduce';
+import { firstDataSet, secondDataSet } from '@/app/page';
 
 /*
     TODO : style component 적용
 */
 
 interface RowType {
-  title: any;
-  firstTokenNameList: any;
-  secondTokenNameList: any;
+  firstTokenNameList: string[];
   firstTokenDataList: any;
-  secondTokenDataList: any;
-  dataTypes: any;
-  firstDataset: any;
-  secondDataset: any;
+  firstDataset: { [key: string]: firstDataSet };
+  secondDataset: { [key: string]: secondDataSet };
 }
+
+export type dataListType = {
+  acc_trade_price24: number;
+  change_rate: number;
+  highest_price: number;
+  lowest_price: number;
+  opening_price: number;
+  rate_change: number;
+  token: string;
+  trade_price: number;
+  trade_volume: number;
+};
 
 // dataList : 토큰 이름
 // dataset : 실시간 토큰 데이터
 const Row = ({
-  title,
   firstTokenNameList,
-  secondTokenNameList,
   firstTokenDataList,
-  secondTokenDataList,
-  dataTypes,
   firstDataset,
   secondDataset,
 }: RowType) => {
   // values가 존재하지 않을 경우 빈 배열을 사용
-  const [nameList, setNameList] = useState({});
-  const [dataList, setDataList] = useState({});
+  const [nameList, setNameList] = useState<string[]>([]);
+  const [dataList, setDataList] = useState<dataListType[]>([]);
 
   const [prevRowData, setPrevRowData] = useState({});
   const [rowData, setRowData] = useState({});
@@ -150,6 +155,8 @@ const Row = ({
   useEffect(() => {
     if (firstTokenNameList && firstTokenDataList) {
       setNameList(firstTokenNameList);
+      console.log('firstTokenDataList');
+      console.log(firstTokenDataList);
       setDataList(firstTokenDataList);
     }
   }, [firstTokenNameList, firstTokenDataList]);
@@ -255,15 +262,15 @@ const Row = ({
                   )}
                 >
                   <td>{data['token']}</td>
-                  <span>
-                    <td>{data['trade_price']?.toLocaleString()}원</td>
+                  <td>
+                    {data['trade_price']?.toLocaleString()}원
                     <p className="comparison-group">
                       {/* {data['secondPrice']
                       ? data['secondPrice']
                       : secondTokenDataList[token]['trade_price']} */}
                       원
                     </p>
-                  </span>
+                  </td>
                   {/* <td>{data['trade_volume']}개</td> */}
                   <td
                     style={getChangeRateStyle(
@@ -283,8 +290,10 @@ const Row = ({
                         )
                       )}
                     >
-                      {rateCompareByOriginPrice(
-                        data['trade_price'] / data['highest_price']
+                      {(
+                        rateCompareByOriginPrice(
+                          data['trade_price'] / data['highest_price']
+                        ) * 100
                       ).toFixed(2)}
                       %
                     </div>

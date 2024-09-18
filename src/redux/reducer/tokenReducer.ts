@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const tokenSlices = createSlice({
   name: 'token', // slice 식별 이름
   initialState: {
-    tokenList: { first: {}, second: {} },
+    tokenList: { first: [], second: [] },
     tokenSet: { first: {}, second: {} },
   },
   reducers: {

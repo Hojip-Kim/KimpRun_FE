@@ -26,13 +26,32 @@ export type tokenNameList = {
   secondMarketList: string[];
 };
 
+export type firstDataSet = {
+  acc_trade_price24: number;
+  change_rate: number;
+  highest_price: number;
+  lowest_price: number;
+  opening_price: number;
+  rate_change: string;
+  token: string;
+  trade_price: number;
+  trade_volume: number;
+};
+
+export type secondDataSet = {
+  token: string;
+  trade_price: number;
+};
+
 const MainPage = () => {
   // state
 
-  const [firstDataset, setFirstDataset] = useState<{ [key: string]: any }>({});
-  const [secondDataset, setSecondDateset] = useState<{ [key: string]: any }>(
-    {}
-  );
+  const [firstDataset, setFirstDataset] = useState<{
+    [key: string]: firstDataSet;
+  }>({});
+  const [secondDataset, setSecondDateset] = useState<{
+    [key: string]: secondDataSet;
+  }>({});
 
   // redux
   const dispatch: AppDispatch = useDispatch();
@@ -77,6 +96,7 @@ const MainPage = () => {
 
   const requestInit: RequestInit = {
     method: 'GET',
+    credentials: 'include',
     headers: { 'Content-type': 'application/json' },
   };
 
@@ -88,7 +108,6 @@ const MainPage = () => {
         const text: string = nameList.text;
 
         const tokenNameList: tokenNameList = JSON.parse(text);
-        console.log(tokenNameList);
         return tokenNameList;
       } else {
         throw new Error('Data Name parse Error Occured!');
@@ -181,7 +200,6 @@ const MainPage = () => {
 
   useEffect(() => {
     if (tokenSecondSet) {
-      console.log(tokenSecondSet);
     }
   }, [tokenSecondSet]);
 
@@ -191,12 +209,11 @@ const MainPage = () => {
     // websocket 실시간 마켓데이터 호출
     wsUpbit.onmessage = (event) => {
       const parsedData = JSON.parse(event.data);
-
       if (tokenFirstList) {
         setFirstDataset((prevState) => {
           const newState = { ...prevState };
-          Object.entries(parsedData).map(([key, value]) => {
-            newState[key] = value;
+          Object.entries(parsedData).forEach(([key, value]) => {
+            newState[key] = value as firstDataSet;
           });
 
           return newState;
@@ -214,12 +231,11 @@ const MainPage = () => {
     // websocket 실시간 마켓데이터 호출
     wsBinance.onmessage = (event) => {
       const parsedData = JSON.parse(event.data);
-
       if (tokenSecondList) {
         setSecondDateset((prevState) => {
           const newState = { ...prevState };
-          Object.entries(parsedData).map(([key, value]) => {
-            newState[key] = value;
+          Object.entries(parsedData).forEach(([key, value]) => {
+            newState[key] = value as secondDataSet;
           });
           return newState;
         });
@@ -242,28 +258,6 @@ const MainPage = () => {
     };
   }, []);
 
-  const dataTypes: String[] = [
-    'token',
-    'trade_price',
-    'trade_volume',
-    'change_rate',
-    'highest_price',
-    'lowest_price',
-    'opening_price',
-    'rate_change',
-    'acc_trade_price24',
-  ];
-
-  const dataTitle: String[] = [
-    '코인',
-    '현재 가격',
-    '거래량',
-    '변동률(전가격대비)',
-    '52주 고가',
-    '52주 저가',
-    '시가',
-  ];
-
   return (
     <div className="main_container">
       <div className="chart_container">
@@ -273,12 +267,8 @@ const MainPage = () => {
       <div className="row_container">
         <Search tokenList={tokenFirstList} />
         <Row
-          title={dataTitle}
           firstTokenNameList={tokenFirstList}
-          secondTokenNameList={tokenSecondList}
           firstTokenDataList={tokenFirstSet}
-          secondTokenDataList={tokenSecondSet}
-          dataTypes={dataTypes}
           firstDataset={firstDataset}
           secondDataset={secondDataset}
         />
