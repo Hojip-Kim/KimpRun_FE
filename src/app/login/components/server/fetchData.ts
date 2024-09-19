@@ -2,6 +2,10 @@
 
 import serverFetch from '@/server/fetch/server';
 
+interface LoginResponse {
+  result: string;
+}
+
 export const fetchLoginData = async (
   loginId: string,
   password: string
@@ -10,8 +14,8 @@ export const fetchLoginData = async (
 
   const requestInit: RequestInit = {
     method: 'POST',
-    headers: { 'Content-type': 'application/json' },
-    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include', // 쿠키 포함
     body: JSON.stringify({
       loginId,
       password,
@@ -19,10 +23,9 @@ export const fetchLoginData = async (
   };
 
   try {
-    const response = await serverFetch(loginUrl, requestInit);
-
+    const response = await fetch(loginUrl, requestInit);
     if (response.ok) {
-      const data = JSON.parse(response.text);
+      const data: LoginResponse = await response.json();
 
       if (data.result === 'success') {
         return true;
