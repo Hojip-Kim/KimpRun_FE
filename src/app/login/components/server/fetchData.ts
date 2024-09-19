@@ -6,7 +6,7 @@ export const fetchLoginData = async (
   loginId: string,
   password: string
 ): Promise<boolean> => {
-  const loginUrl = 'http://localhost:8080/login';
+  const loginUrl = process.env.NEXT_PUBLIC_LOGIN_URL;
 
   const requestInit: RequestInit = {
     method: 'POST',
