@@ -13,7 +13,7 @@ const Nav = () => {
   const reduxTether = useSelector((state: RootState) => state.info.tether);
 
   const isLogined = async () => {
-    const testURL = 'http://127.0.0.1:8080/user/test';
+    const testURL = process.env.NEXT_PUBLIC_LOGIN_TEST_URL;
 
     const requestInit: RequestInit = {
       method: 'GET',
@@ -57,7 +57,7 @@ const Nav = () => {
           <div className="nav-category-2">
             <button
               onClick={() => {
-                window.location.href = 'http://localhost:3000/';
+                window.location.href = process.env.NEXT_PUBLIC_MAIN_PAGE;
               }}
               className="title"
             >
@@ -66,35 +66,36 @@ const Nav = () => {
             <ul>
               <li
                 onClick={() => {
-                  window.location.href = 'http://localhost:3000/community';
+                  window.location.href = process.env.NEXT_PUBLIC_COMMUNITY_PAGE;
                 }}
               >
                 커뮤니티
               </li>
               <li
                 onClick={() => {
-                  window.location.href = 'http://localhost:3000/statistics';
+                  window.location.href =
+                    process.env.NEXT_PUBLIC_STATISTICS_PAGE;
                 }}
               >
                 통계
               </li>
               <li
                 onClick={() => {
-                  window.location.href = 'http://localhost:3000/news';
+                  window.location.href = process.env.NEXT_PUBLIC_NEWS_PAGE;
                 }}
               >
                 뉴스
               </li>
               <li
                 onClick={() => {
-                  window.location.href = 'http://localhost:3000/profile';
+                  window.location.href = process.env.NEXT_PUBLIC_PROFILE_PAGE;
                 }}
               >
                 내 프로필
               </li>
               <li
                 onClick={() => {
-                  window.location.href = 'http://localhost:3000/login';
+                  window.location.href = process.env.NEXT_PUBLIC_LOGIN_PAGE;
                 }}
               >
                 로그인
