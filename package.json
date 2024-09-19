@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "vercel-deploy": "vercel --prod",
     "lint": "next lint"
   },
   "dependencies": {
