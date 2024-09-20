@@ -21,9 +21,9 @@ const Nav = () => {
       headers: { 'Content-type': 'application/json' },
     };
 
-    const response = await serverFetch(testURL, requestInit);
+    const response = await fetch(testURL, requestInit);
     if (response.ok) {
-      console.log(response.text);
+      console.log(await response.json());
     } else {
       console.log(response);
     }
