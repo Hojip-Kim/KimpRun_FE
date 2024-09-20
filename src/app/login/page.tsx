@@ -1,7 +1,6 @@
 'use client';
-import { use, useState } from 'react';
+import { useState } from 'react';
 import './page.css';
-import { fetchLoginData } from './components/server/fetchData';
 
 const LoginPage = () => {
   const [username, setUsername] = useState<string>('');
@@ -11,12 +10,29 @@ const LoginPage = () => {
     e.preventDefault();
 
     // Spring Boot의 /login 엔드포인트로 POST 요청
-    const response = await fetchLoginData(username, password);
-    if (response) {
-      // true면
+    const loginUrl = process.env.NEXT_PUBLIC_LOGIN_URL;
+
+    const requestInit: RequestInit = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', // 쿠키 포함
+      body: JSON.stringify({
+        loginId: username,
+        password: password,
+      }),
+    };
+
+    try {
+      const response = await fetch(loginUrl, requestInit);
       console.log(response);
-    } else {
-      alert('로그인 실패');
+      if (response.ok) {
+        alert('로그인 성공');
+      } else {
+        alert('로그인 실패');
+      }
+    } catch (e) {
+      console.error(e);
+      return false;
     }
   };
 
