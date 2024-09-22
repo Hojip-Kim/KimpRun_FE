@@ -10,7 +10,7 @@ export const fetchLoginData = async (
   loginId: string,
   password: string
 ): Promise<boolean> => {
-  const loginUrl = process.env.NEXT_PUBLIC_LOGIN_URL;
+  const loginUrl = process.env.LOGIN_URL;
 
   const requestInit: RequestInit = {
     method: 'POST',
