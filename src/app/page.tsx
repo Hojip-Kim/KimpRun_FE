@@ -1,6 +1,6 @@
 'use client';
 
-import Row from '@/components/Row';
+import Row from '@/components/row/Row';
 import {
   setTokenFirstList,
   setTokenFirstDataset,
@@ -13,7 +13,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import './page.css';
 import TradingViewWidget from '@/components/TradingViewWidget';
-import Search from '@/components/Search';
+import Search from '@/components/search/Search';
 import Chat from '@/components/Chat';
 
 export type TokenNameList = {
