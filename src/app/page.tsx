@@ -14,7 +14,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import './page.css';
 import TradingViewWidget from '@/components/TradingViewWidget';
 import Search from '@/components/search/Search';
-import Chat from '@/components/Chat';
+import Chat from '@/components/chat/Chat';
 
 export type TokenNameList = {
   firstMarketData: any;
