@@ -1,11 +1,5 @@
 'use server';
 
-import serverFetch from '@/server/fetch/server';
-
-interface LoginResponse {
-  result: string;
-}
-
 export const fetchLoginData = async (
   loginId: string,
   password: string
@@ -25,13 +19,7 @@ export const fetchLoginData = async (
   try {
     const response = await fetch(loginUrl, requestInit);
     if (response.ok) {
-      const data: LoginResponse = await response.json();
-
-      if (data.result === 'success') {
-        return true;
-      } else {
-        return false;
-      }
+      return true;
     } else {
       return false;
     }

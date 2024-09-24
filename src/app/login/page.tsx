@@ -14,7 +14,7 @@ const LoginPage = () => {
     const response = await fetchLoginData(username, password);
     if (response) {
       // true면
-      console.log(response);
+      alert('로그인 성공');
     } else {
       alert('로그인 실패');
     }
