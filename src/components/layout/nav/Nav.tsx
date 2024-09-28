@@ -21,11 +21,17 @@ const Nav = () => {
       headers: { 'Content-type': 'application/json' },
     };
 
-    const response = await serverFetch(testURL, requestInit);
-    if (response.ok) {
-      console.log(response.text);
-    } else {
-      console.log(response);
+    try {
+      const response = await fetch(testURL, requestInit);
+      if (response.ok) {
+        console.log(response);
+        console.log('성공');
+      } else {
+        console.log(response);
+        console.log('실패');
+      }
+    } catch (e) {
+      console.error(e);
     }
   };
 
