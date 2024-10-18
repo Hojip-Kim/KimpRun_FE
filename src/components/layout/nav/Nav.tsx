@@ -1,66 +1,103 @@
 'use client';
 
-import serverFetch from '@/server/fetch/server';
 import React, { useEffect, useState } from 'react';
 import './Nav.css';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
+import Modal from '@/components/modal/modal';
+import LoginForm from '@/components/login/loginForm';
+import { logout } from '@/redux/reducer/authReducer';
 
 const Nav = () => {
   const [dollars, setDollars] = useState('');
   const [userCount, setUserCount] = useState(0);
+  const [isModalActive, setIsModalActive] = useState<boolean>(false);
 
   const reduxTether = useSelector((state: RootState) => state.info.tether);
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated
+  );
+  const user = useSelector((state: RootState) => state.auth.user);
+  const dispatch = useDispatch();
 
-  const isLogined = async () => {
-    const testURL = process.env.NEXT_PUBLIC_LOGIN_TEST_URL;
+  const statusUrl = process.env.NEXT_PUBLIC_STATUS_URL;
+  const logoutUrl = process.env.NEXT_PUBLIC_LOGOUT_URL;
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      const fetchUserInfo = async () => {
+        try {
+          const response = await fetch(
+            statusUrl,
+            { method: 'GET', credentials: 'include' }
+          );
+          if (response.ok) {
+            const data = await response.json();
+            console.log(data);
+          } else {
+            dispatch(logout());
+          }
+        } catch (error) {
+          console.error('사용자 정보 가져오기 실패:', error);
+        }
+      };
+      fetchUserInfo();
+    }
+  }, [isAuthenticated, dispatch, user]);
+
+  const handleLoginClick = () => {
+    setIsModalActive(true);
+  };
+
+  const handleLogout = async () => {
     const requestInit: RequestInit = {
-      method: 'GET',
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      headers: { 'Content-type': 'application/json' },
     };
 
     try {
-      const response = await fetch(testURL, requestInit);
+      const response = await fetch(
+        logoutUrl,
+        requestInit
+      );
+
       if (response.ok) {
-        console.log(response);
-        console.log('성공');
+        alert('로그아웃 성공');
+        dispatch(logout());
       } else {
-        console.log(response);
-        console.log('실패');
+        alert('로그아웃 실패');
       }
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error('로그아웃 오류', error);
+      alert('로그아웃 중 오류 발생');
     }
   };
-
-  // TODO : refactoring - server side, client side hooks 나누기.
-
-  useEffect(() => {
-    // setUserCount((prevCount) => prevCount + 1);
-
-    return () => {};
-  }, []);
 
   return (
     <nav className="navbar">
       <div className="nav-box">
         <section className="nav-container1">
-          <div className="nav-category-1">
-            <div className="nav-category">
+          <div className="nav-category">
+            <div className="category">
               <img src="" />
               환율 : {dollars}
             </div>
-            <div className="nav-category">
+            <div className="category">
               <img src="" />
               테더 : {reduxTether}{' '}
             </div>
             <div className="user-count">유저 수 : {userCount}</div>
           </div>
+          <div
+            className="nav-category"
+            onClick={isAuthenticated ? handleLogout : handleLoginClick}
+          >
+            {isAuthenticated ? '로그아웃' : '로그인'}
+          </div>
         </section>
         <section className="nav-container2">
-          <div className="nav-category-2">
+          <div className="nav-category">
             <button
               onClick={() => {
                 window.location.href = process.env.NEXT_PUBLIC_MAIN_PAGE;
@@ -99,25 +136,20 @@ const Nav = () => {
               >
                 내 프로필
               </li>
-              <li
-                onClick={() => {
-                  window.location.href = process.env.NEXT_PUBLIC_LOGIN_PAGE;
-                }}
-              >
-                로그인
-              </li>
-              <li
-                onClick={() => {
-                  isLogined();
-                }}
-              >
-                로그인 테스트
-              </li>
             </ul>
           </div>
         </section>
         {/* <div className="nav-container2"></div> */}
       </div>
+
+      {isModalActive && (
+        <Modal
+          width={400}
+          height={300}
+          element={<LoginForm closeModal={() => setIsModalActive(false)} />}
+          setModal={setIsModalActive}
+        ></Modal>
+      )}
     </nav>
   );
 };
