@@ -8,13 +8,14 @@ import {
   setTokenSecondDataset,
 } from '@/redux/reducer/tokenReducer';
 import { AppDispatch, RootState } from '@/redux/store';
-import serverFetch from '@/server/fetch/server';
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import './page.css';
 import TradingViewWidget from '@/components/TradingViewWidget';
 import Search from '@/components/search/Search';
 import Chat from '@/components/chat/Chat';
+import { fetchTokenNames, fetchTokenCombinedDatas, fetchTokenDatas } from './components/server/DataFetcher';
+import styled from 'styled-components';
 
 export type TokenNameList = {
   firstMarketData: any;
@@ -44,8 +45,6 @@ export type secondDataSet = {
 };
 
 const MainPage = () => {
-  // state
-
   const [firstDataset, setFirstDataset] = useState<{
     [key: string]: firstDataSet;
   }>({});
@@ -53,111 +52,23 @@ const MainPage = () => {
     [key: string]: secondDataSet;
   }>({});
 
-  // redux
   const dispatch: AppDispatch = useDispatch();
-  const tokenFirstList = useSelector(
-    (state: RootState) => state.token.tokenList.first
-  );
-  const tokenSecondList = useSelector(
-    (state: RootState) => state.token.tokenList.second
-  );
+  const tokenFirstList = useSelector((state: RootState) => state.token.tokenList.first);
+  const tokenSecondList = useSelector((state: RootState) => state.token.tokenList.second);
+  const tokenFirstSet = useSelector((state: RootState) => state.token.tokenSet.first);
+  const tokenSecondSet = useSelector((state: RootState) => state.token.tokenSet.second);
 
-  const tokenFirstSet = useSelector(
-    (state: RootState) => state.token.tokenSet.first
-  );
-
-  const tokenSecondSet = useSelector(
-    (state: RootState) => state.token.tokenSet.second
-  );
-
-  const updateTokenFirstList = (newTokenList) => {
-    dispatch(setTokenFirstList(newTokenList));
-  };
-  const updateTokenFirstDataSet = (newTokenSet) => {
-    dispatch(setTokenFirstDataset(newTokenSet));
-  };
-
-  const updateTokenSecondList = (newTokenList) => {
-    dispatch(setTokenSecondList(newTokenList));
-  };
-
-  const updateTokenSecondDataSet = (newTokenSet) => {
-    dispatch(setTokenSecondDataset(newTokenSet));
-  };
-
-  const upbitMarketDataURL = process.env.NEXT_PUBLIC_MARKET_UPBIT_DATA;
-
-  const marketDataURL = process.env.NEXT_PUBLIC_MARKET_COMBINE_DATA;
-
-  const marketListURL = process.env.NEXT_PUBLIC_MARKET_FIRST_NAME;
+  const updateTokenFirstList = (newTokenList) => dispatch(setTokenFirstList(newTokenList));
+  const updateTokenFirstDataSet = (newTokenSet) => dispatch(setTokenFirstDataset(newTokenSet));
+  const updateTokenSecondList = (newTokenList) => dispatch(setTokenSecondList(newTokenList));
+  const updateTokenSecondDataSet = (newTokenSet) => dispatch(setTokenSecondDataset(newTokenSet));
 
   const upbitWebsocketURL = process.env.NEXT_PUBLIC_UPBIT_WEBSOCKET_URL;
   const binanceWebsocketURL = process.env.NEXT_PUBLIC_BINANCE_WEBSOCKET_URL;
 
-  const requestInit: RequestInit = {
-    method: 'GET',
-    credentials: 'include',
-    headers: { 'Content-type': 'application/json' },
-  };
-
-  const fetchTokenNames = async (): Promise<tokenNameList | null> => {
-    try {
-      const nameList = await serverFetch(marketListURL, requestInit);
-
-      if (nameList.ok) {
-        const text: string = nameList.text;
-
-        const tokenNameList: tokenNameList = JSON.parse(text);
-        return tokenNameList;
-      } else {
-        throw new Error('Data Name parse Error Occured!');
-      }
-    } catch (error) {
-      console.error(error);
-      return null;
-    }
-  };
-
-  const fetchTokenCombinedDatas = async (
-    firstMarket: string,
-    secondMarket: string
-  ) => {
-    try {
-      const url = new URL(marketDataURL);
-      url.searchParams.set('first', firstMarket);
-      url.searchParams.set('second', secondMarket);
-
-      const result = await serverFetch(url.toString(), requestInit);
-      if (result.ok) {
-        return JSON.parse(result.text);
-      } else {
-        throw new Error('Error Occured');
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const fetchTokenDatas = async (market: string) => {
-    try {
-      const url = new URL(upbitMarketDataURL);
-      url.searchParams.set('market', market);
-
-      const result = await serverFetch(url.toString(), requestInit);
-      if (result.ok) {
-        return result.text;
-      } else {
-        throw new Error('Error Occured');
-      }
-    } catch (error) {
-      console.error(error);
-      return null;
-    }
-  };
-
   const updateNamesAsync = async () => {
     try {
-      const tokenNames: tokenNameList = await fetchTokenNames();
+      const tokenNames = await fetchTokenNames();
       if (tokenNames) {
         updateTokenFirstList(tokenNames.firstMarketList);
         updateTokenSecondList(tokenNames.secondMarketList);
@@ -171,9 +82,7 @@ const MainPage = () => {
     try {
       let tokenData;
       if (secondMarket === null || secondMarket === undefined) {
-        // 이 데이터는 사용되지 않을 데이터입니다.
         tokenData = await fetchTokenDatas(market);
-        tokenData = JSON.parse(tokenData);
         if (tokenData) {
           if (market === 'upbit') {
             await updateTokenFirstDataSet(tokenData);
@@ -194,19 +103,14 @@ const MainPage = () => {
   };
 
   useEffect(() => {
-    updateNamesAsync(); // 토큰이름 fetch
-    updateDataAsync('upbit', 'binance'); // 토큰데이터 fetch
+    updateNamesAsync();
+    updateDataAsync('upbit', 'binance');
   }, []);
 
   useEffect(() => {
-    if (tokenSecondSet) {
-    }
-  }, [tokenSecondSet]);
-
-  useEffect(() => {
     const wsUpbit = new WebSocket(upbitWebsocketURL);
+    const wsBinance = new WebSocket(binanceWebsocketURL);
 
-    // websocket 실시간 마켓데이터 호출
     wsUpbit.onmessage = (event) => {
       const parsedData = JSON.parse(event.data);
       if (tokenFirstList) {
@@ -215,20 +119,11 @@ const MainPage = () => {
           Object.entries(parsedData).forEach(([key, value]) => {
             newState[key] = value as firstDataSet;
           });
-
           return newState;
         });
       }
     };
 
-    wsUpbit.onerror = (error) => {
-      console.error('Upbit Websocket Error:', error);
-      wsUpbit.close();
-    };
-    // binance
-    const wsBinance = new WebSocket(binanceWebsocketURL);
-
-    // websocket 실시간 마켓데이터 호출
     wsBinance.onmessage = (event) => {
       const parsedData = JSON.parse(event.data);
       if (tokenSecondList) {
@@ -240,15 +135,15 @@ const MainPage = () => {
           return newState;
         });
       }
+    };
 
-      wsBinance.onerror = (error) => {
-        console.error('Binacne Websocket Error: ', error);
-        wsBinance.close();
-      };
+    wsUpbit.onerror = (error) => {
+      console.error('Upbit Websocket Error:', error);
+      wsUpbit.close();
     };
 
     wsBinance.onerror = (error) => {
-      console.error('Websocket Error:', error);
+      console.error('Binance Websocket Error:', error);
       wsBinance.close();
     };
 
@@ -256,15 +151,14 @@ const MainPage = () => {
       wsUpbit.close();
       wsBinance.close();
     };
-  }, []);
+  }, [tokenFirstList, tokenSecondList]);
 
   return (
-    <div className="main_container">
-      <div className="chart_container">
+    <MainContainer>
+      <ChartContainer>
         <TradingViewWidget />
-      </div>
-
-      <div className="row_container">
+      </ChartContainer>
+      <RowContainer>
         <Search tokenList={tokenFirstList} />
         <Row
           firstTokenNameList={tokenFirstList}
@@ -272,13 +166,47 @@ const MainPage = () => {
           firstDataset={firstDataset}
           secondDataset={secondDataset}
         />
-      </div>
-
-      <div className="chat_container">
+      </RowContainer>
+      <ChatContainer>
         <Chat />
-      </div>
-    </div>
+      </ChatContainer>
+    </MainContainer>
   );
 };
 
 export default MainPage;
+
+const MainContainer = styled.div`
+  width: 100%;
+  display: flex;
+`;
+
+const ChartContainer = styled.div`
+  margin: 20px;
+  padding: 0px 0px 0px 20px;
+  width: 30%;
+  height: 40%;
+
+  #chart {
+    justify-content: center;
+    background-color: #131722;
+    align-items: left;
+    height: 350px;
+    margin: auto;
+    border: solid white;
+    border-radius: 10px;
+  }
+`;
+
+const RowContainer = styled.div`
+  margin: 20px 40px 20px 20px;
+  padding: 0px 20px 0px 0px;
+  width: 50%;
+  border: solid gray;
+`;
+
+const ChatContainer = styled.div`
+  width: 20%;
+  border: solid gray;
+  margin: 20px 40px 20px 0px;
+`;
