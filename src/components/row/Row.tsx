@@ -16,6 +16,7 @@ interface RowType {
   firstTokenDataList: any;
   firstDataset: { [key: string]: firstDataSet };
   secondDataset: { [key: string]: secondDataSet };
+  filteredTokens: string[];
 }
 
 export type dataListType = {
@@ -35,6 +36,7 @@ const Row = ({
   firstTokenDataList,
   firstDataset,
   secondDataset,
+  filteredTokens,
 }: RowType) => {
   const [nameList, setNameList] = useState<string[]>([]);
   const [dataList, setDataList] = useState<dataListType[]>([]);
@@ -207,9 +209,11 @@ const Row = ({
             </tr>
           </thead>
           <tbody>
-            {Object.entries(rowData).map(([token, data]) => (
-              <React.Fragment key={token}>
-                <tr
+            {Object.entries(rowData)
+              .filter(([token]) => filteredTokens.includes(token))
+              .map(([token, data]) => (
+                <React.Fragment key={token}>
+                  <tr
                   onClick={() => {
                     rowClick(token);
                   }}
