@@ -1,31 +1,40 @@
 'use client';
 import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
 
-const Search = (tokenList) => {
-  const [word, setWord] = useState('');
+interface SearchProps {
+  onSearch: (searchTerm: string) => void;
+}
 
-  const searchToken = (searchTerm) => {
-    Object.entries(tokenList['tokenList']).forEach((idx) => {
-      // console.log(idx[1]);
-    });
-  };
+const Search: React.FC<SearchProps> = ({ onSearch }) => {
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    searchToken('hello');
-  }, [tokenList]);
+    onSearch(searchTerm);
+  }, [searchTerm, onSearch]);
 
   return (
-    <div>
-      <div className="search-container">
-        <input
-          type="text"
-          value={word}
-          onChange={(e) => setWord(e.target.value)}
-          placeholder="여기에 원하는 코인 이름을 넣으세요."
-        ></input>
-      </div>
-    </div>
+    <SearchContainer>
+      <SearchInput
+        type="text"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        placeholder="코인 이름을 입력하세요"
+      />
+    </SearchContainer>
   );
 };
 
 export default Search;
+
+const SearchContainer = styled.div`
+  margin-bottom: 20px;
+`;
+
+const SearchInput = styled.input`
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+`;
