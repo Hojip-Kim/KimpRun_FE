@@ -14,7 +14,11 @@ import './page.css';
 import TradingViewWidget from '@/components/TradingViewWidget';
 import Search from '@/components/search/Search';
 import Chat from '@/components/chat/Chat';
-import { fetchTokenNames, fetchTokenCombinedDatas, fetchTokenDatas } from './components/server/DataFetcher';
+import {
+  fetchTokenNames,
+  fetchTokenCombinedDatas,
+  fetchTokenDatas,
+} from './components/server/DataFetcher';
 import styled from 'styled-components';
 
 export type TokenNameList = {
@@ -52,16 +56,30 @@ const MainPage = () => {
     [key: string]: secondDataSet;
   }>({});
 
-  const dispatch: AppDispatch = useDispatch();
-  const tokenFirstList = useSelector((state: RootState) => state.token.tokenList.first);
-  const tokenSecondList = useSelector((state: RootState) => state.token.tokenList.second);
-  const tokenFirstSet = useSelector((state: RootState) => state.token.tokenSet.first);
-  const tokenSecondSet = useSelector((state: RootState) => state.token.tokenSet.second);
+  const [filteredTokens, setFilteredTokens] = useState<string[]>([]);
 
-  const updateTokenFirstList = (newTokenList) => dispatch(setTokenFirstList(newTokenList));
-  const updateTokenFirstDataSet = (newTokenSet) => dispatch(setTokenFirstDataset(newTokenSet));
-  const updateTokenSecondList = (newTokenList) => dispatch(setTokenSecondList(newTokenList));
-  const updateTokenSecondDataSet = (newTokenSet) => dispatch(setTokenSecondDataset(newTokenSet));
+  const dispatch: AppDispatch = useDispatch();
+  const tokenFirstList = useSelector(
+    (state: RootState) => state.token.tokenList.first
+  );
+  const tokenSecondList = useSelector(
+    (state: RootState) => state.token.tokenList.second
+  );
+  const tokenFirstSet = useSelector(
+    (state: RootState) => state.token.tokenSet.first
+  );
+  const tokenSecondSet = useSelector(
+    (state: RootState) => state.token.tokenSet.second
+  );
+
+  const updateTokenFirstList = (newTokenList) =>
+    dispatch(setTokenFirstList(newTokenList));
+  const updateTokenFirstDataSet = (newTokenSet) =>
+    dispatch(setTokenFirstDataset(newTokenSet));
+  const updateTokenSecondList = (newTokenList) =>
+    dispatch(setTokenSecondList(newTokenList));
+  const updateTokenSecondDataSet = (newTokenSet) =>
+    dispatch(setTokenSecondDataset(newTokenSet));
 
   const upbitWebsocketURL = process.env.NEXT_PUBLIC_UPBIT_WEBSOCKET_URL;
   const binanceWebsocketURL = process.env.NEXT_PUBLIC_BINANCE_WEBSOCKET_URL;
@@ -101,6 +119,21 @@ const MainPage = () => {
       console.error(error);
     }
   };
+
+  const handleSearch = (searchTerm: string) => {
+    if (!searchTerm) {
+      setFilteredTokens(tokenFirstList);
+    } else {
+      const filtered = tokenFirstList.filter((token) =>
+        token.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredTokens(filtered);
+    }
+  };
+
+  useEffect(() => {
+    setFilteredTokens(tokenFirstList);
+  }, [tokenFirstList]);
 
   useEffect(() => {
     updateNamesAsync();
@@ -159,12 +192,13 @@ const MainPage = () => {
         <TradingViewWidget />
       </ChartContainer>
       <RowContainer>
-        <Search tokenList={tokenFirstList} />
+        <Search onSearch={handleSearch} />
         <Row
           firstTokenNameList={tokenFirstList}
           firstTokenDataList={tokenFirstSet}
           firstDataset={firstDataset}
           secondDataset={secondDataset}
+          filteredTokens={filteredTokens}
         />
       </RowContainer>
       <ChatContainer>
