@@ -6,12 +6,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import Modal from '@/components/modal/modal';
 import LoginForm from '@/components/login/loginForm';
-import { logout } from '@/redux/reducer/authReducer';
+import { logout, setUser } from '@/redux/reducer/authReducer';
+import { fetchUserInfo } from '@/components/auth/fetchUserInfo';
 
 const Nav = () => {
   const [dollars, setDollars] = useState('');
   const [userCount, setUserCount] = useState(0);
   const [isModalActive, setIsModalActive] = useState<boolean>(false);
+  const [modalSize, setModalSize] = useState({ width: 400, height: 300 });
 
   const reduxTether = useSelector((state: RootState) => state.info.tether);
   const isAuthenticated = useSelector(
@@ -23,29 +25,19 @@ const Nav = () => {
   const statusUrl = process.env.NEXT_PUBLIC_STATUS_URL;
   const logoutUrl = process.env.NEXT_PUBLIC_LOGOUT_URL;
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      const fetchUserInfo = async () => {
-        try {
-          const response = await fetch(
-            statusUrl,
-            { method: 'GET', credentials: 'include' }
-          );
-          if (response.ok) {
-            const data = await response.json();
-            console.log(data);
-          } else {
-            dispatch(logout());
-          }
-        } catch (error) {
-          console.error('사용자 정보 가져오기 실패:', error);
-        }
-      };
-      fetchUserInfo();
+  const fetchUserInfoData = async () => {
+    const data = await fetchUserInfo(statusUrl);
+    if (data && data.user) {
+      dispatch(setUser(data.user));
     }
-  }, [isAuthenticated, dispatch, user]);
+  };
+
+  useEffect(() => {
+    fetchUserInfoData();
+  }, [isAuthenticated, dispatch]);
 
   const handleLoginClick = () => {
+    setModalSize({ width: 400, height: 300 });
     setIsModalActive(true);
   };
 
@@ -57,10 +49,7 @@ const Nav = () => {
     };
 
     try {
-      const response = await fetch(
-        logoutUrl,
-        requestInit
-      );
+      const response = await fetch(logoutUrl, requestInit);
 
       if (response.ok) {
         alert('로그아웃 성공');
@@ -73,7 +62,6 @@ const Nav = () => {
       alert('로그아웃 중 오류 발생');
     }
   };
-
   return (
     <nav className="navbar">
       <div className="nav-box">
@@ -144,14 +132,18 @@ const Nav = () => {
 
       {isModalActive && (
         <Modal
-          width={400}
-          height={300}
-          element={<LoginForm closeModal={() => setIsModalActive(false)} />}
+          width={modalSize.width}
+          height={modalSize.height}
+          element={
+            <LoginForm
+              closeModal={() => setIsModalActive(false)}
+              setModalSize={setModalSize}
+            />
+          }
           setModal={setIsModalActive}
         ></Modal>
       )}
     </nav>
   );
 };
-
 export default Nav;
