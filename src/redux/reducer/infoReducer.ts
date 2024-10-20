@@ -8,7 +8,7 @@ const infoSlices = createSlice({
       state.tether = action.payload;
     },
 
-    setUser: (state, action) => {
+    setUser: (state) => {
       state.user = state.user++;
     },
   },
