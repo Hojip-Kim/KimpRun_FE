@@ -1,6 +1,10 @@
+'use client';
+
 import React, { useEffect, useRef, useState } from 'react';
 import './Chat.css';
 import serverFetch from '@/server/fetch/server';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
 
 // const type Message = {
 
@@ -29,6 +33,8 @@ const Chat = () => {
     method: 'GET',
     headers: { 'Content-type': 'application/json' },
   };
+
+  const user = useSelector((state: RootState) => state.auth.user);
 
   const fetchPreviousMessage = async () => {
     try {
@@ -61,9 +67,17 @@ const Chat = () => {
     }
   };
 
+  type ChatMessage = {
+    chatID: string;
+    content: string;
+  };
+
   const handleSendMessage = () => {
     if (input.trim() && ws?.readyState === WebSocket.OPEN) {
-      ws.send(input);
+      const userNickname = user.name;
+      const message: ChatMessage = { chatID: userNickname, content: input };
+
+      ws.send(JSON.stringify(message));
       setInput('');
     } else {
       console.error('message send error');
