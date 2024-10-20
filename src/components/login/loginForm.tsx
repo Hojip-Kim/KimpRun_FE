@@ -1,48 +1,48 @@
 'use client';
-import { use, useState } from 'react';
+import { useEffect, useState } from 'react';
 import './loginForm.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { setIsAuthenticated, setUser } from '@/redux/reducer/authReducer';
-import { RootState } from '@/redux/store';
 import styled from 'styled-components';
+import SignupForm from '../signup/SignupForm';
+import { loginDataFetch } from './server/loginDataFetch';
+import { fetchUserInfo } from '../auth/fetchUserInfo';
+import { RootState } from '@/redux/store';
 
 interface LoginFormProps {
   closeModal: () => void;
+  setModalSize: React.Dispatch<
+    React.SetStateAction<{ width: number; height: number }>
+  >;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ closeModal }) => {
+const LoginForm: React.FC<LoginFormProps> = ({ closeModal, setModalSize }) => {
   const dispatch = useDispatch();
-  const [username, setUsername] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [isLoginForm, setIsLoginForm] = useState<boolean>(true);
+
+  const statusUrl = process.env.NEXT_PUBLIC_STATUS_URL;
+  const loginUrl = process.env.NEXT_PUBLIC_LOGIN_URL;
+  const user = useSelector((state: RootState) => state.auth.user);
+
+  useEffect(() => {
+    if (isLoginForm) {
+      setModalSize({ width: 400, height: 300 });
+    } else {
+      setModalSize({ width: 450, height: 450 });
+    }
+  }, [isLoginForm, setModalSize]);
 
   const fetchLoginData = async (
-    loginId: string,
+    email: string,
     password: string
   ): Promise<boolean> => {
-    const loginUrl = process.env.NEXT_PUBLIC_LOGIN_URL;
+    const isLoginSuccess = await loginDataFetch(loginUrl, email, password);
 
-    const requestInit: RequestInit = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', // 쿠키 포함
-      body: JSON.stringify({
-        loginId,
-        password,
-      }),
-    };
-
-    try {
-      const response = await fetch(loginUrl, requestInit);
-      if (response.ok) {
-        const data = await response.json();
-        dispatch(setIsAuthenticated(true));
-        dispatch(setUser(data.user));
-        return true;
-      } else {
-        return false;
-      }
-    } catch (e) {
-      console.error(e);
+    if (isLoginSuccess) {
+      return true;
+    } else {
       return false;
     }
   };
@@ -51,9 +51,12 @@ const LoginForm: React.FC<LoginFormProps> = ({ closeModal }) => {
     e.preventDefault();
 
     // Spring Boot의 /login 엔드포인트로 POST 요청
-    const isSuccess = await fetchLoginData(username, password);
+    const isSuccess = await fetchLoginData(email, password);
     if (isSuccess) {
       // true면
+      await dispatch(setIsAuthenticated());
+      const data = await fetchUserInfo(statusUrl);
+      dispatch(setUser(data.user));
       alert('로그인 성공');
       closeModal();
     } else {
@@ -63,26 +66,35 @@ const LoginForm: React.FC<LoginFormProps> = ({ closeModal }) => {
 
   return (
     <FormContainer>
-      <h1>Login</h1>
-      <form onSubmit={handleLogin}>
-        <div>
-          <label>Username</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-        </div>
-        <div>
-          <label>Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        <button type="submit">Login</button>
-      </form>
+      {isLoginForm ? (
+        <>
+          <h1>Login</h1>
+          <form onSubmit={handleLogin}>
+            <div>
+              <label>Email</label>
+              <input
+                type="text"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div>
+              <label>Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <button type="submit">Login</button>
+          </form>
+
+          <h1>아이디가 없으세요?</h1>
+          <button onClick={() => setIsLoginForm(false)}>회원가입</button>
+        </>
+      ) : (
+        <SignupForm setIsLoginForm={setIsLoginForm} />
+      )}
     </FormContainer>
   );
 };
