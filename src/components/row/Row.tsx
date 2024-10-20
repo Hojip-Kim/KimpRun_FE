@@ -9,10 +9,7 @@ import { numberToKorean, rateCompareByOriginPrice } from '@/method';
 import { setTether } from '@/redux/reducer/infoReducer';
 import { setToken } from '@/redux/reducer/widgetReduce';
 import { firstDataSet, secondDataSet } from '@/app/page';
-
-/*
-    TODO : style component 적용
-*/
+import { getRowData, updateRowData } from './rowDataFetch';
 
 interface RowType {
   firstTokenNameList: string[];
@@ -33,21 +30,17 @@ export type dataListType = {
   trade_volume: number;
 };
 
-// dataList : 토큰 이름
-// dataset : 실시간 토큰 데이터
 const Row = ({
   firstTokenNameList,
   firstTokenDataList,
   firstDataset,
   secondDataset,
 }: RowType) => {
-  // values가 존재하지 않을 경우 빈 배열을 사용
   const [nameList, setNameList] = useState<string[]>([]);
   const [dataList, setDataList] = useState<dataListType[]>([]);
 
   const [prevRowData, setPrevRowData] = useState({});
   const [rowData, setRowData] = useState({});
-  // const [secondRowData, setSecondRowData]
   const [sortConfig, setSortConfig] = useState({
     key: 'change_rate',
     direction: 'asc',
@@ -57,22 +50,18 @@ const Row = ({
 
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
-  // Tether 전역상태관리
   const dispatch: AppDispatch = useDispatch();
 
   const tether = useSelector((state: RootState) => state.info.tether);
   const updateTether = (tether) => {
     dispatch(setTether(tether));
   };
-  //************************ */
 
-  // widget token 전역상태관리
   const widgetToken = useSelector((state: RootState) => state.widget.token);
 
   const updateWidgetToken = (token) => {
     dispatch(setToken(token));
   };
-  //************************ */
 
   const updateTokenFirstList = (newTokenList) => {
     dispatch(setTokenFirstList(newTokenList));
@@ -108,21 +97,6 @@ const Row = ({
     setSortConfig({ key, direction });
   };
 
-  /* 
-  name의 [0] : index
-  name의 [1] : token Name
-  data의 [0] : index
-  data의 [1] : token data
-    */
-  const dataMerge = (name: any, data: any) => {
-    const mergeData = {};
-
-    for (let i = 0; i < name.length; i++) {
-      mergeData[name[i]] = data[i];
-    }
-    setRowData(mergeData);
-  };
-
   const priceChangeStyle = (prev: number, cur: number) => {
     if (prev === undefined)
       return { transition: 'background-color 0.4s ease-in-out' };
@@ -130,12 +104,12 @@ const Row = ({
       return {
         backgroundColor: 'rgba(0, 255, 0, 0.3)',
         transition: 'background-color 0.4s ease-in-out',
-      }; // Green with opacity
+      };
     } else if (prev > cur) {
       return {
         backgroundColor: 'rgba(255, 0, 0, 0.3)',
         transition: 'background-color 0.4s ease-in-out',
-      }; // Red with opacity
+      };
     } else {
       return { transition: 'background-color 0.4s ease-in-out' };
     }
@@ -161,7 +135,7 @@ const Row = ({
 
   useEffect(() => {
     if (nameList.length > 0 && dataList.length > 0) {
-      dataMerge(nameList, dataList);
+      getRowData(nameList, dataList).then(setRowData);
     }
   }, [nameList, dataList]);
 
@@ -169,39 +143,27 @@ const Row = ({
     if (rowData && firstDataset && secondDataset) {
       setPrevRowData(rowData);
 
-      const updatedRowData = { ...rowData };
+      updateRowData(rowData, firstDataset, secondDataset, tether).then((updatedData) => {
+        setRowData(updatedData);
 
-      Object.entries(firstDataset).forEach(([token, data]) => {
-        updatedRowData[token] = data;
-      });
-
-      Object.entries(secondDataset).forEach(([token, data]) => {
-        if (updatedRowData[token]) {
-          updatedRowData[token] = {
-            ...updatedRowData[token],
-            secondPrice: (data.trade_price * tether).toLocaleString(),
-          };
-        }
-      });
-      setRowData(updatedRowData);
-
-      const newFadeOutClass = {};
-      Object.keys(firstDataset).forEach((token) => {
-        if (token != 'USDT') {
-          const prev = prevRowData[token]?.trade_price;
-          const cur = firstDataset[token].trade_price;
-          if (prev !== undefined && prev !== cur) {
-            newFadeOutClass[token] = 'fade-out';
+        const newFadeOutClass = {};
+        Object.keys(firstDataset).forEach((token) => {
+          if (token != 'USDT') {
+            const prev = prevRowData[token]?.trade_price;
+            const cur = firstDataset[token].trade_price;
+            if (prev !== undefined && prev !== cur) {
+              newFadeOutClass[token] = 'fade-out';
+            }
+          } else {
+            updateTether(firstDataset[token].trade_price);
           }
-        } else {
-          updateTether(firstDataset[token].trade_price);
-        }
-      });
-      setFadeOutClass(newFadeOutClass);
+        });
+        setFadeOutClass(newFadeOutClass);
 
-      setTimeout(() => {
-        setFadeOutClass({});
-      }, 200);
+        setTimeout(() => {
+          setFadeOutClass({});
+        }, 200);
+      });
     }
   }, [firstDataset, secondDataset]);
 
@@ -221,7 +183,6 @@ const Row = ({
                   btn
                 </a>
               </th>
-              {/* <th>거래량(개)</th> */}
               <th>
                 변동률(전일대비)
                 <a
@@ -263,13 +224,9 @@ const Row = ({
                   <td>
                     {data['trade_price']?.toLocaleString()}원
                     <p className="comparison-group">
-                      {/* {data['secondPrice']
-                      ? data['secondPrice']
-                      : secondTokenDataList[token]['trade_price']} */}
                       원
                     </p>
                   </td>
-                  {/* <td>{data['trade_volume']}개</td> */}
                   <td
                     style={getChangeRateStyle(
                       data['change_rate'],
