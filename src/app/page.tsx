@@ -8,7 +8,7 @@ import {
   setTokenSecondDataset,
 } from '@/redux/reducer/tokenReducer';
 import { AppDispatch, RootState } from '@/redux/store';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import './page.css';
 import TradingViewWidget from '@/components/TradingViewWidget';
@@ -120,16 +120,19 @@ const MainPage = () => {
     }
   };
 
-  const handleSearch = (searchTerm: string) => {
-    if (!searchTerm) {
-      setFilteredTokens(tokenFirstList);
-    } else {
-      const filtered = tokenFirstList.filter((token) =>
-        token.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredTokens(filtered);
-    }
-  };
+  const handleSearch = useCallback(
+    (searchTerm: string) => {
+      if (!searchTerm) {
+        setFilteredTokens(tokenFirstList);
+      } else {
+        const filtered = tokenFirstList.filter((token) =>
+          token.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        setFilteredTokens(filtered);
+      }
+    },
+    [tokenFirstList]
+  );
 
   useEffect(() => {
     setFilteredTokens(tokenFirstList);
