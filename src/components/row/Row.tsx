@@ -59,8 +59,6 @@ const Row = ({
     dispatch(setTether(tether));
   };
 
-  const widgetToken = useSelector((state: RootState) => state.widget.token);
-
   const updateWidgetToken = (token) => {
     dispatch(setToken(token));
   };
@@ -145,27 +143,29 @@ const Row = ({
     if (rowData && firstDataset && secondDataset) {
       setPrevRowData(rowData);
 
-      updateRowData(rowData, firstDataset, secondDataset, tether).then((updatedData) => {
-        setRowData(updatedData);
+      updateRowData(rowData, firstDataset, secondDataset, tether).then(
+        (updatedData) => {
+          setRowData(updatedData);
 
-        const newFadeOutClass = {};
-        Object.keys(firstDataset).forEach((token) => {
-          if (token != 'USDT') {
-            const prev = prevRowData[token]?.trade_price;
-            const cur = firstDataset[token].trade_price;
-            if (prev !== undefined && prev !== cur) {
-              newFadeOutClass[token] = 'fade-out';
+          const newFadeOutClass = {};
+          Object.keys(firstDataset).forEach((token) => {
+            if (token != 'USDT') {
+              const prev = prevRowData[token]?.trade_price;
+              const cur = firstDataset[token].trade_price;
+              if (prev !== undefined && prev !== cur) {
+                newFadeOutClass[token] = 'fade-out';
+              }
+            } else {
+              updateTether(firstDataset[token].trade_price);
             }
-          } else {
-            updateTether(firstDataset[token].trade_price);
-          }
-        });
-        setFadeOutClass(newFadeOutClass);
+          });
+          setFadeOutClass(newFadeOutClass);
 
-        setTimeout(() => {
-          setFadeOutClass({});
-        }, 200);
-      });
+          setTimeout(() => {
+            setFadeOutClass({});
+          }, 200);
+        }
+      );
     }
   }, [firstDataset, secondDataset]);
 
@@ -214,79 +214,77 @@ const Row = ({
               .map(([token, data]) => (
                 <React.Fragment key={token}>
                   <tr
-                  onClick={() => {
-                    rowClick(token);
-                  }}
-                  key={token}
-                  className={`column ${fadeOutClass[token] || ''}`}
-                  style={priceChangeStyle(
-                    prevRowData[token]?.trade_price,
-                    data['trade_price']
-                  )}
-                >
-                  <td>{data['token']}</td>
-                  <td>
-                    {data['trade_price']?.toLocaleString()}원
-                    <p className="comparison-group">
-                      원
-                    </p>
-                  </td>
-                  <td
-                    style={getChangeRateStyle(
-                      data['change_rate'],
-                      data['rate_change']
+                    onClick={() => {
+                      rowClick(token);
+                    }}
+                    key={token}
+                    className={`column ${fadeOutClass[token] || ''}`}
+                    style={priceChangeStyle(
+                      prevRowData[token]?.trade_price,
+                      data['trade_price']
                     )}
                   >
-                    {(data['change_rate'] * 10).toFixed(2)}%
-                  </td>
-                  <td>
-                    <div>{data['highest_price']?.toLocaleString()}원</div>
-                    <div
-                      className="rate_per_52week"
+                    <td>{data['token']}</td>
+                    <td>
+                      {data['trade_price']?.toLocaleString()}원
+                      <p className="comparison-group">원</p>
+                    </td>
+                    <td
                       style={getChangeRateStyle(
-                        rateCompareByOriginPrice(
-                          data['trade_price'] / data['highest_price']
-                        )
+                        data['change_rate'],
+                        data['rate_change']
                       )}
                     >
-                      {(
-                        rateCompareByOriginPrice(
-                          data['trade_price'] / data['highest_price']
-                        ) * 100
-                      ).toFixed(2)}
-                      %
-                    </div>
-                  </td>
-                  <td>{data['lowest_price']?.toLocaleString()}원</td>
-                  <td>{data['opening_price']?.toLocaleString()}원</td>
-                  <td style={{ fontSize: '0.6rem', color: 'gray' }}>
-                    {numberToKorean(data['acc_trade_price24'] / 10000)}
-                  </td>
-                </tr>
-                {expandedRow === token && (
-                  <tr>
-                    <td colSpan={7}>
+                      {(data['change_rate'] * 10).toFixed(2)}%
+                    </td>
+                    <td>
+                      <div>{data['highest_price']?.toLocaleString()}원</div>
                       <div
-                        className={`expandable-content ${
-                          expandedRow === token ? 'expanded' : ''
-                        }`}
-                        style={{
-                          backgroundColor: 'gray',
-                          padding: '10px',
-                          border: '1px solid #dee2e6',
-                          borderRadius: '4px',
-                          height: expandedRow === token ? 'auto' : '0',
-                        }}
+                        className="rate_per_52week"
+                        style={getChangeRateStyle(
+                          rateCompareByOriginPrice(
+                            data['trade_price'] / data['highest_price']
+                          )
+                        )}
                       >
-                        <p>Token : {token}</p>
-                        <p>추가정보 : </p>
-                        <p> Hello world!</p>
+                        {(
+                          rateCompareByOriginPrice(
+                            data['trade_price'] / data['highest_price']
+                          ) * 100
+                        ).toFixed(2)}
+                        %
                       </div>
                     </td>
+                    <td>{data['lowest_price']?.toLocaleString()}원</td>
+                    <td>{data['opening_price']?.toLocaleString()}원</td>
+                    <td style={{ fontSize: '0.6rem', color: 'gray' }}>
+                      {numberToKorean(data['acc_trade_price24'] / 10000)}
+                    </td>
                   </tr>
-                )}
-              </React.Fragment>
-            ))}
+                  {expandedRow === token && (
+                    <tr>
+                      <td colSpan={7}>
+                        <div
+                          className={`expandable-content ${
+                            expandedRow === token ? 'expanded' : ''
+                          }`}
+                          style={{
+                            backgroundColor: 'gray',
+                            padding: '10px',
+                            border: '1px solid #dee2e6',
+                            borderRadius: '4px',
+                            height: expandedRow === token ? 'auto' : '0',
+                          }}
+                        >
+                          <p>Token : {token}</p>
+                          <p>추가정보 : </p>
+                          <p> Hello world!</p>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+              ))}
           </tbody>
         </table>
       </div>
