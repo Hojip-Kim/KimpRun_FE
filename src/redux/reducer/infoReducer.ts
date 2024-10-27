@@ -8,11 +8,11 @@ const infoSlices = createSlice({
       state.tether = action.payload;
     },
 
-    setUser: (state) => {
+    setUserCount: (state) => {
       state.user = state.user++;
     },
   },
 });
 
-export const { setTether, setUser } = infoSlices.actions;
+export const { setTether, setUserCount } = infoSlices.actions;
 export default infoSlices.reducer;
