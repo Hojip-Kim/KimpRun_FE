@@ -97,21 +97,31 @@ export default Search;
 
 const SearchContainer = styled.div`
   margin-bottom: 20px;
+  color: #e0e0e0;
 `;
 
 const SearchInput = styled.input`
   width: 100%;
   padding: 10px;
   font-size: 16px;
-  border: 1px solid #ccc;
+  border: 1px solid #333;
   border-radius: 4px;
+  background-color: #2c2c2c;
+  color: #e0e0e0;
+  margin-top: 10px;
 `;
 
 const SearchButton = styled.button`
   padding: 10px 20px;
   font-size: 16px;
-  background-color: #007bff;
+  background-color: #4a90e2;
   color: #fff;
   border: none;
   border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+
+  &:hover {
+    background-color: #3a7bc8;
+  }
 `;
