@@ -13,6 +13,9 @@ export default () => {
   }
 
   return {
+    compiler: {
+      styledComponents: true,
+    },
     reactStrictMode: false,
     webpack: (config, options) => {
       config.cache = false;
