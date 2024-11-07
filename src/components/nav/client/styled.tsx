@@ -9,20 +9,23 @@ export const NavbarWrapper = styled.nav`
   right: 0;
   height: 100px;
   z-index: 1000;
-  background-color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #1e1e1e;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 `;
 
 export const TopSection = styled.div`
   display: flex;
   justify-content: space-between;
-  padding: 10px 20px;
-  border-bottom: 1px solid #e0e0e0;
+  height: 100px;
+  padding-top: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
 `;
 
 export const InfoContainer = styled.div`
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  justify-content: space-between;
 `;
 
 export const InfoItem = styled.div`
@@ -30,6 +33,36 @@ export const InfoItem = styled.div`
   align-items: center;
   margin-right: 20px;
   font-size: 0.9rem;
+  color: #e0e0e0;
+`;
+export const TopInfoSection = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+export const LogoIcon = styled.img`
+  width: 50px;
+  height: 50px;
+  min-width: 35px;
+  min-height: 35px;
+
+  object-fit: contain;
+  aspect-ratio: 1;
+
+  @media (max-width: 1200px) {
+    width: 45px;
+    height: 45px;
+  }
+
+  @media (max-width: 768px) {
+    width: 40px;
+    height: 40px;
+  }
+
+  @media (max-width: 480px) {
+    width: 35px;
+    height: 35px;
+  }
 `;
 
 export const Icon = styled.img`
@@ -56,11 +89,14 @@ export const UserRole = styled.span<{ role?: string }>`
   font-weight: ${(props) =>
     props.role === 'OPERATOR' || props.role === 'MANAGER' ? 'bold' : 'normal'};
   margin-bottom: 5px;
+  margin-right: 5px;
 `;
 
 export const UserName = styled.span`
   font-size: 0.9rem;
   margin-bottom: 5px;
+  font-size: 0.9rem;
+  color: #e0e0e0;
 `;
 
 export const ActionButtons = styled.div`
@@ -68,23 +104,26 @@ export const ActionButtons = styled.div`
 `;
 
 export const ActionButton = styled.button`
-  background-color: #f0f0f0;
+  background-color: #2c2c2c;
   border: none;
   padding: 5px 10px;
   margin-left: 10px;
   cursor: pointer;
   border-radius: 4px;
   font-size: 0.8rem;
+  color: #e0e0e0;
 
   &:hover {
-    background-color: #e0e0e0;
+    background-color: #3a3a3a;
   }
 `;
+
 export const BottomSection = styled.div`
   display: flex;
   align-items: center;
-  padding: 10px 20px;
-  height: 0px;
+  height: 40px;
+  padding: 10px 0;
+  margin-top: 10px;
 `;
 
 export const Logo = styled.div`
@@ -104,6 +143,8 @@ export const NavMenu = styled.ul`
   margin: 0;
   height: 100%;
   align-items: center;
+  font-size: 0.9rem;
+  color: #e0e0e0;
 `;
 
 export const CloseButton = styled.button`
@@ -126,15 +167,26 @@ export const NavMenuLink = styled.span`
 `;
 
 export const SubMenu = styled.ul`
-  display: none;
   position: absolute;
-  background-color: white;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  padding: 10px 0;
+  background-color: #2c2c2c;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  margin-top: 30px; 
   z-index: 1;
   min-width: 150px;
-  top: 100%;
-  left: 0;
+  border-radius: 4px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+
+  &:hover {
+    opacity: 1;
+    visibility: visible;
+  }
+`;
+
+export const TradingViewOverviewContainer = styled.div`
+  align-items: center;
+  width: 700px;
 `;
 
 export const SubMenuItem = styled.li`
@@ -142,28 +194,36 @@ export const SubMenuItem = styled.li`
   cursor: pointer;
   white-space: nowrap;
   text-align: left;
+  color: #e0e0e0;
+  transition: background-color 0.3s ease, color 0.3s ease;
 
   &:hover {
-    background-color: #f0f0f0;
+    background-color: #3a3a3a;
+    color: #ffd700;
   }
 `;
 
 export const NavMenuItem = styled.li`
   margin-right: 20px;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 0.9rem;
+  font-weight: 700;
   height: 100%;
   display: flex;
-  flex-direction: column; 
+  flex-direction: column;
   align-items: flex-start;
   position: relative;
   padding-bottom: 20px;
+  color: #e0e0e0;
+  transition: color 0.3s ease;
 
   &:hover {
-    color: #007bff;
+    color: #ffd700;
 
     ${SubMenu} {
       display: block;
+      opacity: 1;
+      visibility: visible;
     }
   }
 `;
