@@ -17,19 +17,25 @@ import {
   InfoContainer,
   InfoItem,
   Logo,
+  LogoIcon,
   NavbarWrapper,
   NavMenu,
   NavMenuItem,
   NavMenuLink,
   SubMenu,
   SubMenuItem,
+  TopInfoSection,
   TopSection,
+  TradingViewOverviewContainer,
   UserContainer,
   UserName,
   UserRole,
   UserWrapperContainer,
 } from './client/styled';
 import { useRouter } from 'next/navigation';
+import TradingViewOverview from '../tradingview/TradingViewOverview';
+import { setDollar, setUserCount } from '@/redux/reducer/infoReducer';
+import { FaUser, FaUserCircle, FaUserCog } from 'react-icons/fa';
 
 interface ResponseUrl {
   response: string;
@@ -37,7 +43,7 @@ interface ResponseUrl {
 
 const Nav = () => {
   const [dollars, setDollars] = useState('');
-  const [userCount, setUserCount] = useState(0);
+  const [userSize, setUserSize] = useState(0);
   const [isModalActive, setIsModalActive] = useState<boolean>(false);
   const [modalSize, setModalSize] = useState({ width: 400, height: 300 });
   const router = useRouter();
@@ -46,12 +52,17 @@ const Nav = () => {
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated
   );
+
+  const dollar = useSelector((state: RootState) => state.info.dollar);
+
   const user = useSelector((state: RootState) => state.auth.user);
+  const userCount = useSelector((state: RootState) => state.info.user);
   const dispatch = useDispatch<AppDispatch>();
 
   const statusUrl = process.env.NEXT_PUBLIC_STATUS_URL;
   const logoutUrl = process.env.NEXT_PUBLIC_LOGOUT_URL;
   const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL;
+  const dollarAPIUrl = process.env.NEXT_PUBLIC_DOLLAR_API_URL;
 
   const checkUserAuth = async () => {
     if (isAuthenticated) {
@@ -59,9 +70,45 @@ const Nav = () => {
     }
   };
 
+  const requestDollar = async () => {
+    const requestInit: RequestInit = {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    };
+    const response = await fetch(dollarAPIUrl, requestInit);
+    const parsedData = await response.json();
+
+    setDollars(parsedData.dollar);
+    dispatch(setDollar(parsedData.dollar));
+  };
+
   useEffect(() => {
+    requestDollar();
     checkUserAuth();
   }, [dispatch]);
+
+  useEffect(() => {
+    const infoWebsocket = new WebSocket(
+      process.env.NEXT_PUBLIC_INFO_WEBSOCKET_URL
+    );
+
+    infoWebsocket.onmessage = (event) => {
+      const parsedData = JSON.parse(event.data);
+      setDollars(parsedData.dollar);
+      setUserSize(parsedData.userCount);
+      dispatch(setUserCount(parsedData.userCount));
+      dispatch(setDollar(parsedData.dollar));
+    };
+
+    infoWebsocket.onerror = (error) => {
+      console.error('Info Websocket Error:', error);
+      infoWebsocket.close();
+    };
+
+    return () => {
+      infoWebsocket.close();
+    };
+  }, []);
 
   const handleLoginClick = () => {
     setModalSize({ width: 400, height: 300 });
@@ -130,27 +177,88 @@ const Nav = () => {
     <NavbarWrapper>
       <TopSection>
         <InfoContainer>
-          <InfoItem>
-            <Logo
-              onClick={() =>
-                (window.location.href = process.env.NEXT_PUBLIC_MAIN_PAGE)
-              }
-            >
-              KIMP-RUN
-            </Logo>
-            <Icon src="/dollar.png" alt="Dollar" />
-            환율: {dollars}
-          </InfoItem>
-          <InfoItem>
-            <Icon src="/tether.png" alt="Tether" />
-            테더: {reduxTether}
-          </InfoItem>
-          <InfoItem>유저 수: {userCount}</InfoItem>
+          <TopInfoSection>
+            <InfoItem>
+              <Logo
+                onClick={() => router.push(process.env.NEXT_PUBLIC_MAIN_PAGE)}
+              >
+                <LogoIcon src="/logo.png" alt="Dollar" />
+              </Logo>
+              <Icon src="/dollar.png" alt="Dollar" />
+              환율: {dollar}원
+            </InfoItem>
+            <InfoItem>
+              <Icon src="/tether.png" alt="Tether" />
+              테더: {reduxTether}
+            </InfoItem>
+            <InfoItem>유저 수: {userCount}</InfoItem>
+          </TopInfoSection>
+          <BottomSection>
+            <NavMenu>
+              <NavMenuItem
+                onClick={() => router.push(process.env.NEXT_PUBLIC_MAIN_PAGE)}
+              >
+                메인페이지
+              </NavMenuItem>
+              <NavMenuItem>
+                <NavMenuLink
+                  onClick={() =>
+                    router.push(process.env.NEXT_PUBLIC_COMMUNITY_PAGE)
+                  }
+                >
+                  커뮤니티
+                </NavMenuLink>
+                <SubMenu>
+                  <SubMenuItem
+                    onClick={() =>
+                      router.push(
+                        `${process.env.NEXT_PUBLIC_COMMUNITY_PAGE}/expert`
+                      )
+                    }
+                  >
+                    전문가 게시판
+                  </SubMenuItem>
+                  <SubMenuItem
+                    onClick={() =>
+                      router.push(
+                        `${process.env.NEXT_PUBLIC_COMMUNITY_PAGE}/coin`
+                      )
+                    }
+                  >
+                    코인 게시판
+                  </SubMenuItem>
+                </SubMenu>
+              </NavMenuItem>
+              <NavMenuItem
+                onClick={() =>
+                  router.push(process.env.NEXT_PUBLIC_STATISTICS_PAGE)
+                }
+              >
+                통계
+              </NavMenuItem>
+              <NavMenuItem
+                onClick={() => router.push(process.env.NEXT_PUBLIC_NEWS_PAGE)}
+              >
+                뉴스
+              </NavMenuItem>
+            </NavMenu>
+          </BottomSection>
         </InfoContainer>
+        <TradingViewOverviewContainer>
+          <TradingViewOverview />
+        </TradingViewOverviewContainer>
         <UserWrapperContainer>
           <UserContainer>
             <UserRole role={user?.role}>
-              {isAuthenticated ? user?.role : '로그인 되지 않은 사용자'}
+              {isAuthenticated ? (
+                user?.role === 'OPERATOR' ? (
+                  <FaUserCog size={24} title="관리자" />
+                ) : (
+                  <FaUser size={24} title="일반 사용자" />
+                )
+              ) : (
+                <FaUserCircle size={24} title="비로그인 사용자" />
+              )}
             </UserRole>
             <UserName>{`안녕하세요. ${user?.name}님`}</UserName>
           </UserContainer>
@@ -176,49 +284,6 @@ const Nav = () => {
           </ActionButtons>
         </UserWrapperContainer>
       </TopSection>
-      <BottomSection>
-        <NavMenu>
-          <NavMenuItem>
-            <NavMenuLink
-              onClick={() =>
-                (window.location.href = process.env.NEXT_PUBLIC_COMMUNITY_PAGE)
-              }
-            >
-              커뮤니티
-            </NavMenuLink>
-            <SubMenu>
-              <SubMenuItem
-                onClick={() =>
-                  (window.location.href = `${process.env.NEXT_PUBLIC_COMMUNITY_PAGE}/expert`)
-                }
-              >
-                전문가 게시판
-              </SubMenuItem>
-              <SubMenuItem
-                onClick={() =>
-                  (window.location.href = `${process.env.NEXT_PUBLIC_COMMUNITY_PAGE}/coin`)
-                }
-              >
-                코인 게시판
-              </SubMenuItem>
-            </SubMenu>
-          </NavMenuItem>
-          <NavMenuItem
-            onClick={() =>
-              (window.location.href = process.env.NEXT_PUBLIC_STATISTICS_PAGE)
-            }
-          >
-            통계
-          </NavMenuItem>
-          <NavMenuItem
-            onClick={() =>
-              (window.location.href = process.env.NEXT_PUBLIC_NEWS_PAGE)
-            }
-          >
-            뉴스
-          </NavMenuItem>
-        </NavMenu>
-      </BottomSection>
 
       {isModalActive && (
         <Modal
