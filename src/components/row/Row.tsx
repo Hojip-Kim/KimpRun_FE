@@ -1,19 +1,34 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import './Row.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
-import { setTokenFirstList } from '@/redux/reducer/tokenReducer';
-import { numberToKorean, rateCompareByOriginPrice } from '@/method';
 import { setTether } from '@/redux/reducer/infoReducer';
 import { setToken } from '@/redux/reducer/widgetReduce';
 import { firstDataSet, secondDataSet } from '@/app/page';
-import { getRowData, updateRowData } from './rowDataFetch';
+import {
+  getRowData,
+  updateRowData,
+  updateRowDataFirstRender,
+} from './rowDataFetch';
+import { FaSort, FaSortDown, FaSortUp } from 'react-icons/fa';
+import {
+  RowContainer,
+  TableWrapper,
+  HeaderRow,
+  TableHeader,
+  SortButton,
+  HeaderContent,
+  TableBody,
+  BodyTable,
+  HeaderTable,
+} from './styled';
+import TableRowComponent from './TableRowComponent';
 
 interface RowType {
   firstTokenNameList: string[];
   firstTokenDataList: any;
+  secondTokenDataList: any;
   firstDataset: { [key: string]: firstDataSet };
   secondDataset: { [key: string]: secondDataSet };
   filteredTokens: string[];
@@ -29,32 +44,35 @@ export type dataListType = {
   token: string;
   trade_price: number;
   trade_volume: number;
+  secondPrice: number | undefined;
+  kimp: number | undefined;
 };
 
 const Row = ({
   firstTokenNameList,
   firstTokenDataList,
+  secondTokenDataList,
   firstDataset,
   secondDataset,
   filteredTokens,
 }: RowType) => {
   const [nameList, setNameList] = useState<string[]>([]);
   const [dataList, setDataList] = useState<dataListType[]>([]);
-
-  const [prevRowData, setPrevRowData] = useState({});
-  const [rowData, setRowData] = useState({});
+  const [prevRowData, setPrevRowData] = useState<{
+    [key: string]: dataListType;
+  }>({});
+  const [rowData, setRowData] = useState<{ [key: string]: dataListType }>({});
   const [sortConfig, setSortConfig] = useState({
-    key: 'change_rate',
-    direction: 'asc',
+    key: '',
+    direction: '',
   });
-
   const [fadeOutClass, setFadeOutClass] = useState({});
-
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
   const dispatch: AppDispatch = useDispatch();
-
   const tether = useSelector((state: RootState) => state.info.tether);
+  const dollar = useSelector((state: RootState) => state.info.dollar);
+
   const updateTether = (tether) => {
     dispatch(setTether(tether));
   };
@@ -63,56 +81,40 @@ const Row = ({
     dispatch(setToken(token));
   };
 
-  const updateTokenFirstList = (newTokenList) => {
-    dispatch(setTokenFirstList(newTokenList));
+  const sortDataByConfig = (
+    data: { [key: string]: dataListType },
+    key: string,
+    direction: string
+  ) => {
+    return Object.entries(data).sort((a, b) => {
+      const valueA = a[1][key];
+      const valueB = b[1][key];
+
+      if (key === 'kimp') {
+        const kimpA = valueA === -100 || !isFinite(valueA) ? -Infinity : valueA;
+        const kimpB = valueB === -100 || !isFinite(valueB) ? -Infinity : valueB;
+
+        return direction === 'asc' ? kimpA - kimpB : kimpB - kimpA;
+      }
+
+      if (!isFinite(valueA)) return 1;
+      if (!isFinite(valueB)) return -1;
+
+      return direction === 'asc' ? valueA - valueB : valueB - valueA;
+    });
   };
 
-  const getChangeRateStyle = (rate, change?) => {
-    if ((rate > 0 && change === 'RISE') || rate > 0) {
-      return { color: '#45E8BC' };
-    } else if ((rate < 0 && change === 'FALL') || rate < 0) {
-      return { color: 'red' };
-    } else {
-      return { color: 'white' };
-    }
-  };
-
-  const sortData = (key) => {
+  const sortData = (key: string) => {
     let direction = 'asc';
     if (sortConfig.key === key && sortConfig.direction === 'asc') {
       direction = 'desc';
     }
 
-    const sortedData = Object.entries(rowData).sort((a, b) => {
-      if (a[1][key] < b[1][key]) {
-        return direction === 'asc' ? -1 : 1;
-      } else if (a[1][key] > b[1][key]) {
-        return direction === 'asc' ? 1 : -1;
-      }
-
-      return 0;
-    });
-
-    setRowData(Object.fromEntries(sortedData));
+    const sortedData = sortDataByConfig(rowData, key, direction);
+    setRowData(
+      Object.fromEntries(sortedData) as { [key: string]: dataListType }
+    );
     setSortConfig({ key, direction });
-  };
-
-  const priceChangeStyle = (prev: number, cur: number) => {
-    if (prev === undefined)
-      return { transition: 'background-color 0.4s ease-in-out' };
-    if (prev < cur) {
-      return {
-        backgroundColor: 'rgba(0, 255, 0, 0.3)',
-        transition: 'background-color 0.4s ease-in-out',
-      };
-    } else if (prev > cur) {
-      return {
-        backgroundColor: 'rgba(255, 0, 0, 0.3)',
-        transition: 'background-color 0.4s ease-in-out',
-      };
-    } else {
-      return { transition: 'background-color 0.4s ease-in-out' };
-    }
   };
 
   const rowClick = async (token: string) => {
@@ -122,8 +124,6 @@ const Row = ({
       updateWidgetToken(token);
       setExpandedRow(token);
     }
-
-    return;
   };
 
   useEffect(() => {
@@ -134,29 +134,37 @@ const Row = ({
   }, [firstTokenNameList, firstTokenDataList]);
 
   useEffect(() => {
-    if (nameList.length > 0 && dataList.length > 0) {
-      getRowData(nameList, dataList).then(setRowData);
+    if (
+      nameList.length > 0 &&
+      dataList.length > 0 &&
+      !Object.keys(rowData).length
+    ) {
+      getRowData(nameList, dataList).then((initialRowData) => {
+        updateRowDataFirstRender(
+          initialRowData,
+          firstTokenDataList,
+          secondTokenDataList,
+          dollar
+        ).then((updatedData) => {
+          setRowData(updatedData);
+        });
+      });
     }
   }, [nameList, dataList]);
 
+  // 실시간 업데이트를 위한 useEffect
   useEffect(() => {
-    if (rowData && firstDataset && secondDataset) {
+    if (rowData && firstDataset && secondTokenDataList) {
       setPrevRowData(rowData);
-
-      updateRowData(rowData, firstDataset, secondDataset, tether).then(
+      updateRowData(rowData, firstDataset, secondDataset, dollar).then(
         (updatedData) => {
           setRowData(updatedData);
-
           const newFadeOutClass = {};
           Object.keys(firstDataset).forEach((token) => {
-            if (token != 'USDT') {
-              const prev = prevRowData[token]?.trade_price;
-              const cur = firstDataset[token].trade_price;
-              if (prev !== undefined && prev !== cur) {
-                newFadeOutClass[token] = 'fade-out';
-              }
-            } else {
-              updateTether(firstDataset[token].trade_price);
+            const prev = prevRowData[token]?.trade_price;
+            const cur = firstDataset[token].trade_price;
+            if (prev !== undefined && prev !== cur) {
+              newFadeOutClass[token] = 'fade-out';
             }
           });
           setFadeOutClass(newFadeOutClass);
@@ -167,128 +175,128 @@ const Row = ({
         }
       );
     }
-  }, [firstDataset, secondDataset]);
+  }, [firstDataset]);
 
   return (
-    <div className="row-container">
-      <div className="table-wrapped">
-        <table className="table-m1">
+    <RowContainer>
+      <TableWrapper>
+        <HeaderTable>
           <thead>
-            <tr className="tb-header-container">
-              <th>코인</th>
-              <th>
-                현재가격
-                <a
-                  className="sort-button"
+            <HeaderRow>
+              <TableHeader>
+                <HeaderContent>코인</HeaderContent>
+              </TableHeader>
+              <TableHeader>
+                <HeaderContent>현재가격</HeaderContent>
+                <SortButton
+                  className={sortConfig.key === 'trade_price' ? 'active' : ''}
                   onClick={() => sortData('trade_price')}
                 >
-                  btn
-                </a>
-              </th>
-              <th>
-                변동률(전일대비)
-                <a
-                  className="sort-button"
+                  {sortConfig.key === 'trade_price' ? (
+                    sortConfig.direction === 'asc' ? (
+                      <FaSortUp />
+                    ) : (
+                      <FaSortDown />
+                    )
+                  ) : (
+                    <FaSort />
+                  )}
+                </SortButton>
+              </TableHeader>
+              <TableHeader>
+                <HeaderContent>김프</HeaderContent>
+                <SortButton
+                  className={sortConfig.key === 'kimp' ? 'active' : ''}
+                  onClick={() => sortData('kimp')}
+                >
+                  {sortConfig.key === 'kimp' ? (
+                    sortConfig.direction === 'asc' ? (
+                      <FaSortUp />
+                    ) : (
+                      <FaSortDown />
+                    )
+                  ) : (
+                    <FaSort />
+                  )}
+                </SortButton>
+              </TableHeader>
+              <TableHeader>
+                <HeaderContent>변동률</HeaderContent>
+                <SortButton
+                  className={sortConfig.key === 'change_rate' ? 'active' : ''}
                   onClick={() => sortData('change_rate')}
                 >
-                  btn
-                </a>
-              </th>
-              <th>52주 고가</th>
-              <th>52주 저가</th>
-              <th>장 시작가</th>
-              <th>
-                누적 거래액
-                <a
-                  className="sort-button"
+                  {sortConfig.key === 'change_rate' ? (
+                    sortConfig.direction === 'asc' ? (
+                      <FaSortUp />
+                    ) : (
+                      <FaSortDown />
+                    )
+                  ) : (
+                    <FaSort />
+                  )}
+                </SortButton>
+              </TableHeader>
+              <TableHeader>
+                <HeaderContent>52주 고가</HeaderContent>
+              </TableHeader>
+              <TableHeader>
+                <HeaderContent>52주 저가</HeaderContent>
+              </TableHeader>
+              <TableHeader>
+                <HeaderContent>장 시작가</HeaderContent>
+              </TableHeader>
+              <TableHeader>
+                <HeaderContent>누적 거래액</HeaderContent>
+                <SortButton
+                  className={
+                    sortConfig.key === 'acc_trade_price24' ? 'active' : ''
+                  }
                   onClick={() => sortData('acc_trade_price24')}
                 >
-                  btn
-                </a>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {Object.entries(rowData)
-              .filter(([token]) => filteredTokens.includes(token))
-              .map(([token, data]) => (
-                <React.Fragment key={token}>
-                  <tr
-                    onClick={() => {
-                      rowClick(token);
-                    }}
-                    key={token}
-                    className={`column ${fadeOutClass[token] || ''}`}
-                    style={priceChangeStyle(
-                      prevRowData[token]?.trade_price,
-                      data['trade_price']
-                    )}
-                  >
-                    <td>{data['token']}</td>
-                    <td>
-                      {data['trade_price']?.toLocaleString()}원
-                      <p className="comparison-group">원</p>
-                    </td>
-                    <td
-                      style={getChangeRateStyle(
-                        data['change_rate'],
-                        data['rate_change']
-                      )}
-                    >
-                      {(data['change_rate'] * 10).toFixed(2)}%
-                    </td>
-                    <td>
-                      <div>{data['highest_price']?.toLocaleString()}원</div>
-                      <div
-                        className="rate_per_52week"
-                        style={getChangeRateStyle(
-                          rateCompareByOriginPrice(
-                            data['trade_price'] / data['highest_price']
-                          )
-                        )}
-                      >
-                        {(
-                          rateCompareByOriginPrice(
-                            data['trade_price'] / data['highest_price']
-                          ) * 100
-                        ).toFixed(2)}
-                        %
-                      </div>
-                    </td>
-                    <td>{data['lowest_price']?.toLocaleString()}원</td>
-                    <td>{data['opening_price']?.toLocaleString()}원</td>
-                    <td style={{ fontSize: '0.6rem', color: 'gray' }}>
-                      {numberToKorean(data['acc_trade_price24'] / 10000)}
-                    </td>
-                  </tr>
-                  {expandedRow === token && (
-                    <tr>
-                      <td colSpan={7}>
-                        <div
-                          className={`expandable-content ${
-                            expandedRow === token ? 'expanded' : ''
-                          }`}
-                          style={{
-                            backgroundColor: 'gray',
-                            padding: '10px',
-                            border: '1px solid #dee2e6',
-                            borderRadius: '4px',
-                            height: expandedRow === token ? 'auto' : '0',
-                          }}
-                        >
-                          <p>Token : {token}</p>
-                          <p>추가정보 : </p>
-                          <p> Hello world!</p>
-                        </div>
-                      </td>
-                    </tr>
+                  {sortConfig.key === 'acc_trade_price24' ? (
+                    sortConfig.direction === 'asc' ? (
+                      <FaSortUp />
+                    ) : (
+                      <FaSortDown />
+                    )
+                  ) : (
+                    <FaSort />
                   )}
-                </React.Fragment>
-              ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+                </SortButton>
+              </TableHeader>
+            </HeaderRow>
+          </thead>
+        </HeaderTable>
+
+        <TableBody>
+          <BodyTable>
+            <tbody>
+              {Object.entries(rowData)
+                .filter(([token]) => filteredTokens.includes(token))
+                .map(([token, data]) => (
+                  <TableRowComponent
+                    key={token}
+                    token={token}
+                    data={data}
+                    secondPrice={data.secondPrice}
+                    secondData={{
+                      token: token,
+                      trade_price: secondDataset[token]
+                        ? secondDataset[token].trade_price * dollar
+                        : 0,
+                    }}
+                    prevData={prevRowData[token]}
+                    expandedRow={expandedRow}
+                    fadeOutClass={fadeOutClass[token]}
+                    onRowClick={rowClick}
+                  />
+                ))}
+            </tbody>
+          </BodyTable>
+        </TableBody>
+      </TableWrapper>
+    </RowContainer>
   );
 };
 
