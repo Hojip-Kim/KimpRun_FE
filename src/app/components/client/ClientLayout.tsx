@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { Provider, useDispatch } from 'react-redux';
-import store, { rootReducer } from '@/redux/store';
+import { Provider} from 'react-redux';
+import store from '@/redux/store';
 import Nav from '../../../components/nav/Nav';
 import { persistStore } from 'redux-persist';
 import { PersistGate } from 'redux-persist/integration/react';
@@ -37,7 +37,7 @@ const LayoutWrapper = styled.div`
 
 const MainContent = styled.main`
   flex: 1;
-  padding-top: 130px; // Nav의 높이와 동일하게 설정
+  padding-top: 100px; // Nav의 높이와 동일하게 설정
   min-height: calc(100vh - 130px); // 전체 높이에서 Nav 높이를 뺀 만큼
 `;
 
