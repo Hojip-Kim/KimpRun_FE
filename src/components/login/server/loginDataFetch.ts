@@ -1,23 +1,14 @@
-'use server';
-
-import serverFetch from '@/server/fetch/server';
-
-interface LoginResponse {
-  result: string;
-}
-
-export const fetchLoginData = async (
-  loginId: string,
+export const loginDataFetch = async (
+  loginUrl: string,
+  email: string,
   password: string
-): Promise<boolean> => {
-  const loginUrl = process.env.NEXT_PUBLIC_LOGIN_URL;
-
+): Promise<Boolean> => {
   const requestInit: RequestInit = {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include', // 쿠키 포함
     body: JSON.stringify({
-      loginId,
+      email,
       password,
     }),
   };

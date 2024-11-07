@@ -1,20 +1,21 @@
-import { AppDispatch, RootState } from '@/redux/store';
+import { RootState } from '@/redux/store';
 
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import {useSelector } from 'react-redux';
 
 const TradingViewWidget = () => {
-  const dispatch: AppDispatch = useDispatch();
 
   const widgetToken = useSelector((state: RootState) => state.widget.token);
+  const currency = useSelector((state: RootState) => state.widget.currency);
+  const interval = useSelector((state: RootState) => state.widget.interval);
 
   useEffect(() => {
-    const token = widgetToken ? widgetToken + 'KRW' : 'BTCKRW';
+    const token = widgetToken ? widgetToken + currency : 'BTC' + currency;
     const loadWidget = () => {
       new window.TradingView.widget({
         autosize: true,
         symbol: `${token}`,
-        interval: '240',
+        interval: interval ? interval : '240',
         timezone: 'Etc/UTC',
         style: '1',
         theme: 'dark',
@@ -51,7 +52,7 @@ const TradingViewWidget = () => {
       script.onload = loadWidget;
       document.head.appendChild(script);
     }
-  }, [widgetToken]);
+  }, [widgetToken, currency, interval]);
 
   return <div id="chart"></div>;
 };
