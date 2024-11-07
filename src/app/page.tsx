@@ -11,7 +11,6 @@ import { AppDispatch, RootState } from '@/redux/store';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import './page.css';
-import TradingViewWidget from '@/components/TradingViewWidget';
 import Search from '@/components/search/Search';
 import Chat from '@/components/chat/Chat';
 import {
@@ -20,6 +19,7 @@ import {
   fetchTokenDatas,
 } from './components/server/DataFetcher';
 import styled from 'styled-components';
+import TradingViewWidget from '@/components/tradingview/TradingViewWidget';
 
 export type TokenNameList = {
   firstMarketData: any;
@@ -199,6 +199,7 @@ const MainPage = () => {
         <Row
           firstTokenNameList={tokenFirstList}
           firstTokenDataList={tokenFirstSet}
+          secondTokenDataList={tokenSecondSet}
           firstDataset={firstDataset}
           secondDataset={secondDataset}
           filteredTokens={filteredTokens}
@@ -216,34 +217,42 @@ export default MainPage;
 const MainContainer = styled.div`
   width: 100%;
   display: flex;
+  background-color: #121212;
+  color: #ffffff;
+  min-height: 80vh;
 `;
 
 const ChartContainer = styled.div`
-  margin: 20px;
-  padding: 0px 0px 0px 20px;
-  width: 30%;
+  margin: 20px 0px 20px 20px;
+  width: 40%;
   height: 40%;
 
   #chart {
     justify-content: center;
     background-color: #131722;
     align-items: left;
-    height: 350px;
+    height: 300px;
     margin: auto;
-    border: solid white;
+    border: 1px solid #333333;
     border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
 `;
 
 const RowContainer = styled.div`
-  margin: 20px 40px 20px 20px;
-  padding: 0px 20px 0px 0px;
-  width: 50%;
-  border: solid gray;
+  margin: 20px 20px 20px 20px;
+  padding: 20px;
+  width: 55%;
+  background-color: #1e1e1e;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 `;
 
 const ChatContainer = styled.div`
   width: 20%;
-  border: solid gray;
-  margin: 20px 40px 20px 0px;
+  background-color: #1e1e1e;
+  margin: 20px 20px 20px 0px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
 `;
