@@ -20,6 +20,9 @@ import {
 } from './components/server/DataFetcher';
 import styled from 'styled-components';
 import TradingViewWidget from '@/components/tradingview/TradingViewWidget';
+import { fetchUserInfo } from '@/components/auth/fetchUserInfo';
+import { checkAuth } from '@/components/login/server/checkAuth';
+import TwitterFeed from '@/components/twitter/TwitterFeed';
 
 export type TokenNameList = {
   firstMarketData: any;
@@ -139,6 +142,12 @@ const MainPage = () => {
   }, [tokenFirstList]);
 
   useEffect(() => {
+    if (window.location.search.includes('login=success')) {
+      checkAuth(dispatch);
+    }
+  }, [dispatch]);
+
+  useEffect(() => {
     updateNamesAsync();
     updateDataAsync('upbit', 'binance');
   }, []);
@@ -191,9 +200,12 @@ const MainPage = () => {
 
   return (
     <MainContainer>
-      <ChartContainer>
-        <TradingViewWidget />
-      </ChartContainer>
+      <LeftSideContainer>
+        <ChartContainer>
+          <TradingViewWidget />
+        </ChartContainer>
+        <TwitterFeed />
+      </LeftSideContainer>
       <RowContainer>
         <Search onSearch={handleSearch} />
         <Row
@@ -219,13 +231,21 @@ const MainContainer = styled.div`
   display: flex;
   background-color: #121212;
   color: #ffffff;
-  min-height: 80vh;
+  height: calc(100vh - 150px)
+  overflow: hidden;
+`;
+
+const LeftSideContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 150px)
+  flex: 3;
+  min-width: 400px;
 `;
 
 const ChartContainer = styled.div`
+  min-height: 0;
   margin: 20px 0px 20px 20px;
-  width: 40%;
-  height: 40%;
 
   #chart {
     justify-content: center;
@@ -233,6 +253,7 @@ const ChartContainer = styled.div`
     align-items: left;
     height: 300px;
     margin: auto;
+    width: 100%;
     border: 1px solid #333333;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -240,19 +261,26 @@ const ChartContainer = styled.div`
 `;
 
 const RowContainer = styled.div`
+  flex: 4;
+  min-width: 900px;
   margin: 20px 20px 20px 20px;
+  flex: 1;
   padding: 20px;
   width: 55%;
   background-color: #1e1e1e;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  height: calc(100vh - 130px);
 `;
 
 const ChatContainer = styled.div`
-  width: 20%;
+  flex: 2;
+  min-width: 300px;
   background-color: #1e1e1e;
   margin: 20px 20px 20px 0px;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 20px;
+  height: calc(100vh - 130px);
+  overflow-y: auto;
 `;
