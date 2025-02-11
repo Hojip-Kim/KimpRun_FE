@@ -34,7 +34,11 @@ import {
 } from './client/styled';
 import { useRouter } from 'next/navigation';
 import TradingViewOverview from '../tradingview/TradingViewOverview';
-import { setDollar, setUserCount } from '@/redux/reducer/infoReducer';
+import {
+  setDollar,
+  setTether,
+  setUserCount,
+} from '@/redux/reducer/infoReducer';
 import { FaUser, FaUserCircle, FaUserCog } from 'react-icons/fa';
 
 interface ResponseUrl {
@@ -48,12 +52,12 @@ const Nav = () => {
   const [modalSize, setModalSize] = useState({ width: 400, height: 300 });
   const router = useRouter();
 
-  const reduxTether = useSelector((state: RootState) => state.info.tether);
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated
   );
 
   const dollar = useSelector((state: RootState) => state.info.dollar);
+  const tether = useSelector((state: RootState) => state.info.tether);
 
   const user = useSelector((state: RootState) => state.auth.user);
   const userCount = useSelector((state: RootState) => state.info.user);
@@ -63,11 +67,22 @@ const Nav = () => {
   const logoutUrl = process.env.NEXT_PUBLIC_LOGOUT_URL;
   const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL;
   const dollarAPIUrl = process.env.NEXT_PUBLIC_DOLLAR_API_URL;
+  const tetherAPIUrl = process.env.NEXT_PUBLIC_TETHER_API_URL;
 
   const checkUserAuth = async () => {
     if (isAuthenticated) {
       await fetchUserInfo(statusUrl, dispatch);
     }
+  };
+
+  const requestTether = async () => {
+    const requestInit: RequestInit = {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    };
+    const response = await fetch(tetherAPIUrl, requestInit);
+    const parsedData = await response.json();
+    dispatch(setTether(parsedData.tether));
   };
 
   const requestDollar = async () => {
@@ -84,6 +99,7 @@ const Nav = () => {
 
   useEffect(() => {
     requestDollar();
+    requestTether();
     checkUserAuth();
   }, [dispatch]);
 
@@ -94,10 +110,10 @@ const Nav = () => {
 
     infoWebsocket.onmessage = (event) => {
       const parsedData = JSON.parse(event.data);
-      setDollars(parsedData.dollar);
-      setUserSize(parsedData.userCount);
+
       dispatch(setUserCount(parsedData.userCount));
       dispatch(setDollar(parsedData.dollar));
+      dispatch(setTether(parsedData.tether));
     };
 
     infoWebsocket.onerror = (error) => {
@@ -189,7 +205,7 @@ const Nav = () => {
             </InfoItem>
             <InfoItem>
               <Icon src="/tether.png" alt="Tether" />
-              테더: {reduxTether}
+              테더: {tether}원
             </InfoItem>
             <InfoItem>유저 수: {userCount}</InfoItem>
           </TopInfoSection>
