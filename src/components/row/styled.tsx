@@ -1,18 +1,22 @@
 import styled from 'styled-components';
 
 export const RowContainer = styled.div`
-  position: relative;
-  height: 700px;
+  height: calc(100% - 60px);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 30px;
 `;
 
 export const TableWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  margin: auto;
   width: 100%;
-
-  justify-content: center;
+  margin: 0 20px 0px 0px;
   height: 100%;
+  overflow-y: auto;
+  border: 1px solid #333333;
+  border-radius: 8px;
+  background-color: #1a1a1a;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
 `;
 
 export const StyledTable = styled.table`
@@ -21,37 +25,8 @@ export const StyledTable = styled.table`
   width: 100%;
   border-collapse: collapse;
 `;
-
 export const TableBody = styled.div`
-  overflow-y: auto;
-  height: calc(100% - 40px);
-  border: 1px solid rgba(123, 123, 123, 0.4);
-
-  table {
-    width: 100%;
-    border-top: none;
-  }
-
-  td {
-    width: 12.5%;
-  }
-
-  &::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: rgba(123, 123, 123, 0.5);
-    border-radius: 10px;
-    &:hover {
-      background-color: rgba(123, 123, 123, 0.8);
-    }
-  }
-
-  &::-webkit-scrollbar-track {
-    background-color: rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-  }
+  width: 100%;
 `;
 
 export const HeaderRow = styled.tr`
@@ -66,22 +41,33 @@ export const TableHeader = styled.th`
   position: relative;
   padding: 3px;
   display: table-cell;
-  width: 12.5%;
+  width: ${100 / 7}%;
   box-sizing: border-box;
+  border-bottom: 1px solid rgba(96, 96, 96, 0.4);
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+
+  &:hover {
+    background-color: rgba(255, 215, 0, 0.2);
+    color: rgba(255, 215, 0);
+  }
 `;
 
-export const HeaderTable = styled(StyledTable)`
-  margin-bottom: -1px;
+export const HeaderTable = styled.table`
   width: 100%;
   table-layout: fixed;
+  border-collapse: collapse;
+  position: sticky;
+  top: 0;
+  background-color: #1e1e1e;
+  z-index: 1;
 `;
 
-export const BodyTable = styled(StyledTable)`
-  border-top: none;
+export const BodyTable = styled.table`
   width: 100%;
   table-layout: fixed;
+  border-collapse: collapse;
 `;
-
 export const SortButton = styled.button`
   background: none;
   border: none;
@@ -136,6 +122,7 @@ export const TableRow = styled.tr<{ isExpanded?: boolean }>`
   &:hover {
     td {
       color: rgba(255, 215, 0);
+      background-color: rgba(255, 215, 0, 0.2);
     }
     cursor: pointer;
   }
@@ -156,7 +143,7 @@ export const TableCell = styled.td`
   text-align: center;
   font-size: 0.6rem;
   display: table-cell;
-  width: 12.5%;
+  width: 16%;
   padding: 3px;
   box-sizing: border-box;
 `;
