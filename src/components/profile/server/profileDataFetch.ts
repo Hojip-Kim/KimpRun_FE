@@ -20,7 +20,6 @@ export const updateNickname = async (
   };
 
   try {
-    console.log(updateNicknameUrl);
     const response = await fetch(updateNicknameUrl, requestInit);
 
     if (response.ok) {
