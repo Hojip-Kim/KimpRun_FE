@@ -32,7 +32,7 @@ const authSlices = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setIsAuthenticated: (state, action: PayloadAction<Boolean>) => {
+    setIsAuthenticated: (state) => {
       state.isAuthenticated = true;
     },
 
