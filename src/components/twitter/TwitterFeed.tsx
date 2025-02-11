@@ -71,16 +71,20 @@ const TwitterFeed = () => {
 export default TwitterFeed;
 
 const TwitterContainer = styled.div`
-  width: calc(100% - 20px);
-  height: 500px;
-  overflow: hidden;
-  margin: 0px 20px 20px 20px;
-  position: relative;
+  flex: 1;
+  min-height: 300px;
+  height: 100%;
+  margin: 0;
+  width: 100%;
 
   .elfsight-app-fb09653e-8ab8-478c-91e3-6f27293c4140 {
     height: 100% !important;
-    max-height: 500px !important;
+    min-height: 300px !important;
     overflow-y: auto !important;
+    width: 100% !important; 
+  }
+  iframe {
+    width: 100% !important;
   }
 `;
 
