@@ -19,3 +19,10 @@ export type GetPostResponse = {
   boardResponseDtos: Post[];
   count: number;
 };
+
+export type ErrorResponse = {
+  satus: number;
+  error: string;
+  message: string;
+  trace?: string;
+};
