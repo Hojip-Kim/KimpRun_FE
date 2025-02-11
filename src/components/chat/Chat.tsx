@@ -98,7 +98,7 @@ const Chat = () => {
   }, [user]);
 
   return (
-    <div>
+    <ChatWrapper>
       <ChatContainer>
         <ChatBox ref={chatBoxRef}>
           <FetchButton onClick={fetchPreviousMessage}>
@@ -129,6 +129,7 @@ const Chat = () => {
           <div ref={messageEndRef}></div>
         </ChatBox>
       </ChatContainer>
+
       <ChatForm
         onSubmit={(e) => {
           e.preventDefault();
@@ -148,7 +149,7 @@ const Chat = () => {
         />
         <SendButton type="submit">전송</SendButton>
       </ChatForm>
-    </div>
+    </ChatWrapper>
   );
 };
 
@@ -158,7 +159,7 @@ const ChatContainer = styled.div`
   display: flex;
   flex-direction: column-reverse;
   color: #e0e0e0;
-  max-height: 700px;
+  height: 100%;
   overflow-y: auto;
   background-color: #131722;
   border-radius: 8px;
@@ -178,6 +179,12 @@ const ChatContainer = styled.div`
   &::-webkit-scrollbar-track {
     background-color: rgba(0, 0, 0, 0.2);
   }
+`;
+
+const ChatWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 `;
 
 const ChatBox = styled.div``;

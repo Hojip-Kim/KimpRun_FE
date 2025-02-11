@@ -1,6 +1,6 @@
 export type UserFetch = {
   isAuthenticated: boolean;
-  user: {
+  member: {
     email: string;
     name: string;
     role: string;

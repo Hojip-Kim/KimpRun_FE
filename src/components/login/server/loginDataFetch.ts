@@ -1,8 +1,14 @@
+export interface responseData {
+  result: 'success' | 'check';
+  message: string;
+  data?: string;
+}
+
 export const loginDataFetch = async (
   loginUrl: string,
   email: string,
   password: string
-): Promise<Boolean> => {
+): Promise<responseData> => {
   const requestInit: RequestInit = {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -15,13 +21,16 @@ export const loginDataFetch = async (
 
   try {
     const response = await fetch(loginUrl, requestInit);
+
+    const data: responseData = await response.json();
+
     if (response.ok) {
-      return true;
+      return data;
     } else {
-      return false;
+      throw new Error('login failed.');
     }
   } catch (e) {
     console.error(e);
-    return false;
+    throw new Error(e);
   }
 };

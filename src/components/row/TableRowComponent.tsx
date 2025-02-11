@@ -94,18 +94,39 @@ const TableRowComponent = React.memo(
               rateCompareByOriginPrice(data.trade_price / data.secondPrice)
             )}
           >
-            {data.secondPrice
-              ? rateCompareByOriginPrice(
-                  // data.trade_price / data.secondPrice
-                  data.kimp + 1
-                ).toFixed(2) + '%'
-              : ''}
+            {data.secondPrice ? (
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span>
+                  {rateCompareByOriginPrice(data.kimp + 1).toFixed(2)}%
+                </span>
+                <span style={{ color: 'gray' }}>
+                  {(() => {
+                    const priceDiff = Math.abs(
+                      data.trade_price - data.secondPrice
+                    );
+
+                    if (priceDiff >= 1) {
+                      return priceDiff.toFixed(2);
+                    }
+
+                    return parseFloat(priceDiff.toPrecision(2)).toString();
+                  })()}
+                </span>
+              </div>
+            ) : (
+              ''
+            )}
           </TableCell>
           {/* 변동률 */}
           <TableCell
             style={getChangeRateStyle(data.change_rate, data.rate_change)}
           >
-            {(data.change_rate * 10).toFixed(2)}%
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span>{(data.change_rate * 10).toFixed(2)}%</span>
+              <span style={{ color: 'gray' }}>
+                {data.opening_price?.toLocaleString()}
+              </span>
+            </div>
           </TableCell>
           {/* 52주 고가 */}
           <TableCell>
@@ -138,8 +159,6 @@ const TableRowComponent = React.memo(
               %
             </div>
           </TableCell>
-
-          <TableCell>{data.opening_price?.toLocaleString()}원</TableCell>
           <TableCell style={{ fontSize: '0.6rem', color: 'gray' }}>
             {numberToKorean(data.acc_trade_price24 / 10000)}
           </TableCell>

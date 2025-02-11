@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setIsAuthenticated, setUser } from '@/redux/reducer/authReducer';
 import styled from 'styled-components';
 import SignupForm from '../signup/SignupForm';
-import { loginDataFetch } from './server/loginDataFetch';
+import { loginDataFetch, responseData } from './server/loginDataFetch';
 import { fetchUserInfo } from '../auth/fetchUserInfo';
 
 interface LoginFormProps {
@@ -18,6 +18,13 @@ interface LoginFormProps {
   >;
 }
 
+const googleLoginUrl = process.env.NEXT_PUBLIC_GOOGLE_LOGIN_URL;
+
+interface loginResponse {
+  result: 'check' | 'success';
+  message: string;
+}
+
 const LoginForm: React.FC<LoginFormProps> = ({ closeModal, setModalSize }) => {
   const dispatch = useDispatch();
   const [email, setEmail] = useState<string>('');
@@ -27,13 +34,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ closeModal, setModalSize }) => {
 
   const statusUrl = process.env.NEXT_PUBLIC_STATUS_URL;
   const loginUrl = process.env.NEXT_PUBLIC_LOGIN_URL;
-
-  useEffect(() => {
-    const savedEmail = localStorage.getItem('email');
-    if (savedEmail) {
-      setEmail(savedEmail);
-    }
-  });
 
   useEffect(() => {
     if (isLoginForm) {
@@ -50,19 +50,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ closeModal, setModalSize }) => {
     }
   }, [isLoginForm, setModalSize]);
 
-  const fetchLoginData = async (
-    email: string,
-    password: string
-  ): Promise<boolean> => {
-    const isLoginSuccess = await loginDataFetch(loginUrl, email, password);
-
-    if (isLoginSuccess) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (rememberMe) {
@@ -72,16 +59,38 @@ const LoginForm: React.FC<LoginFormProps> = ({ closeModal, setModalSize }) => {
     }
 
     // Spring Boot의 /login 엔드포인트로 POST 요청
-    const isSuccess = await fetchLoginData(email, password);
-    if (isSuccess) {
-      // true면
-      await dispatch(setIsAuthenticated());
-      await fetchUserInfo(statusUrl, dispatch);
-      alert('로그인 성공');
-      closeModal();
+    const loginResponse: responseData = await loginDataFetch(
+      loginUrl,
+      email,
+      password
+    );
+    if (loginResponse) {
+      if (loginResponse.result === 'success') {
+        await dispatch(setIsAuthenticated());
+        await fetchUserInfo(statusUrl, dispatch);
+        alert('로그인 성공');
+        closeModal();
+      } else if (loginResponse.result === 'check') {
+        const userConfirmed = window.confirm(
+          `다른 기기에서 접속이 감지되었습니다.\n접속 IP: ${loginResponse.data}\n\n계속 진행하시겠습니까?`
+        );
+
+        if (userConfirmed) {
+          await dispatch(setIsAuthenticated());
+          await fetchUserInfo(statusUrl, dispatch);
+          alert('로그인 성공');
+          closeModal();
+        } else {
+          window.location.href = '/change-password'; // 비밀번호 변경 페이지 URL로 수정 필요
+        }
+      }
     } else {
       alert('로그인 실패');
     }
+  };
+
+  const handleGoogleLogin = () => {
+    window.location.href = googleLoginUrl;
   };
 
   return (
@@ -106,8 +115,12 @@ const LoginForm: React.FC<LoginFormProps> = ({ closeModal, setModalSize }) => {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-            <button type="submit">Login</button>
+            <LoginButton type="submit">로그인</LoginButton>
           </form>
+          <GoogleLoginButton onClick={handleGoogleLogin}>
+            <img src="/google.png" alt="google icon" />
+            Google로 로그인
+          </GoogleLoginButton>
           <p>
             <input
               type="checkbox"
@@ -128,6 +141,21 @@ const LoginForm: React.FC<LoginFormProps> = ({ closeModal, setModalSize }) => {
 };
 
 export default LoginForm;
+
+const LoginButton = styled.button`
+  margin-top: 10px;
+  color: white;
+  border: 1px solid #1e1e1e;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #1e1e1e;
+
+  &:hover {
+    color: rgba(255, 215, 0);
+    background-color: #131722;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+`;
 
 const FormContainer = styled.div`
   width: 100%;
@@ -163,18 +191,30 @@ const FormContainer = styled.div`
       margin-bottom: 12px;
       text-align: center;
     }
+  }
+`;
 
-    button {
-      padding: 10px;
-      background-color: #2196f3;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 4px;
+const GoogleLoginButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  background-color: #1e1e1e;
+  border: 1px solid #1e1e1e;
+  border-radius: 4px;
+  cursor: pointer;
 
-      &:hover {
-        background-color: #1976d2;
-      }
-    }
+  img {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+  }
+
+  &:hover {
+    color: rgba(255, 215, 0);
+    background-color: #131722;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 `;

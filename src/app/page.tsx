@@ -20,6 +20,9 @@ import {
 } from './components/server/DataFetcher';
 import styled from 'styled-components';
 import TradingViewWidget from '@/components/tradingview/TradingViewWidget';
+import { fetchUserInfo } from '@/components/auth/fetchUserInfo';
+import { checkAuth } from '@/components/login/server/checkAuth';
+import TwitterFeed from '@/components/twitter/TwitterFeed';
 
 export type TokenNameList = {
   firstMarketData: any;
@@ -139,6 +142,12 @@ const MainPage = () => {
   }, [tokenFirstList]);
 
   useEffect(() => {
+    if (window.location.search.includes('login=success')) {
+      checkAuth(dispatch);
+    }
+  }, [dispatch]);
+
+  useEffect(() => {
     updateNamesAsync();
     updateDataAsync('upbit', 'binance');
   }, []);
@@ -191,9 +200,12 @@ const MainPage = () => {
 
   return (
     <MainContainer>
-      <ChartContainer>
-        <TradingViewWidget />
-      </ChartContainer>
+      <LeftSideContainer>
+        <ChartContainer>
+          <TradingViewWidget />
+        </ChartContainer>
+        <TwitterFeed />
+      </LeftSideContainer>
       <RowContainer>
         <Search onSearch={handleSearch} />
         <Row
@@ -219,20 +231,35 @@ const MainContainer = styled.div`
   display: flex;
   background-color: #121212;
   color: #ffffff;
-  min-height: 80vh;
+  height: 100vh;
+  overflow: hidden;
+  padding-bottom: 150px;
+  gap: 20px;
+  justify-content: center;
+`;
+
+const LeftSideContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 130px);
+  flex: 3;
+  min-width: 400px;
+  max-width: 600px;
+  gap: 20px;
+  margin: 20px 0 20px 20px; // 전체 여백을 여기서 처리
 `;
 
 const ChartContainer = styled.div`
-  margin: 20px 0px 20px 20px;
-  width: 40%;
-  height: 40%;
+  flex: 1;
+  min-height: 300px;
+  max-height: 30%;
 
   #chart {
     justify-content: center;
     background-color: #131722;
     align-items: left;
-    height: 300px;
-    margin: auto;
+    height: 100%;
+    width: 100%;
     border: 1px solid #333333;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -240,19 +267,30 @@ const ChartContainer = styled.div`
 `;
 
 const RowContainer = styled.div`
-  margin: 20px 20px 20px 20px;
+  flex: 4.5;
+  min-width: 600px;
+  max-width: 900px;
+  margin: 20px 0;
   padding: 20px;
-  width: 55%;
   background-color: #1e1e1e;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  height: calc(100vh - 150px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; / 컨테이너 자체는 overflow 숨김
 `;
 
 const ChatContainer = styled.div`
-  width: 20%;
+  flex: 2.5;
+  min-width: 300px;
+  max-width: 400px;
   background-color: #1e1e1e;
-  margin: 20px 20px 20px 0px;
+  margin: 20px 20px 20px 0;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 20px;
+  height: 100%;
+  display: flex; // 추가
+  flex-direction: column; // 추가
 `;

@@ -19,9 +19,9 @@ export const fetchUserInfo = async (
 
     if (response.ok) {
       const data: UserFetch = await response.json();
-      if (data && data.user) {
-        dispatch(setUser(data.user));
-        dispatch(setIsAuthenticated(true));
+      if (data && data.member) {
+        dispatch(setUser(data.member));
+        dispatch(setIsAuthenticated());
       } else {
         dispatch(setGuestUser());
       }

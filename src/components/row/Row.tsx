@@ -3,8 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
-import { setTether } from '@/redux/reducer/infoReducer';
-import { setToken } from '@/redux/reducer/widgetReduce';
+import { setKimp, setToken, setTokenPrice } from '@/redux/reducer/widgetReduce';
 import { firstDataSet, secondDataSet } from '@/app/page';
 import {
   getRowData,
@@ -70,15 +69,14 @@ const Row = ({
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
   const dispatch: AppDispatch = useDispatch();
-  const tether = useSelector((state: RootState) => state.info.tether);
   const dollar = useSelector((state: RootState) => state.info.dollar);
 
-  const updateTether = (tether) => {
-    dispatch(setTether(tether));
-  };
+  const token = useSelector((state: RootState) => state.widget.token);
 
   const updateWidgetToken = (token) => {
     dispatch(setToken(token));
+    updateTokenPrice(token);
+    updateKimp(token);
   };
 
   const sortDataByConfig = (
@@ -91,8 +89,10 @@ const Row = ({
       const valueB = b[1][key];
 
       if (key === 'kimp') {
-        const kimpA = valueA === -100 || !isFinite(valueA) ? -Infinity : valueA;
-        const kimpB = valueB === -100 || !isFinite(valueB) ? -Infinity : valueB;
+        const kimpA = a[1].secondPrice
+          ? (a[1].kimp + 1) * 100 // (kimp + 1) * 100 으로 퍼센트 값 계산
+          : -Infinity;
+        const kimpB = b[1].secondPrice ? (b[1].kimp + 1) * 100 : -Infinity;
 
         return direction === 'asc' ? kimpA - kimpB : kimpB - kimpA;
       }
@@ -105,9 +105,9 @@ const Row = ({
   };
 
   const sortData = (key: string) => {
-    let direction = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
+    let direction = 'desc';
+    if (sortConfig.key === key && sortConfig.direction === 'desc') {
+      direction = 'asc';
     }
 
     const sortedData = sortDataByConfig(rowData, key, direction);
@@ -122,8 +122,20 @@ const Row = ({
       setExpandedRow(null);
     } else {
       updateWidgetToken(token);
+      updateKimp(token);
+      updateTokenPrice(token);
       setExpandedRow(token);
     }
+  };
+
+  const updateTokenPrice = (token: string) => {
+    const tokenPrice = rowData[token]?.trade_price.toFixed(2);
+    dispatch(setTokenPrice(tokenPrice));
+  };
+
+  const updateKimp = (token: string) => {
+    const kimp = rowData[token]?.kimp;
+    dispatch(setKimp(kimp));
   };
 
   useEffect(() => {
@@ -152,12 +164,21 @@ const Row = ({
     }
   }, [nameList, dataList]);
 
-  // 실시간 업데이트를 위한 useEffect
   useEffect(() => {
     if (rowData && firstDataset && secondTokenDataList) {
       setPrevRowData(rowData);
       updateRowData(rowData, firstDataset, secondDataset, dollar).then(
         (updatedData) => {
+          // 정렬 상태가 있다면 정렬된 상태로 데이터 업데이트
+          if (sortConfig.key) {
+            const sortedData = sortDataByConfig(
+              updatedData,
+              sortConfig.key,
+              sortConfig.direction
+            );
+            updatedData = Object.fromEntries(sortedData);
+          }
+
           setRowData(updatedData);
           const newFadeOutClass = {};
           Object.keys(firstDataset).forEach((token) => {
@@ -175,6 +196,8 @@ const Row = ({
         }
       );
     }
+    updateTokenPrice(token);
+    updateKimp(token);
   }, [firstDataset]);
 
   return (
@@ -186,11 +209,10 @@ const Row = ({
               <TableHeader>
                 <HeaderContent>코인</HeaderContent>
               </TableHeader>
-              <TableHeader>
+              <TableHeader onClick={() => sortData('trade_price')}>
                 <HeaderContent>현재가격</HeaderContent>
                 <SortButton
                   className={sortConfig.key === 'trade_price' ? 'active' : ''}
-                  onClick={() => sortData('trade_price')}
                 >
                   {sortConfig.key === 'trade_price' ? (
                     sortConfig.direction === 'asc' ? (
@@ -203,11 +225,10 @@ const Row = ({
                   )}
                 </SortButton>
               </TableHeader>
-              <TableHeader>
+              <TableHeader onClick={() => sortData('kimp')}>
                 <HeaderContent>김프</HeaderContent>
                 <SortButton
                   className={sortConfig.key === 'kimp' ? 'active' : ''}
-                  onClick={() => sortData('kimp')}
                 >
                   {sortConfig.key === 'kimp' ? (
                     sortConfig.direction === 'asc' ? (
@@ -220,11 +241,10 @@ const Row = ({
                   )}
                 </SortButton>
               </TableHeader>
-              <TableHeader>
+              <TableHeader onClick={() => sortData('change_rate')}>
                 <HeaderContent>변동률</HeaderContent>
                 <SortButton
                   className={sortConfig.key === 'change_rate' ? 'active' : ''}
-                  onClick={() => sortData('change_rate')}
                 >
                   {sortConfig.key === 'change_rate' ? (
                     sortConfig.direction === 'asc' ? (
@@ -237,22 +257,44 @@ const Row = ({
                   )}
                 </SortButton>
               </TableHeader>
-              <TableHeader>
+              <TableHeader onClick={() => sortData('highest_price')}>
                 <HeaderContent>52주 고가</HeaderContent>
+                <SortButton
+                  className={sortConfig.key === 'highest_price' ? 'active' : ''}
+                >
+                  {sortConfig.key === 'highest_price' ? (
+                    sortConfig.direction === 'asc' ? (
+                      <FaSortUp />
+                    ) : (
+                      <FaSortDown />
+                    )
+                  ) : (
+                    <FaSort />
+                  )}
+                </SortButton>
               </TableHeader>
-              <TableHeader>
+              <TableHeader onClick={() => sortData('lowest_price')}>
                 <HeaderContent>52주 저가</HeaderContent>
+                <SortButton
+                  className={sortConfig.key === 'lowest_price' ? 'active' : ''}
+                >
+                  {sortConfig.key === 'lowest_price' ? (
+                    sortConfig.direction === 'asc' ? (
+                      <FaSortUp />
+                    ) : (
+                      <FaSortDown />
+                    )
+                  ) : (
+                    <FaSort />
+                  )}
+                </SortButton>
               </TableHeader>
-              <TableHeader>
-                <HeaderContent>장 시작가</HeaderContent>
-              </TableHeader>
-              <TableHeader>
+              <TableHeader onClick={() => sortData('acc_trade_price24')}>
                 <HeaderContent>누적 거래액</HeaderContent>
                 <SortButton
                   className={
                     sortConfig.key === 'acc_trade_price24' ? 'active' : ''
                   }
-                  onClick={() => sortData('acc_trade_price24')}
                 >
                   {sortConfig.key === 'acc_trade_price24' ? (
                     sortConfig.direction === 'asc' ? (
