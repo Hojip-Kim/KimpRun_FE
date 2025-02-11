@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import Board from '../../client/Board';
 import { GetPostResponse, Post } from '../../types';
 
-
 interface CategoryBoardPageProps {
   params: {
     category: string;
@@ -53,7 +52,7 @@ export default async function CategoryBoardPage({
 
   let isError = false;
 
-  if (data.status === 202) {
+  if ('status' in data) {
     isError = true;
   }
 
