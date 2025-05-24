@@ -21,5 +21,24 @@ export default () => {
       config.cache = false;
       return config;
     },
+
+    output: 'standalone',
+    poweredByHeader: false,
+    compress: true,
+    assetPrefix: process.env.NODE_ENV === 'production' ? '' : undefined,
+    staticPageGenerationTimeout: 180,
+    async headers() {
+      return [
+        {
+          source: '/_next/static/:path*',
+          headers: [
+            {
+              key: 'Cache-Control',
+              value: 'public, max-age=31536000, immutable',
+            },
+          ],
+        },
+      ];
+    },
   };
 };
