@@ -6,26 +6,24 @@ RUN npm ci
 
 COPY . .
 
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-
 RUN npm run build
 
-FROM node:20-alpine AS runner
+FROM node:20-alpine
 WORKDIR /app
 
-ENV NODE_ENV=production
-ENV HOST=0.0.0.0
-ENV PORT=3000
-ENV NEXT_TELEMETRY_DISABLED=1
-
-COPY --from=builder /app/next.config.mjs ./
-COPY --from=builder /app/public ./public
+COPY --from=builder /app/package.json /app/package-lock.json ./
 COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/package-lock.json ./
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/next.config.mjs ./next.config.mjs
+COPY .env.production ./
 
-RUN npm install --production
+RUN npm ci --only=production && \
+    npm cache clean --force && \
+    rm -rf /tmp/* /var/cache/apk/*
+
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOST=0.0.0.0
 
 EXPOSE 3000
 
