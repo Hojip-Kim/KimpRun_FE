@@ -7,6 +7,7 @@ import {
   setTokenSecondList,
   setTokenSecondDataset,
 } from '@/redux/reducer/tokenReducer';
+import { clientEnv } from '@/utils/env';
 import { AppDispatch, RootState } from '@/redux/store';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -14,15 +15,19 @@ import './page.css';
 import Search from '@/components/search/Search';
 import Chat from '@/components/chat/Chat';
 import {
-  fetchTokenNames,
-  fetchTokenCombinedDatas,
-  fetchTokenDatas,
-} from './components/server/DataFetcher';
+  getTokenNames,
+  getSingleMarketData,
+  getCombinedTokenData,
+  getDollarInfo,
+  getTetherInfo,
+  getChatLogs,
+} from '@/server/serverDataLoader';
 import styled from 'styled-components';
 import TradingViewWidget from '@/components/tradingview/TradingViewWidget';
 import { fetchUserInfo } from '@/components/auth/fetchUserInfo';
 import { checkAuth } from '@/components/login/server/checkAuth';
 import TwitterFeed from '@/components/twitter/TwitterFeed';
+import { setGuestUser } from '@/redux/reducer/authReducer';
 
 export type TokenNameList = {
   firstMarketData: any;
@@ -84,12 +89,9 @@ const MainPage = () => {
   const updateTokenSecondDataSet = (newTokenSet) =>
     dispatch(setTokenSecondDataset(newTokenSet));
 
-  const upbitWebsocketURL = process.env.NEXT_PUBLIC_UPBIT_WEBSOCKET_URL;
-  const binanceWebsocketURL = process.env.NEXT_PUBLIC_BINANCE_WEBSOCKET_URL;
-
   const updateNamesAsync = async () => {
     try {
-      const tokenNames = await fetchTokenNames();
+      const tokenNames = await getTokenNames();
       if (tokenNames) {
         updateTokenFirstList(tokenNames.firstMarketList);
         updateTokenSecondList(tokenNames.secondMarketList);
@@ -103,7 +105,7 @@ const MainPage = () => {
     try {
       let tokenData;
       if (secondMarket === null || secondMarket === undefined) {
-        tokenData = await fetchTokenDatas(market);
+        tokenData = await getSingleMarketData(market);
         if (tokenData) {
           if (market === 'upbit') {
             await updateTokenFirstDataSet(tokenData);
@@ -112,7 +114,7 @@ const MainPage = () => {
           }
         }
       } else {
-        tokenData = await fetchTokenCombinedDatas(market, secondMarket);
+        tokenData = await getCombinedTokenData(market, secondMarket);
         if (tokenData) {
           await updateTokenFirstDataSet(tokenData.firstMarketDataList);
           await updateTokenSecondDataSet(tokenData.secondMarketDataList);
@@ -142,21 +144,53 @@ const MainPage = () => {
   }, [tokenFirstList]);
 
   useEffect(() => {
-    if (window.location.search.includes('login=success')) {
-      checkAuth(dispatch);
-    }
-  }, [dispatch]);
+    const initAuth = async () => {
+      try {
+        await checkAuth(dispatch);
+      } catch (error) {
+        console.error('인증 확인 오류:', error);
+        // 오류 발생 시 게스트 사용자 설정
+        dispatch(setGuestUser());
+      }
+    };
+    // 인증 상태 확인 시도
+    initAuth();
 
-  useEffect(() => {
     updateNamesAsync();
     updateDataAsync('upbit', 'binance');
+  }, [dispatch]);
+
+  const wsUpbitRef = React.useRef(null);
+  const wsBinanceRef = React.useRef(null);
+
+  useEffect(() => {
+    wsUpbitRef.current = new WebSocket(clientEnv.UPBIT_WEBSOCKET_URL);
+    wsBinanceRef.current = new WebSocket(clientEnv.BINANCE_WEBSOCKET_URL);
+
+    wsUpbitRef.current.onerror = (error) => {
+      console.error('Upbit Websocket Error:', error);
+      wsUpbitRef.current.close();
+    };
+
+    wsBinanceRef.current.onerror = (error) => {
+      console.error('Binance Websocket Error:', error);
+      wsBinanceRef.current.close();
+    };
+
+    return () => {
+      if (wsUpbitRef.current) {
+        wsUpbitRef.current.close();
+      }
+      if (wsBinanceRef.current) {
+        wsBinanceRef.current.close();
+      }
+    };
   }, []);
 
   useEffect(() => {
-    const wsUpbit = new WebSocket(upbitWebsocketURL);
-    const wsBinance = new WebSocket(binanceWebsocketURL);
+    if (!wsUpbitRef.current || !wsBinanceRef.current) return;
 
-    wsUpbit.onmessage = (event) => {
+    const UpbitMessageHandler = (event) => {
       const parsedData = JSON.parse(event.data);
       if (tokenFirstList) {
         setFirstDataset((prevState) => {
@@ -169,7 +203,7 @@ const MainPage = () => {
       }
     };
 
-    wsBinance.onmessage = (event) => {
+    const BinanceMessageHandler = (event) => {
       const parsedData = JSON.parse(event.data);
       if (tokenSecondList) {
         setSecondDateset((prevState) => {
@@ -182,19 +216,16 @@ const MainPage = () => {
       }
     };
 
-    wsUpbit.onerror = (error) => {
-      console.error('Upbit Websocket Error:', error);
-      wsUpbit.close();
-    };
-
-    wsBinance.onerror = (error) => {
-      console.error('Binance Websocket Error:', error);
-      wsBinance.close();
-    };
+    wsUpbitRef.current.onmessage = UpbitMessageHandler;
+    wsBinanceRef.current.onmessage = BinanceMessageHandler;
 
     return () => {
-      wsUpbit.close();
-      wsBinance.close();
+      if (wsUpbitRef.current) {
+        wsUpbitRef.current.onmessage = null;
+      }
+      if (wsBinanceRef.current) {
+        wsBinanceRef.current.onmessage = null;
+      }
     };
   }, [tokenFirstList, tokenSecondList]);
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Post } from '../../coin/types';
+import { clientEnv } from '@/utils/env';
 
 export type allPostData = {
   boards: Post[];
@@ -8,13 +9,12 @@ export type allPostData = {
 
 const fetchAllPostData = async (page: number): Promise<allPostData> => {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BOARD_URL}/all/page?page=${page}`,
+    `${clientEnv.BOARD_URL}/all/page?page=${page}`,
     {
       method: 'GET',
       cache: 'no-store',
     }
   );
-  console.log(response);
   if (!response.ok) {
     throw new Error('Failed to fetch posts');
   }

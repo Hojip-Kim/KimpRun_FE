@@ -5,6 +5,7 @@ import { updateNickname } from './server/profileDataFetch';
 import { setUser } from '@/redux/reducer/authReducer';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
+import { clientEnv } from '@/utils/env';
 
 interface UserInfo {
   email: string;
@@ -32,8 +33,8 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
   const user = useSelector((state: RootState) => state.auth.user);
   const dispatch = useDispatch();
 
-  const userInfoUrl = process.env.NEXT_PUBLIC_USER_INFO_URL;
-  const updateNicknameUrl = process.env.NEXT_PUBLIC_UPDATE_NICKNAME_URL;
+  const userInfoUrl = clientEnv.USER_INFO_URL;
+  const updateNicknameUrl = clientEnv.UPDATE_NICKNAME_URL;
 
   const fetchUserInfo = async (): Promise<void> => {
     const requestInit: RequestInit = {

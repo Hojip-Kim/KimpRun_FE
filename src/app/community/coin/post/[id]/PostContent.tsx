@@ -5,11 +5,12 @@ import styled from 'styled-components';
 import { BoardData } from './types';
 import { formatDate } from './lib/api';
 import { FaEye, FaHeart } from 'react-icons/fa';
+import { clientEnv } from '@/utils/env';
 
 const PostContent: React.FC<{ boardData: BoardData }> = ({ boardData }) => {
   const [likesCount, setLikesCount] = useState(boardData.boardLikesCount);
 
-  const boardUrl = process.env.NEXT_PUBLIC_BOARD_URL;
+  const boardUrl = clientEnv.BOARD_URL;
 
   const handleLike = async () => {
     try {

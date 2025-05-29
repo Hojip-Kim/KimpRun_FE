@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { signupDataFetch } from './server/signupDataFetch';
+import { clientEnv } from '@/utils/env';
 
 interface SignupFormProps {
   setIsLoginForm: React.Dispatch<React.SetStateAction<boolean>>;
@@ -44,9 +45,9 @@ const SignupForm: React.FC<SignupFormProps> = ({ setIsLoginForm }) => {
 
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
 
-  const verifyEmailUrl = process.env.NEXT_PUBLIC_VERIFY_EMAIL_URL;
+  const verifyEmailUrl = clientEnv.VERIFY_EMAIL_URL;
   const sendVerificationCodeEmailUrl =
-    process.env.NEXT_PUBLIC_SEND_VERIFICATION_CODE_EMAIL_URL;
+    clientEnv.SEND_VERIFICATION_CODE_EMAIL_URL;
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();

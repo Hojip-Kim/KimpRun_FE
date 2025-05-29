@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
+import { clientEnv } from '@/utils/env';
 
-const categoryUrl = process.env.NEXT_PUBLIC_CATEGORY_URL;
+const categoryUrl = clientEnv.CATEGORY_URL;
 
 async function getCategories() {
   const response = await fetch(categoryUrl, {
@@ -18,7 +19,7 @@ async function getCategories() {
 export default async function CoinCommunityPage() {
   try {
     const categories = await getCategories();
-    console.log(categories);
+
     if (categories.length === 0) {
       return (
         <div>
