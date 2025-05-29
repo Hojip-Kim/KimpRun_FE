@@ -3,6 +3,8 @@ node_modules
 .pnp
 .pnp.js
 
+README.md
+
 
 .next
 out
@@ -13,17 +15,14 @@ build
 .git
 .gitignore
 
-Dockerfile*
+dockerfile*
 .dockerignore
+
 
 npm-debug.log*
 yarn-debug.log*
 pnpm-debug.log*
 lerna-debug.log*
-
-# .env
-# .env.*.local
-# .env.local
 
 coverage
 nyc_output
