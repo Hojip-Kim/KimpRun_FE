@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Board from '../../client/Board';
 import { GetPostResponse, Post } from '../../types';
-
+import { clientEnv } from '@/utils/env';
 interface CategoryBoardPageProps {
   params: {
     category: string;
@@ -9,8 +9,8 @@ interface CategoryBoardPageProps {
   };
 }
 
-const boardUrl = process.env.NEXT_PUBLIC_BOARD_URL;
-const categoryUrl = process.env.NEXT_PUBLIC_CATEGORY_URL;
+const boardUrl = clientEnv.BOARD_URL;
+const categoryUrl = clientEnv.CATEGORY_URL;
 
 async function getPosts(
   categoryId: string,
