@@ -93,7 +93,7 @@ jobs:
           aws-region: ${{ secrets.AWS_S3_REGION }}
       - name: Download .env.production
         run: |
-          aws s3 cp ${{ secrets.AWS_S3_FE_ENV }} ./.env.local
+          aws s3 cp ${{ secrets.AWS_S3_FE_ENV_PRODUCTION }} ./.env.local
 
       # 도커 이미지 빌드
       - name: Build Docker image
