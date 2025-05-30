@@ -2,7 +2,7 @@ import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import tokenReducer from './reducer/tokenReducer';
 import infoReducer from './reducer/infoReducer';
 import widgetReducer from './reducer/widgetReduce';
-import authReducer from './reducer/authReducer';
+import authReducer, { setGuestUser } from './reducer/authReducer';
 import {
   FLUSH,
   PAUSE,
@@ -57,6 +57,8 @@ const store = configureStore({
       },
     }),
 });
+
+store.dispatch(setGuestUser());
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
