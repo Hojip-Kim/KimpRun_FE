@@ -17,15 +17,11 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-        with:
-          # path: kimprun_fe에 github 소스코드 저장
-          path: ./kimprun_fe
         # node 설정
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          distribution: 'alpine'
           cache: npm
       # AWS 설정
       - name: Configure AWS credentials
@@ -36,18 +32,17 @@ jobs:
           aws-region: ${{ secrets.AWS_S3_REGION }}
       - name: Download .env.development
         run: |
-          aws s3 cp ${{ secrets.AWS_S3_FE_ENV }} ./kimprun_fe/.env.development
+          aws s3 cp ${{ secrets.AWS_S3_FE_ENV }} ./.env.local
       # 단위 테스트 실행
       - name: Run unit test
         run: npm run test
-        working-directory: ./kimprun_fe
       # 테스트 결과 업로드 (단위테스트 실패 시)
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: failure() && steps.run-unit-test.outcome == 'failure'
         with:
           name: test-results
-          path: ./kimprun_fe/coverage
+          path: ./coverage
 
   # 단위 테스트 완료 후 도커 이미지 빌드 및 도커허브로 푸시
   build-and-push-docker-image:
@@ -61,7 +56,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          distribution: 'alpine'
           cache: npm
       # 커밋 아이디 줄이기 (태그넣기용)
       - name: Shorten commit id
@@ -86,7 +80,7 @@ jobs:
           aws-region: ${{ secrets.AWS_S3_REGION }}
       - name: Download .env.production
         run: |
-          aws s3 cp ${{ secrets.AWS_S3_FE_ENV }} ./.env.production
+          aws s3 cp ${{ secrets.AWS_S3_FE_ENV }} ./.env.local
 
       # 도커 이미지 빌드
       - name: Build Docker image
