@@ -12,7 +12,8 @@ module.exports = {
   ],
   testMatch: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
   transform: {
-    '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', { presets: ['next/babel'] }],
+    '^.+\\.(t|j)sx?$': ['@swc/jest'],
   },
   coverageDirectory: 'coverage',
+  moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx'],
 };
