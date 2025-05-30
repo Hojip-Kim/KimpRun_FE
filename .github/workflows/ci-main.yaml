@@ -25,7 +25,15 @@ jobs:
           cache: npm
       # 의존성 설치
       - name: Install dependencies
-        run: npm install
+        run: npm ci
+
+      - name: Debug environment
+        run: |
+          node --version
+          npm --version
+          npx jest --version
+          cat package.json
+          echo "NODE_ENV: $NODE_ENV"
 
       # AWS 설정
       - name: Configure AWS credentials
