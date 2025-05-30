@@ -23,6 +23,10 @@ jobs:
         with:
           node-version: 20
           cache: npm
+      # 의존성 설치
+      - name: Install dependencies
+        run: npm install
+
       # AWS 설정
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
