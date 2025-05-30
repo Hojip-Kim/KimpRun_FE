@@ -9,7 +9,7 @@ const requestInit: RequestInit = {
 
 export async function getTokenNames() {
   try {
-    const url = serverEnv.MARKET_FIRST_NAME;
+    const url = serverEnv.NEXT_PUBLIC_MARKET_FIRST_NAME;
     const response = await fetch(url, requestInit);
 
     if (response.ok) {
@@ -31,7 +31,7 @@ export async function getCombinedTokenData(
   secondMarket: string
 ) {
   try {
-    const url = new URL(serverEnv.MARKET_COMBINE_DATA);
+    const url = new URL(serverEnv.NEXT_PUBLIC_MARKET_COMBINE_DATA);
     url.searchParams.set('first', firstMarket);
     url.searchParams.set('second', secondMarket);
 
@@ -56,7 +56,7 @@ export async function getCombinedTokenData(
 // 단일 마켓 토큰 데이터 가져오기
 export async function getSingleMarketData(market: string) {
   try {
-    const url = new URL(serverEnv.MARKET_UPBIT_DATA);
+    const url = new URL(serverEnv.NEXT_PUBLIC_MARKET_UPBIT_DATA);
     url.searchParams.set('market', market);
 
     const response = await fetch(url.toString(), requestInit);
@@ -76,7 +76,7 @@ export async function getSingleMarketData(market: string) {
 // 달러 정보 가져오기
 export async function getDollarInfo() {
   try {
-    const response = await fetch(serverEnv.DOLLAR_API_URL, requestInit);
+    const response = await fetch(serverEnv.NEXT_PUBLIC_DOLLAR_API_URL, requestInit);
 
     if (response.ok) {
       return await response.json();
@@ -93,7 +93,7 @@ export async function getDollarInfo() {
 // 테더 정보 가져오기
 export async function getTetherInfo() {
   try {
-    const response = await fetch(serverEnv.TETHER_API_URL, requestInit);
+    const response = await fetch(serverEnv.NEXT_PUBLIC_TETHER_API_URL, requestInit);
 
     if (response.ok) {
       return await response.json();
@@ -110,7 +110,7 @@ export async function getTetherInfo() {
 // 모든 채팅 로그 가져오기
 export async function getChatLogs(page: number = 0, size: number = 20) {
   try {
-    const url = new URL(serverEnv.CHAT_LOG_URL);
+    const url = new URL(serverEnv.NEXT_PUBLIC_CHAT_LOG_URL);
     url.searchParams.set('page', page.toString());
     url.searchParams.set('size', size.toString());
 
