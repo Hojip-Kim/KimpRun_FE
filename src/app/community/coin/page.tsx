@@ -3,10 +3,10 @@ import { GetPostResponse, Post } from './types';
 import Board from './client/Board';
 import ErrorMessage from '@/components/error/ErrorMessage';
 import { allPostData } from '../components/server/fetchData';
-
-const allPostsUrl = process.env.NEXT_PUBLIC_ALL_POSTS_URL;
-const boardUrl = process.env.NEXT_PUBLIC_BOARD_URL;
-const categoryUrl = process.env.NEXT_PUBLIC_CATEGORY_URL;
+import { clientEnv } from '@/utils/env';
+const allPostsUrl = clientEnv.ALL_POSTS_URL;
+const boardUrl = clientEnv.BOARD_URL;
+const categoryUrl = clientEnv.CATEGORY_URL;
 
 async function getAllPosts(page: number): Promise<allPostData> {
   const response = await fetch(`${allPostsUrl}?page=${page}`, {

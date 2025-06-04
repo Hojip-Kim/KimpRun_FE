@@ -1,13 +1,14 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import './Chat.css';
 import { useSelector } from 'react-redux';
 import { ChatMessage } from '@/types';
 import { RootState } from '@/redux/store';
-import { fetchPreviousMessages } from './server/fetchPreviousMessages';
 import { Icon } from '../nav/client/styled';
 import styled from 'styled-components';
+import { getChatLogs } from '@/server/serverDataLoader';
+import { clientEnv } from '@/utils/env';
 
 const Chat = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -15,13 +16,18 @@ const Chat = () => {
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [page, setPage] = useState<number>(0);
   const [chatId, setChatId] = useState<string>('');
+  const [connectionStatus, setConnectionStatus] =
+    useState<string>('연결 중...');
 
+  const websocketRef = useRef<WebSocket | null>(null);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const pingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const chatBoxRef = useRef<HTMLDivElement | null>(null);
   const messageEndRef = useRef<HTMLDivElement | null>(null);
 
-  const websocketUrl = process.env.NEXT_PUBLIC_CHAT_WEBSOCKET_URL;
-
   const user = useSelector((state: RootState) => state.auth.user);
+
+  const websocketUrl = clientEnv.CHAT_WEBSOCKET_URL;
 
   const fetchPreviousMessage = async () => {
     try {
@@ -30,35 +36,144 @@ const Chat = () => {
         const prevScrollHeight = scrollContainer.scrollHeight;
         const prevScrollTop = scrollContainer.scrollTop;
 
-        const parsedData = await fetchPreviousMessages(page, 30);
-        setMessages((prev) => [...parsedData, ...prev]);
-        setPage((prev) => prev + 1);
+        const parsedData = await getChatLogs(page, 30);
+        if (parsedData) {
+          setMessages((prev) => [...parsedData, ...prev]);
+          setPage((prev) => prev + 1);
 
-        setTimeout(() => {
-          if (scrollContainer) {
-            const newScrollHeight = scrollContainer.scrollHeight;
-            scrollContainer.scrollTop =
-              newScrollHeight - prevScrollHeight + prevScrollTop;
-          }
-        }, 0);
+          setTimeout(() => {
+            if (scrollContainer) {
+              const newScrollHeight = scrollContainer.scrollHeight;
+              scrollContainer.scrollTop =
+                newScrollHeight - prevScrollHeight + prevScrollTop;
+            }
+          }, 0);
+        }
       }
     } catch (error) {
-      console.error(error);
+      console.error('이전 메시지 로딩 오류:', error);
     }
   };
 
-  const handleSendMessage = () => {
-    if (input.trim() && ws?.readyState === WebSocket.OPEN) {
-      const message: ChatMessage = {
-        chatID: chatId,
-        content: input,
-        authenticated: user.role === 'GUEST' ? 'false' : 'true',
+  // 웹소켓 연결 함수
+  const connectWebSocket = useCallback(() => {
+    if (websocketRef.current?.readyState === WebSocket.OPEN) {
+      return websocketRef.current;
+    }
+
+    // 기존 웹소켓 정리
+    if (websocketRef.current) {
+      websocketRef.current.close();
+    }
+
+    if (pingIntervalRef.current) {
+      clearInterval(pingIntervalRef.current);
+    }
+    setConnectionStatus('연결 중...');
+
+    try {
+      const socket = new WebSocket(websocketUrl);
+      websocketRef.current = socket;
+
+      socket.onopen = () => {
+        setConnectionStatus('연결됨');
+        setWs(socket);
+
+        // 30초마다 ping 메시지 전송하여 연결 유지
+        pingIntervalRef.current = setInterval(() => {
+          if (socket.readyState === WebSocket.OPEN) {
+            try {
+              socket.send(JSON.stringify({ type: 'ping' }));
+            } catch (e) {
+              console.error('하트비트 전송 오류:', e);
+            }
+          }
+        }, 30000);
       };
 
-      ws.send(JSON.stringify(message));
+      socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+
+          if (
+            data &&
+            typeof data === 'object' &&
+            'type' in data &&
+            data.type === 'ping'
+          ) {
+            return;
+          }
+
+          const parsedData: ChatMessage = data;
+          if (parsedData) {
+            setMessages((prev) => [...prev, parsedData]);
+          }
+        } catch (error) {
+          console.error('메시지 파싱 오류:', error);
+        }
+      };
+
+      socket.onerror = (error) => {
+        console.error('채팅 웹소켓 오류:', error);
+        setConnectionStatus('연결 오류');
+
+        if (reconnectTimeoutRef.current) {
+          clearTimeout(reconnectTimeoutRef.current);
+        }
+
+        reconnectTimeoutRef.current = setTimeout(() => {
+          if (socket) socket.close();
+          connectWebSocket();
+        }, 3000);
+      };
+
+      socket.onclose = (event) => {
+        setConnectionStatus('연결 종료됨');
+        setConnectionStatus('연결 종료됨');
+        setWs(null);
+
+        if (reconnectTimeoutRef.current) {
+          clearTimeout(reconnectTimeoutRef.current);
+        }
+
+        reconnectTimeoutRef.current = setTimeout(() => {
+          connectWebSocket();
+        }, 5000);
+      };
+
+      return socket;
+    } catch (error) {
+      console.error('웹소켓 생성 오류:', error);
+      setConnectionStatus('연결 실패');
+      return null;
+    }
+  }, [websocketUrl]);
+
+  const handleSendMessage = () => {
+    if (!input.trim()) return;
+
+    const currentReadyState = websocketRef.current?.readyState;
+
+    if (currentReadyState !== WebSocket.OPEN) {
+      setConnectionStatus('재연결 시도 중...');
+      connectWebSocket();
+      setTimeout(() => handleSendMessage(), 1500);
+      return;
+    }
+
+    const message: ChatMessage = {
+      chatID: chatId || '게스트',
+      content: input,
+      authenticated: user?.role === 'GUEST' ? 'false' : 'true',
+    };
+
+    try {
+      websocketRef.current.send(JSON.stringify(message));
+      console.log('메시지 전송 성공:', message);
       setInput('');
-    } else {
-      console.error('메시지 전송 오류: 웹소켓이 연결되지 않았습니다.');
+    } catch (error) {
+      console.error('메시지 전송 오류:', error);
+      setConnectionStatus('메시지 전송 오류');
     }
   };
 
@@ -70,35 +185,68 @@ const Chat = () => {
   };
 
   useEffect(() => {
-    setChatId(user?.name);
+    const checkConnection = setInterval(() => {
+      if (websocketRef.current) {
+        if (websocketRef.current.readyState !== WebSocket.OPEN) {
+          connectWebSocket();
+        }
+      }
+    }, 60000);
 
-    fetchPreviousMessage();
+    return () => clearInterval(checkConnection);
+  }, [connectWebSocket]);
 
-    const websocket = new WebSocket(websocketUrl);
-
-    websocket.onopen = () => {
-      setWs(websocket);
-    };
-
-    websocket.onmessage = (event) => {
-      const parsedData: ChatMessage = JSON.parse(event.data);
-      if (parsedData) {
-        setMessages((prev) => [...prev, parsedData]);
+  useEffect(() => {
+    const handleOnline = () => {
+      if (
+        !websocketRef.current ||
+        websocketRef.current.readyState !== WebSocket.OPEN
+      ) {
+        connectWebSocket();
       }
     };
 
-    websocket.onerror = (error) => {
-      console.error('채팅 웹소켓 오류: ', error);
-      websocket.close();
-    };
+    window.addEventListener('online', handleOnline);
 
     return () => {
-      websocket.close();
+      window.removeEventListener('online', handleOnline);
+    };
+  }, [connectWebSocket]);
+
+  useEffect(() => {
+    setChatId(user?.name || '게스트');
+
+    fetchPreviousMessage();
+
+    if (
+      !websocketRef.current ||
+      websocketRef.current.readyState !== WebSocket.OPEN
+    ) {
+      const socket = connectWebSocket();
+    }
+
+    return () => {
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+
+      if (pingIntervalRef.current) {
+        clearInterval(pingIntervalRef.current);
+      }
+
+      if (websocketRef.current) {
+        websocketRef.current.close();
+      }
     };
   }, [user]);
 
   return (
     <ChatWrapper>
+      <ConnectionStatus
+        status={connectionStatus === '연결됨' ? 'connected' : 'disconnected'}
+      >
+        {connectionStatus}
+      </ConnectionStatus>
       <ChatContainer>
         <ChatBox ref={chatBoxRef}>
           <FetchButton onClick={fetchPreviousMessage}>
@@ -108,15 +256,17 @@ const Chat = () => {
             <MessageContainer
               key={index}
               authenticated={data.authenticated}
-              isSelf={data.chatID === user?.name}
+              isSelf={data.chatID === (user?.name || '게스트')}
             >
               <div>
                 <MessageContent>
-                  {data.chatID === user?.name ? '' : data.chatID + ':'}{' '}
+                  {data.chatID === (user?.name || '게스트')
+                    ? ''
+                    : data.chatID + ':'}{' '}
                   {data.content}
                 </MessageContent>
                 {data.authenticated === 'true' &&
-                  data.chatID !== user?.name && (
+                  data.chatID !== (user?.name || '게스트') && (
                     <Icon
                       src="/bitcoin.png"
                       alt="medal"
@@ -247,4 +397,18 @@ const SendButton = styled.button`
   &:hover {
     background-color: #3a7bc8;
   }
+`;
+
+// 새로운 연결 상태 표시 컴포넌트
+const ConnectionStatus = styled.div<{ status: string }>`
+  padding: 5px;
+  text-align: center;
+  font-size: 0.7rem;
+  color: ${(props) => (props.status === 'connected' ? '#4caf50' : '#f44336')};
+  background-color: ${(props) =>
+    props.status === 'connected'
+      ? 'rgba(76, 175, 80, 0.1)'
+      : 'rgba(244, 67, 54, 0.1)'};
+  border-radius: 4px;
+  margin-bottom: 5px;
 `;

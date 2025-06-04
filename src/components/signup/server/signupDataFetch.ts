@@ -1,4 +1,6 @@
-const signupUrl = process.env.NEXT_PUBLIC_SIGNUP_URL;
+import { clientEnv } from '@/utils/env';
+
+const signupUrl = clientEnv.SIGNUP_URL;
 
 interface SignupResponse {
   email: string;

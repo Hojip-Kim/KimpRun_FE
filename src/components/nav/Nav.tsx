@@ -39,14 +39,16 @@ import {
   setTether,
   setUserCount,
 } from '@/redux/reducer/infoReducer';
+import { getDollarInfo, getTetherInfo } from '@/server/serverDataLoader';
 import { FaUser, FaUserCircle, FaUserCog } from 'react-icons/fa';
-
+import { List } from 'postcss/lib/list';
+import { clientEnv, serverEnv } from '@/utils/env';
+import { marketWebsocketData, noticeWebsocketData } from './type';
 interface ResponseUrl {
   response: string;
 }
 
 const Nav = () => {
-  const [dollars, setDollars] = useState('');
   const [userSize, setUserSize] = useState(0);
   const [isModalActive, setIsModalActive] = useState<boolean>(false);
   const [modalSize, setModalSize] = useState({ width: 400, height: 300 });
@@ -63,11 +65,9 @@ const Nav = () => {
   const userCount = useSelector((state: RootState) => state.info.user);
   const dispatch = useDispatch<AppDispatch>();
 
-  const statusUrl = process.env.NEXT_PUBLIC_STATUS_URL;
-  const logoutUrl = process.env.NEXT_PUBLIC_LOGOUT_URL;
-  const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL;
-  const dollarAPIUrl = process.env.NEXT_PUBLIC_DOLLAR_API_URL;
-  const tetherAPIUrl = process.env.NEXT_PUBLIC_TETHER_API_URL;
+  const statusUrl = clientEnv.STATUS_URL;
+  const logoutUrl = clientEnv.LOGOUT_URL;
+  const adminUrl = clientEnv.ADMIN_URL;
 
   const checkUserAuth = async () => {
     if (isAuthenticated) {
@@ -80,9 +80,8 @@ const Nav = () => {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     };
-    const response = await fetch(tetherAPIUrl, requestInit);
-    const parsedData = await response.json();
-    dispatch(setTether(parsedData.tether));
+    const response = await getTetherInfo();
+    dispatch(setTether(response.tether));
   };
 
   const requestDollar = async () => {
@@ -90,11 +89,9 @@ const Nav = () => {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     };
-    const response = await fetch(dollarAPIUrl, requestInit);
-    const parsedData = await response.json();
+    const response = await getDollarInfo();
 
-    setDollars(parsedData.dollar);
-    dispatch(setDollar(parsedData.dollar));
+    dispatch(setDollar(response.dollar));
   };
 
   useEffect(() => {
@@ -104,16 +101,28 @@ const Nav = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    const infoWebsocket = new WebSocket(
-      process.env.NEXT_PUBLIC_INFO_WEBSOCKET_URL
-    );
+    const infoWebsocket = new WebSocket(clientEnv.INFO_WEBSOCKET_URL);
 
     infoWebsocket.onmessage = (event) => {
-      const parsedData = JSON.parse(event.data);
-
-      dispatch(setUserCount(parsedData.userCount));
-      dispatch(setDollar(parsedData.dollar));
-      dispatch(setTether(parsedData.tether));
+      const parsedData: marketWebsocketData | noticeWebsocketData = JSON.parse(
+        event.data
+      );
+      console.log(parsedData);
+      if (parsedData.type === 'market') {
+        const userData = parsedData.userData;
+        const marketData = parsedData.marketData;
+        dispatch(setUserCount(userData.userCount));
+        dispatch(setDollar(marketData.dollar));
+        dispatch(setTether(marketData.tether));
+      } else if (parsedData.type === 'notice') {
+        console.log('******************new Notice occurred******************');
+        const exchangeName = parsedData.exchange_name;
+        const absoluteUrl = parsedData.absoluteUrl;
+        const noticeDataList = parsedData.noticeDataList;
+        console.log('exchangeName', exchangeName);
+        console.log('absoluteUrl', absoluteUrl);
+        console.log('noticeDataList', noticeDataList);
+      }
     };
 
     infoWebsocket.onerror = (error) => {
@@ -195,9 +204,7 @@ const Nav = () => {
         <InfoContainer>
           <TopInfoSection>
             <InfoItem>
-              <Logo
-                onClick={() => router.push(process.env.NEXT_PUBLIC_MAIN_PAGE)}
-              >
+              <Logo onClick={() => router.push(clientEnv.MAIN_PAGE)}>
                 <LogoIcon src="/logo.png" alt="Dollar" />
               </Logo>
               <Icon src="/dollar.png" alt="Dollar" />
@@ -211,34 +218,26 @@ const Nav = () => {
           </TopInfoSection>
           <BottomSection>
             <NavMenu>
-              <NavMenuItem
-                onClick={() => router.push(process.env.NEXT_PUBLIC_MAIN_PAGE)}
-              >
+              <NavMenuItem onClick={() => router.push(clientEnv.MAIN_PAGE)}>
                 메인페이지
               </NavMenuItem>
               <NavMenuItem>
                 <NavMenuLink
-                  onClick={() =>
-                    router.push(process.env.NEXT_PUBLIC_COMMUNITY_PAGE)
-                  }
+                  onClick={() => router.push(clientEnv.COMMUNITY_PAGE)}
                 >
                   커뮤니티
                 </NavMenuLink>
                 <SubMenu>
                   <SubMenuItem
                     onClick={() =>
-                      router.push(
-                        `${process.env.NEXT_PUBLIC_COMMUNITY_PAGE}/expert`
-                      )
+                      router.push(`${clientEnv.COMMUNITY_PAGE}/expert`)
                     }
                   >
                     전문가 게시판
                   </SubMenuItem>
                   <SubMenuItem
                     onClick={() =>
-                      router.push(
-                        `${process.env.NEXT_PUBLIC_COMMUNITY_PAGE}/coin`
-                      )
+                      router.push(`${clientEnv.COMMUNITY_PAGE}/coin`)
                     }
                   >
                     코인 게시판
@@ -246,15 +245,11 @@ const Nav = () => {
                 </SubMenu>
               </NavMenuItem>
               <NavMenuItem
-                onClick={() =>
-                  router.push(process.env.NEXT_PUBLIC_STATISTICS_PAGE)
-                }
+                onClick={() => router.push(clientEnv.STATISTICS_PAGE)}
               >
                 통계
               </NavMenuItem>
-              <NavMenuItem
-                onClick={() => router.push(process.env.NEXT_PUBLIC_NEWS_PAGE)}
-              >
+              <NavMenuItem onClick={() => router.push(clientEnv.NEWS_PAGE)}>
                 뉴스
               </NavMenuItem>
             </NavMenu>

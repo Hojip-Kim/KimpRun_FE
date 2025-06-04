@@ -7,7 +7,7 @@ import styled from 'styled-components';
 import SignupForm from '../signup/SignupForm';
 import { loginDataFetch, responseData } from './server/loginDataFetch';
 import { fetchUserInfo } from '../auth/fetchUserInfo';
-
+import { clientEnv } from '@/utils/env';
 interface LoginFormProps {
   closeModal: () => void;
   setModalSize: React.Dispatch<
@@ -18,7 +18,7 @@ interface LoginFormProps {
   >;
 }
 
-const googleLoginUrl = process.env.NEXT_PUBLIC_GOOGLE_LOGIN_URL;
+const googleLoginUrl = clientEnv.GOOGLE_LOGIN_URL;
 
 interface loginResponse {
   result: 'check' | 'success';
@@ -32,8 +32,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ closeModal, setModalSize }) => {
   const [isLoginForm, setIsLoginForm] = useState<boolean>(true);
   const [rememberMe, setRememberMe] = useState<boolean>(false);
 
-  const statusUrl = process.env.NEXT_PUBLIC_STATUS_URL;
-  const loginUrl = process.env.NEXT_PUBLIC_LOGIN_URL;
+  const statusUrl = clientEnv.STATUS_URL;
+  const loginUrl = clientEnv.LOGIN_URL;
 
   useEffect(() => {
     if (isLoginForm) {

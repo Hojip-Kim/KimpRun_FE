@@ -8,6 +8,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { FaEye, FaPencilAlt, FaCheck, FaImage } from 'react-icons/fa';
 import type ReactQuill from 'react-quill';
+import { clientEnv } from '@/utils/env';
 
 const ReactQuillComponent = dynamic(
   async () => {
@@ -61,7 +62,7 @@ const WritePost: React.FC = () => {
     return Array.from(imgElements).map((img) => img.src);
   };
 
-  const boardUrl = process.env.NEXT_PUBLIC_BOARD_URL;
+  const boardUrl = clientEnv.BOARD_URL;
 
   const createPost = async () => {
     try {

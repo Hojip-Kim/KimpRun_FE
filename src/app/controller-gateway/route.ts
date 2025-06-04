@@ -28,15 +28,15 @@ async function requestApiCall(url: string) {
   if (response.ok) {
     if (contentType.includes('application/json')) {
       const jsonData = await response.json();
-      console.log(jsonData);
       return jsonData;
     } else {
       const textData = await response.text();
-      console.warn('JSON이 아닌 응답:', textData);
       return textData;
     }
   } else {
     const errorText = await response.text();
-    throw new Error(`API 호출 실패 (상태: ${response.status}): ${errorText}`);
+    throw new Error(
+      `API 호출 실패 (상태: ${response.status}): ${errorText},'url :' ${url}`
+    );
   }
 }

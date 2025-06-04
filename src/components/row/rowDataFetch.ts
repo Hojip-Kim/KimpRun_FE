@@ -1,5 +1,3 @@
-'use server';
-
 import { firstDataSet, secondDataSet } from '@/app/page';
 
 export async function getRowData(

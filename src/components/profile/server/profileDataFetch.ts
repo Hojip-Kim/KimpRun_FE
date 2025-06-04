@@ -1,4 +1,6 @@
-const userInfoUrl = process.env.USER_INFO_URL;
+import { clientEnv } from '@/utils/env';
+
+const userInfoUrl = clientEnv.USER_INFO_URL;
 
 interface UserInfo {
   email: string;
