@@ -87,7 +87,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build Docker image - verification
-        run: docker build --platform linux/amd64 -t hojipkim/kimprun_fe:${{ env.COMMIT_ID }} .
+        run: docker build --platform linux/amd64 -t hojipkim/kimprun_fe:${{ env.COMMIT_ID }} ./kimprun_fe
       
       - name: Upload commit ID artifact
         uses: actions/upload-artifact@v4
