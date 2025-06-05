@@ -1,20 +1,33 @@
 'use client';
 
-import Row from '@/components/Row';
+import Row from '@/components/row/Row';
 import {
   setTokenFirstList,
   setTokenFirstDataset,
   setTokenSecondList,
   setTokenSecondDataset,
 } from '@/redux/reducer/tokenReducer';
+import { clientEnv } from '@/utils/env';
 import { AppDispatch, RootState } from '@/redux/store';
-import serverFetch from '@/server/fetch/server';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import './page.css';
-import TradingViewWidget from '@/components/TradingViewWidget';
-import Search from '@/components/Search';
-import Chat from '@/components/Chat';
+import Search from '@/components/search/Search';
+import Chat from '@/components/chat/Chat';
+import {
+  getTokenNames,
+  getSingleMarketData,
+  getCombinedTokenData,
+  getDollarInfo,
+  getTetherInfo,
+  getChatLogs,
+} from '@/server/serverDataLoader';
+import styled from 'styled-components';
+import TradingViewWidget from '@/components/tradingview/TradingViewWidget';
+import { fetchUserInfo } from '@/components/auth/fetchUserInfo';
+import { checkAuth } from '@/components/login/server/checkAuth';
+import TwitterFeed from '@/components/twitter/TwitterFeed';
+import { setGuestUser } from '@/redux/reducer/authReducer';
 
 export type TokenNameList = {
   firstMarketData: any;
@@ -44,8 +57,6 @@ export type secondDataSet = {
 };
 
 const MainPage = () => {
-  // state
-
   const [firstDataset, setFirstDataset] = useState<{
     [key: string]: firstDataSet;
   }>({});
@@ -53,7 +64,8 @@ const MainPage = () => {
     [key: string]: secondDataSet;
   }>({});
 
-  // redux
+  const [filteredTokens, setFilteredTokens] = useState<string[]>([]);
+
   const dispatch: AppDispatch = useDispatch();
   const tokenFirstList = useSelector(
     (state: RootState) => state.token.tokenList.first
@@ -61,103 +73,25 @@ const MainPage = () => {
   const tokenSecondList = useSelector(
     (state: RootState) => state.token.tokenList.second
   );
-
   const tokenFirstSet = useSelector(
     (state: RootState) => state.token.tokenSet.first
   );
-
   const tokenSecondSet = useSelector(
     (state: RootState) => state.token.tokenSet.second
   );
 
-  const updateTokenFirstList = (newTokenList) => {
+  const updateTokenFirstList = (newTokenList) =>
     dispatch(setTokenFirstList(newTokenList));
-  };
-  const updateTokenFirstDataSet = (newTokenSet) => {
+  const updateTokenFirstDataSet = (newTokenSet) =>
     dispatch(setTokenFirstDataset(newTokenSet));
-  };
-
-  const updateTokenSecondList = (newTokenList) => {
+  const updateTokenSecondList = (newTokenList) =>
     dispatch(setTokenSecondList(newTokenList));
-  };
-
-  const updateTokenSecondDataSet = (newTokenSet) => {
+  const updateTokenSecondDataSet = (newTokenSet) =>
     dispatch(setTokenSecondDataset(newTokenSet));
-  };
-
-  const upbitMarketDataURL = process.env.NEXT_PUBLIC_MARKET_UPBIT_DATA;
-
-  const marketDataURL = process.env.NEXT_PUBLIC_MARKET_COMBINE_DATA;
-
-  const marketListURL = process.env.NEXT_PUBLIC_MARKET_FIRST_NAME;
-
-  const upbitWebsocketURL = process.env.NEXT_PUBLIC_UPBIT_WEBSOCKET_URL;
-  const binanceWebsocketURL = process.env.NEXT_PUBLIC_BINANCE_WEBSOCKET_URL;
-
-  const requestInit: RequestInit = {
-    method: 'GET',
-    credentials: 'include',
-    headers: { 'Content-type': 'application/json' },
-  };
-
-  const fetchTokenNames = async (): Promise<tokenNameList | null> => {
-    try {
-      const nameList = await serverFetch(marketListURL, requestInit);
-
-      if (nameList.ok) {
-        const text: string = nameList.text;
-
-        const tokenNameList: tokenNameList = JSON.parse(text);
-        return tokenNameList;
-      } else {
-        throw new Error('Data Name parse Error Occured!');
-      }
-    } catch (error) {
-      console.error(error);
-      return null;
-    }
-  };
-
-  const fetchTokenCombinedDatas = async (
-    firstMarket: string,
-    secondMarket: string
-  ) => {
-    try {
-      const url = new URL(marketDataURL);
-      url.searchParams.set('first', firstMarket);
-      url.searchParams.set('second', secondMarket);
-
-      const result = await serverFetch(url.toString(), requestInit);
-      if (result.ok) {
-        return JSON.parse(result.text);
-      } else {
-        throw new Error('Error Occured');
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const fetchTokenDatas = async (market: string) => {
-    try {
-      const url = new URL(upbitMarketDataURL);
-      url.searchParams.set('market', market);
-
-      const result = await serverFetch(url.toString(), requestInit);
-      if (result.ok) {
-        return result.text;
-      } else {
-        throw new Error('Error Occured');
-      }
-    } catch (error) {
-      console.error(error);
-      return null;
-    }
-  };
 
   const updateNamesAsync = async () => {
     try {
-      const tokenNames: tokenNameList = await fetchTokenNames();
+      const tokenNames = await getTokenNames();
       if (tokenNames) {
         updateTokenFirstList(tokenNames.firstMarketList);
         updateTokenSecondList(tokenNames.secondMarketList);
@@ -171,9 +105,7 @@ const MainPage = () => {
     try {
       let tokenData;
       if (secondMarket === null || secondMarket === undefined) {
-        // 이 데이터는 사용되지 않을 데이터입니다.
-        tokenData = await fetchTokenDatas(market);
-        tokenData = JSON.parse(tokenData);
+        tokenData = await getSingleMarketData(market);
         if (tokenData) {
           if (market === 'upbit') {
             await updateTokenFirstDataSet(tokenData);
@@ -182,7 +114,7 @@ const MainPage = () => {
           }
         }
       } else {
-        tokenData = await fetchTokenCombinedDatas(market, secondMarket);
+        tokenData = await getCombinedTokenData(market, secondMarket);
         if (tokenData) {
           await updateTokenFirstDataSet(tokenData.firstMarketDataList);
           await updateTokenSecondDataSet(tokenData.secondMarketDataList);
@@ -193,21 +125,72 @@ const MainPage = () => {
     }
   };
 
+  const handleSearch = useCallback(
+    (searchTerm: string) => {
+      if (!searchTerm) {
+        setFilteredTokens(tokenFirstList);
+      } else {
+        const filtered = tokenFirstList.filter((token) =>
+          token.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        setFilteredTokens(filtered);
+      }
+    },
+    [tokenFirstList]
+  );
+
   useEffect(() => {
-    updateNamesAsync(); // 토큰이름 fetch
-    updateDataAsync('upbit', 'binance'); // 토큰데이터 fetch
+    setFilteredTokens(tokenFirstList);
+  }, [tokenFirstList]);
+
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        await checkAuth(dispatch);
+      } catch (error) {
+        console.error('인증 확인 오류:', error);
+        // 오류 발생 시 게스트 사용자 설정
+        dispatch(setGuestUser());
+      }
+    };
+    // 인증 상태 확인 시도
+    initAuth();
+
+    updateNamesAsync();
+    updateDataAsync('upbit', 'binance');
+  }, [dispatch]);
+
+  const wsUpbitRef = React.useRef(null);
+  const wsBinanceRef = React.useRef(null);
+
+  useEffect(() => {
+    wsUpbitRef.current = new WebSocket(clientEnv.UPBIT_WEBSOCKET_URL);
+    wsBinanceRef.current = new WebSocket(clientEnv.BINANCE_WEBSOCKET_URL);
+
+    wsUpbitRef.current.onerror = (error) => {
+      console.error('Upbit Websocket Error:', error);
+      wsUpbitRef.current.close();
+    };
+
+    wsBinanceRef.current.onerror = (error) => {
+      console.error('Binance Websocket Error:', error);
+      wsBinanceRef.current.close();
+    };
+
+    return () => {
+      if (wsUpbitRef.current) {
+        wsUpbitRef.current.close();
+      }
+      if (wsBinanceRef.current) {
+        wsBinanceRef.current.close();
+      }
+    };
   }, []);
 
   useEffect(() => {
-    if (tokenSecondSet) {
-    }
-  }, [tokenSecondSet]);
+    if (!wsUpbitRef.current || !wsBinanceRef.current) return;
 
-  useEffect(() => {
-    const wsUpbit = new WebSocket(upbitWebsocketURL);
-
-    // websocket 실시간 마켓데이터 호출
-    wsUpbit.onmessage = (event) => {
+    const UpbitMessageHandler = (event) => {
       const parsedData = JSON.parse(event.data);
       if (tokenFirstList) {
         setFirstDataset((prevState) => {
@@ -215,21 +198,12 @@ const MainPage = () => {
           Object.entries(parsedData).forEach(([key, value]) => {
             newState[key] = value as firstDataSet;
           });
-
           return newState;
         });
       }
     };
 
-    wsUpbit.onerror = (error) => {
-      console.error('Upbit Websocket Error:', error);
-      wsUpbit.close();
-    };
-    // binance
-    const wsBinance = new WebSocket(binanceWebsocketURL);
-
-    // websocket 실시간 마켓데이터 호출
-    wsBinance.onmessage = (event) => {
+    const BinanceMessageHandler = (event) => {
       const parsedData = JSON.parse(event.data);
       if (tokenSecondList) {
         setSecondDateset((prevState) => {
@@ -240,45 +214,114 @@ const MainPage = () => {
           return newState;
         });
       }
-
-      wsBinance.onerror = (error) => {
-        console.error('Binacne Websocket Error: ', error);
-        wsBinance.close();
-      };
     };
 
-    wsBinance.onerror = (error) => {
-      console.error('Websocket Error:', error);
-      wsBinance.close();
-    };
+    wsUpbitRef.current.onmessage = UpbitMessageHandler;
+    wsBinanceRef.current.onmessage = BinanceMessageHandler;
 
     return () => {
-      wsUpbit.close();
-      wsBinance.close();
+      if (wsUpbitRef.current) {
+        wsUpbitRef.current.onmessage = null;
+      }
+      if (wsBinanceRef.current) {
+        wsBinanceRef.current.onmessage = null;
+      }
     };
-  }, []);
+  }, [tokenFirstList, tokenSecondList]);
 
   return (
-    <div className="main_container">
-      <div className="chart_container">
-        <TradingViewWidget />
-      </div>
-
-      <div className="row_container">
-        <Search tokenList={tokenFirstList} />
+    <MainContainer>
+      <LeftSideContainer>
+        <ChartContainer>
+          <TradingViewWidget />
+        </ChartContainer>
+        <TwitterFeed />
+      </LeftSideContainer>
+      <RowContainer>
+        <Search onSearch={handleSearch} />
         <Row
           firstTokenNameList={tokenFirstList}
           firstTokenDataList={tokenFirstSet}
+          secondTokenDataList={tokenSecondSet}
           firstDataset={firstDataset}
           secondDataset={secondDataset}
+          filteredTokens={filteredTokens}
         />
-      </div>
-
-      <div className="chat_container">
+      </RowContainer>
+      <ChatContainer>
         <Chat />
-      </div>
-    </div>
+      </ChatContainer>
+    </MainContainer>
   );
 };
 
 export default MainPage;
+
+const MainContainer = styled.div`
+  width: 100%;
+  display: flex;
+  background-color: #121212;
+  color: #ffffff;
+  height: 100vh;
+  overflow: hidden;
+  padding-bottom: 150px;
+  gap: 20px;
+  justify-content: center;
+`;
+
+const LeftSideContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 130px);
+  flex: 3;
+  min-width: 400px;
+  max-width: 600px;
+  gap: 20px;
+  margin: 20px 0 20px 20px; // 전체 여백을 여기서 처리
+`;
+
+const ChartContainer = styled.div`
+  flex: 1;
+  min-height: 300px;
+  max-height: 30%;
+
+  #chart {
+    justify-content: center;
+    background-color: #131722;
+    align-items: left;
+    height: 100%;
+    width: 100%;
+    border: 1px solid #333333;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+`;
+
+const RowContainer = styled.div`
+  flex: 4.5;
+  min-width: 600px;
+  max-width: 900px;
+  margin: 20px 0;
+  padding: 20px;
+  background-color: #1e1e1e;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  height: calc(100vh - 150px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; / 컨테이너 자체는 overflow 숨김
+`;
+
+const ChatContainer = styled.div`
+  flex: 2.5;
+  min-width: 300px;
+  max-width: 400px;
+  background-color: #1e1e1e;
+  margin: 20px 20px 20px 0;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  height: 100%;
+  display: flex; // 추가
+  flex-direction: column; // 추가
+`;

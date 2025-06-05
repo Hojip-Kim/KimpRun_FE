@@ -1,7 +1,10 @@
 import React from 'react';
+import { fetchBithumb } from './DataFetching';
 
 const StatisticPage = () => {
-  return <div></div>;
+  const data = fetchBithumb();
+
+  return <div>{data}</div>;
 };
 
 export default StatisticPage;
