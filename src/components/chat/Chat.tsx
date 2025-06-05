@@ -83,7 +83,14 @@ const Chat = () => {
         pingIntervalRef.current = setInterval(() => {
           if (socket.readyState === WebSocket.OPEN) {
             try {
-              socket.send(JSON.stringify({ type: 'ping' }));
+              socket.send(
+                JSON.stringify({
+                  ping: true,
+                  chatID: chatId,
+                  content: '',
+                  authenticated: user?.role === 'GUEST' ? 'false' : 'true',
+                })
+              );
             } catch (e) {
               console.error('하트비트 전송 오류:', e);
             }
@@ -93,20 +100,14 @@ const Chat = () => {
 
       socket.onmessage = (event) => {
         try {
-          const data = JSON.parse(event.data);
+          const data: ChatMessage = JSON.parse(event.data);
 
-          if (
-            data &&
-            typeof data === 'object' &&
-            'type' in data &&
-            data.type === 'ping'
-          ) {
+          if (data.ping === true) {
             return;
           }
 
-          const parsedData: ChatMessage = data;
-          if (parsedData) {
-            setMessages((prev) => [...prev, parsedData]);
+          if (data) {
+            setMessages((prev) => [...prev, data]);
           }
         } catch (error) {
           console.error('메시지 파싱 오류:', error);
@@ -162,6 +163,7 @@ const Chat = () => {
     }
 
     const message: ChatMessage = {
+      ping: false,
       chatID: chatId || '게스트',
       content: input,
       authenticated: user?.role === 'GUEST' ? 'false' : 'true',
