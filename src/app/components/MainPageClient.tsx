@@ -66,31 +66,6 @@ const MainPageClient: React.FC<MainPageProps> = ({
   const updateTokenSecondDataSet = (newTokenSet: any) =>
     dispatch(setTokenSecondDataset(newTokenSet));
 
-  // 데이터 업데이트 비동기 처리
-  const updateDataAsync = async (market: string, secondMarket?: string) => {
-    try {
-      let tokenData;
-      if (secondMarket === null || secondMarket === undefined) {
-        tokenData = await getSingleMarketData(market);
-        if (tokenData) {
-          if (market === 'upbit') {
-            await updateTokenFirstDataSet(tokenData);
-          } else if (market === 'binance') {
-            await updateTokenSecondDataSet(tokenData);
-          }
-        }
-      } else {
-        tokenData = await getCombinedTokenData(market, secondMarket);
-        if (tokenData) {
-          await updateTokenFirstDataSet(tokenData.firstMarketDataList);
-          await updateTokenSecondDataSet(tokenData.secondMarketDataList);
-        }
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const handleSearch = useCallback(
     (searchTerm: string) => {
       if (!searchTerm) {
