@@ -17,8 +17,6 @@ import {
   serverPut,
   serverPatch,
   serverDelete,
-  callExternalApi,
-  callDatabaseApi,
   cachedRequest,
 } from './server';
 
