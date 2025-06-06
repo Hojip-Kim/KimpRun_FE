@@ -182,7 +182,6 @@ const Chat = () => {
 
     try {
       websocketRef.current.send(JSON.stringify(message));
-      console.log('메시지 전송 성공:', message);
       setInput('');
     } catch (error) {
       console.error('메시지 전송 오류:', error);
