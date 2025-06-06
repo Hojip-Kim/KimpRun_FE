@@ -5,20 +5,20 @@ export enum marketEnum {
   BITHUMB = 'BITHUMB',
 }
 
-export type noticeData = {
+export interface noticeData {
   title: string;
   alink: string;
   date: Date;
-};
+}
 
-export type noticeWebsocketData = {
+export interface noticeWebsocketData {
   type: 'notice';
   exchange_name: string;
   absoluteUrl: string;
   noticeDataList: noticeData[];
-};
+}
 
-export type marketWebsocketData = {
+export interface marketWebsocketData {
   type: 'market';
   userData: {
     userCount: number;

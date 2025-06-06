@@ -5,8 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import Modal from '@/components/modal/modal';
 import LoginForm from '@/components/login/loginForm';
-import { logout } from '@/redux/reducer/authReducer';
-import { fetchUserInfo } from '@/components/auth/fetchUserInfo';
+import { logout, setUser } from '@/redux/reducer/authReducer';
 import ProfileForm from '../profile/ProfileForm';
 import {
   ActionButton,
@@ -39,11 +38,16 @@ import {
   setTether,
   setUserCount,
 } from '@/redux/reducer/infoReducer';
-import { getDollarInfo, getTetherInfo } from '@/server/serverDataLoader';
 import { FaUser, FaUserCircle, FaUserCog } from 'react-icons/fa';
-import { List } from 'postcss/lib/list';
 import { clientEnv, serverEnv } from '@/utils/env';
 import { marketWebsocketData, noticeWebsocketData } from './type';
+import { clientRequest } from '@/server/fetch';
+import {
+  checkUserAuth,
+  requestDollar,
+  requestTether,
+} from './client/dataFetch';
+
 interface ResponseUrl {
   response: string;
 }
@@ -65,39 +69,31 @@ const Nav = () => {
   const userCount = useSelector((state: RootState) => state.info.user);
   const dispatch = useDispatch<AppDispatch>();
 
-  const statusUrl = clientEnv.STATUS_URL;
-  const logoutUrl = clientEnv.LOGOUT_URL;
-  const adminUrl = clientEnv.ADMIN_URL;
-
-  const checkUserAuth = async () => {
-    if (isAuthenticated) {
-      await fetchUserInfo(statusUrl, dispatch);
-    }
+  const setReduxDollar = async () => {
+    const response = await requestDollar();
+    dispatch(setDollar(response));
   };
 
-  const requestTether = async () => {
-    const requestInit: RequestInit = {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    };
-    const response = await getTetherInfo();
-    dispatch(setTether(response.tether));
+  const setReduxTether = async () => {
+    const response = await requestTether();
+    dispatch(setTether(response));
   };
 
-  const requestDollar = async () => {
-    const requestInit: RequestInit = {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    };
-    const response = await getDollarInfo();
-
-    dispatch(setDollar(response.dollar));
+  const setReduxUserAuth = async () => {
+    const response = await checkUserAuth(isAuthenticated);
+    dispatch(
+      setUser({
+        name: response?.nickname,
+        email: response?.email,
+        role: response?.role,
+      })
+    );
   };
 
   useEffect(() => {
-    requestDollar();
-    requestTether();
-    checkUserAuth();
+    setReduxDollar();
+    setReduxTether();
+    setReduxUserAuth();
   }, [dispatch]);
 
   useEffect(() => {
@@ -141,16 +137,17 @@ const Nav = () => {
   };
 
   const handleLogout = async () => {
-    const requestInit: RequestInit = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-    };
-
     try {
-      const response = await fetch(logoutUrl, requestInit);
+      const response = await clientRequest.post(
+        clientEnv.LOGOUT_URL,
+        {},
+        {
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
 
-      if (response.ok) {
+      if (response.success) {
         alert('로그아웃 성공');
         dispatch(logout());
       } else {
@@ -169,15 +166,16 @@ const Nav = () => {
 
   const handleAdminClick = async () => {
     try {
-      const requestInit: RequestInit = {
-        method: 'GET',
-        credentials: 'include',
-      };
-      const response = await fetch(adminUrl, requestInit);
-      if (response.ok) {
-        const redirectUrl: ResponseUrl = await response.json();
-        if (redirectUrl) {
-          window.location.href = redirectUrl.response;
+      const response = await clientRequest.get<ResponseUrl>(
+        clientEnv.ADMIN_URL,
+        {
+          credentials: 'include',
+        }
+      );
+
+      if (response.success && response.status === 200) {
+        if (response.data.response) {
+          window.location.href = response.data.response;
         } else {
           console.error('리다이렉션 URL을 찾을 수 없음.');
         }
