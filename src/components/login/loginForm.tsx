@@ -3,11 +3,11 @@ import { useEffect, useState } from 'react';
 import './loginForm.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { setIsAuthenticated, setUser } from '@/redux/reducer/authReducer';
-import styled from 'styled-components';
 import SignupForm from '../signup/SignupForm';
 import { loginDataFetch, responseData } from './server/loginDataFetch';
 import { fetchUserInfo } from '../auth/fetchUserInfo';
 import { clientEnv } from '@/utils/env';
+import { FormContainer, LoginButton, GoogleLoginButton } from './style';
 interface LoginFormProps {
   closeModal: () => void;
   setModalSize: React.Dispatch<
@@ -67,7 +67,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ closeModal, setModalSize }) => {
     if (loginResponse) {
       if (loginResponse.result === 'success') {
         await dispatch(setIsAuthenticated());
-        await fetchUserInfo(statusUrl, dispatch);
+        await fetchUserInfo();
         alert('로그인 성공');
         closeModal();
       } else if (loginResponse.result === 'check') {
@@ -77,7 +77,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ closeModal, setModalSize }) => {
 
         if (userConfirmed) {
           await dispatch(setIsAuthenticated());
-          await fetchUserInfo(statusUrl, dispatch);
+          await fetchUserInfo();
           alert('로그인 성공');
           closeModal();
         } else {
@@ -141,80 +141,3 @@ const LoginForm: React.FC<LoginFormProps> = ({ closeModal, setModalSize }) => {
 };
 
 export default LoginForm;
-
-const LoginButton = styled.button`
-  margin-top: 10px;
-  color: white;
-  border: 1px solid #1e1e1e;
-  border-radius: 4px;
-  cursor: pointer;
-  background-color: #1e1e1e;
-
-  &:hover {
-    color: rgba(255, 215, 0);
-    background-color: #131722;
-    transition: background-color 0.3s ease, color 0.3s ease;
-  }
-`;
-
-const FormContainer = styled.div`
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-
-  h1 {
-    text-align: center;
-    margin-bottom: 16px;
-  }
-
-  form {
-    display: flex;
-    flex-direction: column;
-
-    input {
-      width: 100%;
-      padding: 8px;
-      box-sizing: border-box;
-      color: black;
-      background-color: #fff;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    label {
-      display: block;
-      margin-bottom: 4px;
-      color: white;
-    }
-
-    .error {
-      color: red;
-      margin-bottom: 12px;
-      text-align: center;
-    }
-  }
-`;
-
-const GoogleLoginButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  background-color: #1e1e1e;
-  border: 1px solid #1e1e1e;
-  border-radius: 4px;
-  cursor: pointer;
-
-  img {
-    width: 20px;
-    height: 20px;
-    margin-right: 10px;
-  }
-
-  &:hover {
-    color: rgba(255, 215, 0);
-    background-color: #131722;
-    transition: background-color 0.3s ease, color 0.3s ease;
-  }
-`;
