@@ -1,8 +1,8 @@
 import { BoardData, Comment } from '../types';
-import { clientEnv } from '@/utils/env';
+import { serverEnv } from '@/utils/env';
 
-const boardUrl = clientEnv.BOARD_URL;
-const commentUrl = clientEnv.COMMENT_URL;
+const boardUrl = serverEnv.BOARD_URL;
+const commentUrl = serverEnv.COMMENT_URL;
 
 export async function getBoardData(id: string): Promise<BoardData | null> {
   const boardRequestUrl = `${boardUrl}?boardId=${id}&commentPage=0`;
