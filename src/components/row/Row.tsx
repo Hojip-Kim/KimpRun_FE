@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { setKimp, setToken, setTokenPrice } from '@/redux/reducer/widgetReduce';
-import { firstDataSet, secondDataSet } from '@/app/page';
+import { firstDataSet, secondDataSet } from '@/app/types';
 import {
   getRowData,
   updateRowData,
@@ -23,29 +23,7 @@ import {
   HeaderTable,
 } from './styled';
 import TableRowComponent from './TableRowComponent';
-
-interface RowType {
-  firstTokenNameList: string[];
-  firstTokenDataList: any;
-  secondTokenDataList: any;
-  firstDataset: { [key: string]: firstDataSet };
-  secondDataset: { [key: string]: secondDataSet };
-  filteredTokens: string[];
-}
-
-export type dataListType = {
-  acc_trade_price24: number;
-  change_rate: number;
-  highest_price: number;
-  lowest_price: number;
-  opening_price: number;
-  rate_change: number;
-  token: string;
-  trade_price: number;
-  trade_volume: number;
-  secondPrice: number | undefined;
-  kimp: number | undefined;
-};
+import { RowType, dataListType } from './types';
 
 const Row = ({
   firstTokenNameList,
@@ -73,7 +51,7 @@ const Row = ({
 
   const token = useSelector((state: RootState) => state.widget.token);
 
-  const updateWidgetToken = (token) => {
+  const updateWidgetToken = (token: string) => {
     dispatch(setToken(token));
     updateTokenPrice(token);
     updateKimp(token);
