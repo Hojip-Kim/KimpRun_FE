@@ -1,6 +1,6 @@
 import { CustomException } from '@/types/exception';
 
-export type Post = {
+export interface Post {
   boardId: number;
   memberId: number;
   categoryId: number;
@@ -13,14 +13,9 @@ export type Post = {
   createdAt: Date;
   updatedAt: Date;
   commentsCount: number;
-};
+}
 
-export type GetPostResponse = {
-  boardResponseDtos: Post[];
-  count: number;
-};
-
-export type ErrorResponse = {
+export interface ErrorResponse {
   satus: number;
   error: string;
   message: string;
