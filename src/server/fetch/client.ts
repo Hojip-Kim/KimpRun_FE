@@ -12,8 +12,6 @@ export const clientFetch = async (
   route: string,
   init?: RequestInit
 ): Promise<ClientFetchResponse> => {
-  console.log('Client fetch route:', route);
-  console.log('Client fetch init:', init);
 
   try {
     const response = await fetch(route, init);
