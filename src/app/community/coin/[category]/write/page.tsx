@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { FaEye, FaPencilAlt, FaCheck, FaImage } from 'react-icons/fa';
 import type ReactQuill from 'react-quill';
-import { clientEnv } from '@/utils/env';
+import { serverEnv } from '@/utils/env';
 
 const ReactQuillComponent = dynamic(
   async () => {
@@ -25,6 +25,7 @@ const ReactQuillComponent = dynamic(
 );
 
 import 'react-quill/dist/quill.snow.css';
+import { clientRequest } from '@/server/fetch';
 
 const WritePost: React.FC = () => {
   const [title, setTitle] = useState('');
@@ -62,20 +63,20 @@ const WritePost: React.FC = () => {
     return Array.from(imgElements).map((img) => img.src);
   };
 
-  const boardUrl = clientEnv.BOARD_URL;
+  const boardUrl = serverEnv.BOARD_URL;
 
   const createPost = async () => {
     try {
-      const response = await fetch(`${boardUrl}/${categoryIdFromPath}/create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ title, content, previewImage: selectedImage }),
-      });
+      const response = await clientRequest.post(
+        `${boardUrl}/${categoryIdFromPath}/create`,
+        {
+          title,
+          content,
+          previewImage: selectedImage,
+        }
+      );
 
-      if (response.ok) {
+      if (response.status === 200) {
         alert('게시글 작성 성공');
         window.location.href = `/community/coin/${categoryIdFromPath}/1`;
       } else {
