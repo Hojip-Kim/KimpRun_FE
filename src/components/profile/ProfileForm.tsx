@@ -1,11 +1,15 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { updateNickname } from './server/profileDataFetch';
-import { setUser } from '@/redux/reducer/authReducer';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/redux/store';
+import { setUser } from '@/redux/reducer/authReducer';
 import { clientEnv } from '@/utils/env';
+import { updateNickname } from './server/profileDataFetch';
+import { clientRequest } from '@/server/fetch';
+
+const userInfoUrl = clientEnv.USER_INFO_URL;
+const updateNicknameUrl = clientEnv.UPDATE_NICKNAME_URL;
 
 interface UserInfo {
   email: string;
@@ -24,56 +28,61 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
   closeModal,
   setModalSize,
 }) => {
+  const user = useSelector((state: RootState) => state.auth.user);
+  const dispatch = useDispatch();
+
   const [userInfo, setUserInfo] = useState<UserInfo>({
     email: '',
     nickname: '',
     role: '',
   });
 
-  const user = useSelector((state: RootState) => state.auth.user);
-  const dispatch = useDispatch();
-
-  const userInfoUrl = clientEnv.USER_INFO_URL;
-  const updateNicknameUrl = clientEnv.UPDATE_NICKNAME_URL;
-
   const fetchUserInfo = async (): Promise<void> => {
-    const requestInit: RequestInit = {
-      method: 'GET',
-      credentials: 'include',
-    };
+    try {
+      const response = await clientRequest.get<UserInfo>(userInfoUrl, {
+        credentials: 'include',
+      });
 
-    const response = await fetch(userInfoUrl, requestInit);
-
-    if (response.ok) {
-      const data: UserInfo = await response.json();
-      setUserInfo(data);
-    } else {
-      throw new Error('Failed to fetch user info');
+      if (response.success && response.data) {
+        setUserInfo(response.data);
+      } else {
+        throw new Error(response.error || 'Failed to fetch user info');
+      }
+    } catch (error) {
+      console.error('사용자 정보 가져오기 실패:', error);
     }
   };
 
   const handleUpdateNickname = async () => {
     const newNickname = prompt('새로운 닉네임을 입력하세요:');
     if (newNickname) {
-      const updatedUserInfo = await updateNickname(
-        updateNicknameUrl,
-        newNickname
-      );
+      try {
+        const updatedUserInfo = await updateNickname(
+          updateNicknameUrl,
+          newNickname
+        );
 
-      if (updatedUserInfo) {
-        const newUserInfo: UserInfo = {
-          email: updatedUserInfo.email,
-          nickname: updatedUserInfo.name,
-          role: updatedUserInfo.role,
-        };
+        if (updatedUserInfo && updatedUserInfo.result === 'success') {
+          const newUserInfo: UserInfo = {
+            email: userInfo.email,
+            nickname: newNickname,
+            role: userInfo.role,
+          };
 
-        setUserInfo(newUserInfo);
+          setUserInfo(newUserInfo);
 
-        dispatch(setUser(updatedUserInfo));
+          // Redux 상태도 업데이트
+          if (user) {
+            dispatch(setUser({ ...user, name: newNickname }));
+          }
 
-        alert('닉네임 변경 성공');
-      } else {
-        alert('닉네임 변경 실패');
+          alert('닉네임 변경 성공');
+        } else {
+          alert('닉네임 변경 실패');
+        }
+      } catch (error) {
+        console.error('닉네임 변경 오류:', error);
+        alert('닉네임 변경 중 오류 발생');
       }
     }
   };

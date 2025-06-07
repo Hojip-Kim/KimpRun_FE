@@ -1,4 +1,4 @@
-import { firstDataSet, secondDataSet } from '@/app/page';
+import { firstDataSet, secondDataSet } from '@/app/types';
 
 export async function getRowData(
   firstTokenNameList: string[],

@@ -1,3 +1,5 @@
+import { clientRequest } from '@/server/fetch';
+
 export interface responseData {
   result: 'success' | 'check';
   message: string;
@@ -9,28 +11,26 @@ export const loginDataFetch = async (
   email: string,
   password: string
 ): Promise<responseData> => {
-  const requestInit: RequestInit = {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include', // 쿠키 포함
-    body: JSON.stringify({
-      email,
-      password,
-    }),
-  };
-
   try {
-    const response = await fetch(loginUrl, requestInit);
+    const response = await clientRequest.post<responseData>(
+      loginUrl,
+      {
+        email,
+        password,
+      },
+      {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
 
-    const data: responseData = await response.json();
-
-    if (response.ok) {
-      return data;
+    if (response.success && response.data) {
+      return response.data;
     } else {
-      throw new Error('login failed.');
+      throw new Error(response.error || 'login failed.');
     }
   } catch (e) {
     console.error(e);
-    throw new Error(e);
+    throw new Error(e instanceof Error ? e.message : 'Unknown error');
   }
 };

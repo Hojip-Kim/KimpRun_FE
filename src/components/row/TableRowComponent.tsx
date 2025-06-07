@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect } from 'react';
 import { numberToKorean, rateCompareByOriginPrice } from '@/method';
 import {
@@ -5,7 +7,7 @@ import {
   TableRow as StyledTableRow,
   ExpandableContent,
 } from './styled';
-import { dataListType } from './Row';
+import { dataListType } from './types';
 
 interface TableRowProps {
   token: string;
@@ -64,7 +66,7 @@ const TableRowComponent = React.memo(
     return (
       <React.Fragment>
         <StyledTableRow
-          isExpanded={expandedRow === token}
+          $isExpanded={expandedRow === token}
           onClick={() => onRowClick(token)}
           className={fadeOutClass || ''}
           style={priceChangeStyle(prevData?.trade_price, data.trade_price)}
@@ -166,7 +168,7 @@ const TableRowComponent = React.memo(
         {expandedRow === token && (
           <tr>
             <td colSpan={8}>
-              <ExpandableContent isExpanded={expandedRow === token}>
+              <ExpandableContent $isExpanded={expandedRow === token}>
                 <p>Token: {token}</p>
                 <p>추가정보:</p>
                 <p>Hello world!</p>

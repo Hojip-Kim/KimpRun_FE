@@ -113,7 +113,7 @@ export const HeaderContent = styled.div`
   text-align: center;
 `;
 
-export const TableRow = styled.tr<{ isExpanded?: boolean }>`
+export const TableRow = styled.tr<{ $isExpanded?: boolean }>`
   text-align: right;
   font-size: 0.6rem;
   border-bottom: solid rgba(96, 96, 96, 0.4);
@@ -131,8 +131,8 @@ export const TableRow = styled.tr<{ isExpanded?: boolean }>`
     background-color: rgba(0, 0, 0, 0);
   }
 
-  ${({ isExpanded }) =>
-    isExpanded &&
+  ${({ $isExpanded }) =>
+    $isExpanded &&
     `
     background-color: #404040;
   `}
@@ -148,11 +148,11 @@ export const TableCell = styled.td`
   box-sizing: border-box;
 `;
 
-export const ExpandableContent = styled.div<{ isExpanded: boolean }>`
+export const ExpandableContent = styled.div<{ $isExpanded: boolean }>`
   padding: 10px;
   border: 1px solid #555;
   border-radius: 4px;
-  height: ${({ isExpanded }) => (isExpanded ? 'auto' : '0')};
+  height: ${({ $isExpanded }) => ($isExpanded ? 'auto' : '0')};
   overflow: hidden;
   background-color: #131722;
   transition: background-color 0.3s ease, color 0.3s ease;

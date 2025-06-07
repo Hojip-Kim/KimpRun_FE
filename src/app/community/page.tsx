@@ -1,60 +1,39 @@
-'use client';
-import React, { useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components';
-import { category, getCategories } from '../admin/server/fetchCategory';
+import React from 'react';
+import { getInitialCommunityData } from './server';
+import CommunityClient from './client/CommunityClient';
+import { Category, CategoryResponse } from '../admin/type';
+import { ApiResponse } from '@/server/type';
 import { Post } from './coin/types';
-import fetchAllPostData, { allPostData } from './components/server/fetchData';
-import Board from './coin/client/Board';
+import { AllPostData } from './types';
 
-const CommunityPage = () => {
-  const [categories, setCategories] = useState<category[]>([]);
-  const [allPosts, setAllPosts] = useState<Post[]>([]);
-  const [boardCount, setBoardCount] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+const CommunityPage = async () => {
+  const { categories, allPosts } = await getInitialCommunityData();
 
-  const fetchCategories = useCallback(async () => {
-    try {
-      const response: category[] = await getCategories();
-      setCategories(response);
-    } catch (error) {
-      console.error('category fetch failed.', error);
-    }
-  }, []);
+  const apiCategoryResponse = categories as ApiResponse<CategoryResponse>;
+  const apiAllPostsResponse = allPosts as ApiResponse<AllPostData>;
 
-  const fetchAllPost = useCallback(async () => {
-    try {
-      const response: allPostData = await fetchAllPostData(1);
-      setAllPosts(response.boards);
-      setBoardCount(response.boardCount);
-    } catch (error) {
-      console.error('post loading failed', error);
-    }
-  }, []);
+  let parsedCategories: Category[];
+  let parsedAllPosts: AllPostData;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await Promise.all([fetchCategories(), fetchAllPost()]);
-      } catch (error) {
-        console.error('데이터 로딩 실패:', error);
-      } finally {
-        setIsLoading(false);
-      }
+  if (apiCategoryResponse.status === 200) {
+    parsedCategories = apiCategoryResponse.data.categories;
+  } else {
+    parsedCategories = [];
+  }
+
+  if (apiAllPostsResponse.status === 200) {
+    parsedAllPosts = apiAllPostsResponse.data;
+  } else {
+    parsedAllPosts = {
+      boards: [],
+      boardCount: 0,
     };
-
-    fetchData();
-  }, [fetchCategories, fetchAllPost]);
-  if (isLoading || categories.length === 0 || allPosts.length === 0) {
-    return <div>Loading...</div>;
   }
 
   return (
-    <Board
-      initialCategoryId={-1}
-      initialPage={1}
-      categories={categories}
-      initialPosts={{ boardResponseDtos: allPosts, count: boardCount }}
-      isError={false}
+    <CommunityClient
+      initialCategories={parsedCategories}
+      initialAllPosts={parsedAllPosts}
     />
   );
 };

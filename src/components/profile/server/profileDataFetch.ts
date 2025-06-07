@@ -1,37 +1,32 @@
-import { clientEnv } from '@/utils/env';
+import { clientRequest } from '@/server/fetch';
 
-const userInfoUrl = clientEnv.USER_INFO_URL;
-
-interface UserInfo {
-  email: string;
-  name: string;
-  role: string;
+export interface ProfileUpdateResponse {
+  result: 'success' | 'error';
+  message: string;
+  data?: any;
 }
 
 export const updateNickname = async (
   updateNicknameUrl: string,
   newNickname: string
-) => {
-  const requestInit: RequestInit = {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ nickname: newNickname }),
-    credentials: 'include',
-  };
-
+): Promise<ProfileUpdateResponse> => {
   try {
-    const response = await fetch(updateNicknameUrl, requestInit);
+    const response = await clientRequest.put<ProfileUpdateResponse>(
+      updateNicknameUrl,
+      { nickname: newNickname },
+      {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
 
-    if (response.ok) {
-      const data: UserInfo = await response.json();
-      return data;
+    if (response.success && response.data) {
+      return response.data;
     } else {
-      throw new Error('Failed to update nickname');
+      throw new Error(response.error || 'nickname update failed.');
     }
-  } catch (error) {
-    console.error('Error updating nickname:', error);
-    throw error;
+  } catch (e) {
+    console.error(e);
+    throw new Error(e instanceof Error ? e.message : 'Unknown error');
   }
 };

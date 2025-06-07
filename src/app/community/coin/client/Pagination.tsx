@@ -1,5 +1,5 @@
 import React from 'react';
-import styled from 'styled-components';
+import { PaginationContainer, PageButton } from './style';
 
 interface PaginationProps {
   postsPerPage: number;
@@ -8,26 +8,6 @@ interface PaginationProps {
   currentCategoryId: number;
   onPageChange: (pageNumber: number) => void;
 }
-
-const PaginationContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-`;
-
-const PageButton = styled.button<{ isActive?: boolean }>`
-  margin: 0 5px;
-  padding: 5px 10px;
-  border: 1px solid #ddd;
-  background-color: ${(props) => (props.isActive ? '#ffd700' : 'white')};
-  color: ${(props) => (props.isActive ? 'white' : 'black')};
-  cursor: pointer;
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
 
 const Pagination: React.FC<PaginationProps> = ({
   postsPerPage,

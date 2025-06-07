@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import Board from '../../client/Board';
-import { GetPostResponse, Post } from '../../types';
-import { clientEnv } from '@/utils/env';
+import { serverEnv } from '@/utils/env';
+import { AllPostData } from '@/app/community/types';
+
 interface CategoryBoardPageProps {
   params: {
     category: string;
@@ -9,13 +10,13 @@ interface CategoryBoardPageProps {
   };
 }
 
-const boardUrl = clientEnv.BOARD_URL;
-const categoryUrl = clientEnv.CATEGORY_URL;
+const boardUrl = serverEnv.BOARD_URL;
+const categoryUrl = serverEnv.CATEGORY_URL;
 
 async function getPosts(
   categoryId: string,
   page: string
-): Promise<GetPostResponse> {
+): Promise<AllPostData> {
   const response = await fetch(`${boardUrl}/${categoryId}/${page}`, {
     method: 'GET',
     cache: 'no-store',

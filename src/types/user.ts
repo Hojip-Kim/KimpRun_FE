@@ -1,4 +1,4 @@
-export type UserFetch = {
+export interface UserFetch {
   isAuthenticated: boolean;
   member: {
     email: string;
@@ -7,8 +7,8 @@ export type UserFetch = {
   };
 };
 
-export type User = {
+export interface User {
   email: string;
   name: string;
   role: string;
-};
+}

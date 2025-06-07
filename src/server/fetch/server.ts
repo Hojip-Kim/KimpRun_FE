@@ -1,6 +1,7 @@
 'use server';
 
-import { ServerFetchResponse } from '@/types';
+import { ServerFetchResponse, FetchConfig, ApiResponse } from '../type';
+import { createApiClient } from './request';
 
 /* RequestInit : Fetch함수 호출 옵션 명확히 정의
   method: HTTP 요청 메서드 (예: "GET", "POST", "PUT", "DELETE" 등)
@@ -14,19 +15,88 @@ import { ServerFetchResponse } from '@/types';
   referrerPolicy: 리퍼러 정책 (예: "no-referrer", "no-referrer-when-downgrade", "origin", "origin-when-cross-origin", "unsafe-url")
   integrity: 서브 리소스 무결성 (SRI) 체크를 위한 문자열
 */
-const serverFetch = async (
-  url: string,
-  init: RequestInit
-): Promise<ServerFetchResponse> => {
-  const response = await fetch(url, init).then(async (r) => {
+
+const serverApi = createApiClient('', {
+  headers: {
+    'Content-Type': 'application/json',
+    'User-Agent': 'NextJS-Server',
+  },
+});
+
+export async function serverFetch(
+  route: string,
+  init?: RequestInit
+): Promise<ServerFetchResponse> {
+  try {
+    const response = await fetch(route, init);
+    const text = await response.text();
+
     return {
-      ok: r.ok,
-      status: r.status,
-      text: await r.text(),
+      ok: response.ok,
+      status: response.status,
+      text,
     };
-  });
+  } catch (error) {
+    console.error('Server fetch error:', error);
+    return {
+      ok: false,
+      status: 500,
+      text: 'Server fetch failed',
+    };
+  }
+}
 
-  return response;
-};
+// 서버 전용 GET 요청
+export async function serverGet<T = any>(
+  url: string,
+  config?: Partial<FetchConfig>
+): Promise<ApiResponse<T>> {
+  return serverApi.get<T>(url, config);
+}
 
-export default serverFetch;
+// 서버 전용 POST 요청
+export async function serverPost<T = any>(
+  url: string,
+  data?: any,
+  config?: Partial<FetchConfig>
+): Promise<ApiResponse<T>> {
+  return serverApi.post<T>(url, data, config);
+}
+
+// 서버 전용 PUT 요청
+export async function serverPut<T = any>(
+  url: string,
+  data?: any,
+  config?: Partial<FetchConfig>
+): Promise<ApiResponse<T>> {
+  return serverApi.put<T>(url, data, config);
+}
+
+// 서버 전용 PATCH 요청
+export async function serverPatch<T = any>(
+  url: string,
+  data?: any,
+  config?: Partial<FetchConfig>
+): Promise<ApiResponse<T>> {
+  return serverApi.patch<T>(url, data, config);
+}
+
+// 서버 전용 DELETE 요청
+export async function serverDelete<T = any>(
+  url: string,
+  config?: Partial<FetchConfig>
+): Promise<ApiResponse<T>> {
+  return serverApi.delete<T>(url, config);
+}
+
+// 캐시된 데이터 요청
+export async function cachedRequest<T = any>(
+  url: string,
+  cacheKey: string,
+  config?: Partial<FetchConfig>
+): Promise<ApiResponse<T>> {
+  // 차후 Redis로 대체
+  const cache = new Map();
+
+  return cache.get(cacheKey);
+}

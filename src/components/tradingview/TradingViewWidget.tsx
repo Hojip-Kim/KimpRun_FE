@@ -1,10 +1,11 @@
+'use client';
+
 import { RootState } from '@/redux/store';
 
 import React, { useEffect } from 'react';
-import {useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 const TradingViewWidget = () => {
-
   const widgetToken = useSelector((state: RootState) => state.widget.token);
   const currency = useSelector((state: RootState) => state.widget.currency);
   const interval = useSelector((state: RootState) => state.widget.interval);

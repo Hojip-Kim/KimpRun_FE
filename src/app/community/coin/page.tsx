@@ -1,65 +1,7 @@
 import React from 'react';
-import { GetPostResponse, Post } from './types';
 import Board from './client/Board';
 import ErrorMessage from '@/components/error/ErrorMessage';
-import { allPostData } from '../components/server/fetchData';
-import { clientEnv } from '@/utils/env';
-const allPostsUrl = clientEnv.ALL_POSTS_URL;
-const boardUrl = clientEnv.BOARD_URL;
-const categoryUrl = clientEnv.CATEGORY_URL;
-
-async function getAllPosts(page: number): Promise<allPostData> {
-  const response = await fetch(`${allPostsUrl}?page=${page}`, {
-    method: 'GET',
-    cache: 'no-store',
-  });
-
-  if (!response.ok) {
-    throw new Error('게시글을 가져오는데 실패했습니다.');
-  }
-
-  return response.json();
-}
-
-async function getPosts(
-  categoryId: number,
-  page: number
-): Promise<GetPostResponse> {
-  const response = await fetch(`${boardUrl}/${categoryId}/${page}`, {
-    method: 'GET',
-    cache: 'no-store',
-  });
-
-  if (!response.ok) {
-    throw new Error('게시글을 가져오는데 실패했습니다.');
-  }
-
-  return response.json();
-}
-
-async function getCategories() {
-  try {
-    const response = await fetch(categoryUrl, {
-      method: 'GET',
-      cache: 'no-store',
-    });
-
-    if (!response.ok) {
-      throw new Error('카테고리를 가져오는데 실패했습니다.');
-    }
-
-    const data = await response.json();
-
-    return data;
-  } catch (error) {
-    console.error('Fetching data error', error);
-    return {
-      props: {
-        data: null,
-      },
-    };
-  }
-}
+import { getCategories, getPosts } from './server/server';
 
 export default async function CoinCommunityPage() {
   try {
@@ -77,22 +19,31 @@ export default async function CoinCommunityPage() {
     const firstCategoryId = categories[0].id;
     const postOfCategory = await getPosts(firstCategoryId, 1);
 
+    if (!postOfCategory) {
+      return (
+        <ErrorMessage
+          title="게시글 데이터를 불러올 수 없습니다."
+          message="게시글 데이터를 불러오는데 실패했습니다."
+        />
+      );
+    }
+
     return (
       <Board
         initialCategoryId={firstCategoryId}
         initialPage={1}
-        categories={categories}
-        initialPosts={postOfCategory}
+        categories={categories.data}
+        initialPosts={postOfCategory.data}
         isError={false}
       />
     );
   } catch (error) {
     console.error('Error:', error);
     return (
-      <div>
-        <h1>코인 커뮤니티</h1>
-        <p>데이터를 불러오는 중 오류가 발생했습니다.</p>
-      </div>
+      <ErrorMessage
+        title="데이터를 불러오는 중 오류가 발생했습니다."
+        message="데이터를 불러오는 중 오류가 발생했습니다."
+      />
     );
   }
 }
