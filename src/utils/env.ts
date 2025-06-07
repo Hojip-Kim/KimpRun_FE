@@ -35,6 +35,7 @@ export const clientEnv = {
   DOLLAR_API_URL: process.env.NEXT_PUBLIC_DOLLAR_API_URL,
   TETHER_API_URL: process.env.NEXT_PUBLIC_TETHER_API_URL,
   CHAT_LOG_URL: process.env.NEXT_PUBLIC_CHAT_LOG_URL,
+  NOTICE_URL: process.env.NEXT_PUBLIC_NOTICE_URL,
 };
 
 export const serverEnv = {
