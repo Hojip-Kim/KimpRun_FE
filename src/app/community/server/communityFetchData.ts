@@ -6,6 +6,16 @@ export const fetchAllPostData = async (
   page: number
 ): Promise<ApiResponse<AllPostData>> => {
   try {
+    if (!serverEnv.BOARD_URL) {
+      console.warn('BOARD_URL 환경변수가 설정되지 않았습니다.');
+      return {
+        success: false,
+        error: 'BOARD_URL not configured',
+        status: 500,
+        data: { boards: [], boardCount: 0 },
+      };
+    }
+
     const url = new URL(`${serverEnv.BOARD_URL}/all/page`);
     url.searchParams.set('page', page.toString());
 
@@ -19,11 +29,21 @@ export const fetchAllPostData = async (
       return response;
     } else {
       console.error('커뮤니티 데이터 가져오기 실패:', response.error);
-      return null;
+      return {
+        success: false,
+        error: response.error || 'Failed to fetch community data',
+        status: response.status || 500,
+        data: { boards: [], boardCount: 0 },
+      };
     }
   } catch (error) {
     console.error('커뮤니티 데이터 요청 오류:', error);
-    return null;
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      status: 500,
+      data: { boards: [], boardCount: 0 },
+    };
   }
 };
 
@@ -31,6 +51,15 @@ export async function fetchCommunityData(
   endpoint: string
 ): Promise<ApiResponse<AllPostData>> {
   try {
+    if (!serverEnv.BOARD_URL) {
+      return {
+        success: false,
+        error: 'BOARD_URL not configured',
+        status: 500,
+        data: { boards: [], boardCount: 0 },
+      };
+    }
+
     const response = await serverRequest.get(
       `${serverEnv.BOARD_URL}${endpoint}`,
       {
@@ -44,10 +73,20 @@ export async function fetchCommunityData(
       return response;
     } else {
       console.error('커뮤니티 데이터 가져오기 실패:', response.error);
-      return null;
+      return {
+        success: false,
+        error: response.error || 'Failed to fetch community data',
+        status: response.status || 500,
+        data: { boards: [], boardCount: 0 },
+      };
     }
   } catch (error) {
     console.error('커뮤니티 데이터 요청 오류:', error);
-    return null;
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      status: 500,
+      data: { boards: [], boardCount: 0 },
+    };
   }
 }
