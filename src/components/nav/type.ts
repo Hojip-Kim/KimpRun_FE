@@ -1,30 +1,25 @@
-export enum marketEnum {
-  BINANCE = 'BINANCE',
-  UPBIT = 'UPBIT',
-  COINONE = 'COINONE',
-  BITHUMB = 'BITHUMB',
+import { Notice } from '../notice/type';
+
+export interface MarketData {
+  dollar: number;
+  tether: number;
 }
 
-export interface noticeData {
-  title: string;
-  alink: string;
-  date: Date;
+export interface UserData {
+  userCount: number;
 }
 
-export interface noticeWebsocketData {
-  type: 'notice';
-  exchange_name: string;
-  absoluteUrl: string;
-  noticeDataList: noticeData[];
+export interface MarketWebsocketPayload {
+  userData: UserData;
+  marketData: MarketData;
 }
 
-export interface marketWebsocketData {
-  type: 'market';
-  userData: {
-    userCount: number;
-  };
-  marketData: {
-    dollar: number;
-    tether: number;
-  };
-};
+export type MarketWebsocketData =
+  | {
+      type: 'market';
+      data: MarketWebsocketPayload;
+    }
+  | {
+      type: 'notice';
+      data: Notice;
+    };
