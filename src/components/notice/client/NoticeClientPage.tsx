@@ -58,7 +58,6 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
-  // 거래소 변경 핸들러
   const handleMarketChange = async (marketType: MarketType) => {
     setSelectedMarket(marketType);
     setIsLoading(true);
