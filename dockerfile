@@ -15,12 +15,14 @@ RUN npm run build:production
 FROM node:20-alpine
 WORKDIR /app
 
+COPY --from=builder /app/package.json /app/package-lock.json ./
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 COPY .env.production ./
 
-RUN apk add --no-cache dumb-init && \
+RUN npm ci --only=production && \
+    npm cache clean --force && \
     rm -rf /tmp/* /var/cache/apk/*
 
 ENV NODE_ENV=production
