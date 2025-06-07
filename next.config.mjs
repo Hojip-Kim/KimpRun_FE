@@ -53,6 +53,7 @@ const nextConfig = {
   compress: true,
   assetPrefix: process.env.NODE_ENV === 'production' ? '' : undefined,
   staticPageGenerationTimeout: 180,
+  output: 'standalone',
   async headers() {
     return [
       {
@@ -74,6 +75,11 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '2mb',
     },
+    skipTrailingSlashRedirect: true,
+  },
+  env: {
+    SKIP_ENV_VALIDATION:
+      process.env.NODE_ENV === 'production' ? 'true' : undefined,
   },
 };
 

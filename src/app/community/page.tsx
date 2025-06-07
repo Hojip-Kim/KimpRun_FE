@@ -6,28 +6,38 @@ import { ApiResponse } from '@/server/type';
 import { Post } from './coin/types';
 import { AllPostData } from './types';
 
+// 🔧 동적 렌더링 강제 (빌드 시점에 정적 생성하지 않음)
+export const dynamic = 'force-dynamic';
+
 const CommunityPage = async () => {
-  const { categories, allPosts } = await getInitialCommunityData();
+  let parsedCategories: Category[] = [];
+  let parsedAllPosts: AllPostData = {
+    boards: [],
+    boardCount: 0,
+  };
 
-  const apiCategoryResponse = categories as ApiResponse<CategoryResponse>;
-  const apiAllPostsResponse = allPosts as ApiResponse<AllPostData>;
+  try {
+    const { categories, allPosts } = await getInitialCommunityData();
 
-  let parsedCategories: Category[];
-  let parsedAllPosts: AllPostData;
+    if (
+      categories &&
+      typeof categories === 'object' &&
+      'success' in categories
+    ) {
+      const apiCategoryResponse = categories as ApiResponse<CategoryResponse>;
+      if (apiCategoryResponse.success && apiCategoryResponse.data) {
+        parsedCategories = apiCategoryResponse.data.categories;
+      }
+    }
 
-  if (apiCategoryResponse.status === 200) {
-    parsedCategories = apiCategoryResponse.data.categories;
-  } else {
-    parsedCategories = [];
-  }
-
-  if (apiAllPostsResponse.status === 200) {
-    parsedAllPosts = apiAllPostsResponse.data;
-  } else {
-    parsedAllPosts = {
-      boards: [],
-      boardCount: 0,
-    };
+    if (allPosts && typeof allPosts === 'object' && 'success' in allPosts) {
+      const apiAllPostsResponse = allPosts as ApiResponse<AllPostData>;
+      if (apiAllPostsResponse.success && apiAllPostsResponse.data) {
+        parsedAllPosts = apiAllPostsResponse.data;
+      }
+    }
+  } catch (error) {
+    console.error('커뮤니티 페이지 초기 데이터 로드 실패:', error);
   }
 
   return (
