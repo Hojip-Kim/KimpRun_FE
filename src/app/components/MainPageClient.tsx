@@ -13,10 +13,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Search from '@/components/search/Search';
 import Chat from '@/components/chat/Chat';
-import {
-  getSingleMarketData,
-  getCombinedTokenData,
-} from '@/server/serverDataLoader';
 import TradingViewWidget from '@/components/tradingview/TradingViewWidget';
 import { checkAuth } from '@/components/login/server/checkAuth';
 import TwitterFeed from '@/components/twitter/TwitterFeed';
@@ -65,7 +61,6 @@ const MainPageClient: React.FC<MainPageProps> = ({
     dispatch(setTokenSecondList(newTokenList));
   const updateTokenSecondDataSet = (newTokenSet: any) =>
     dispatch(setTokenSecondDataset(newTokenSet));
-
   const handleSearch = useCallback(
     (searchTerm: string) => {
       if (!searchTerm) {

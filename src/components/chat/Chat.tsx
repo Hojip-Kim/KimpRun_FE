@@ -6,7 +6,7 @@ import { ChatMessage } from '@/types';
 import { RootState } from '@/redux/store';
 import { Icon } from '../nav/client/styled';
 import './Chat.css';
-import { getChatLogs } from '@/server/serverDataLoader';
+import { getChatLogs } from '@/components/chat/client/dataFetch';
 import { clientEnv } from '@/utils/env';
 import {
   ChatContainer,
