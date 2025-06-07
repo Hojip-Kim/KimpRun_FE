@@ -1,19 +1,9 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import {
-  createCategory,
-  deleteCategory,
-  fetchAllCategories,
-  updateCategory,
-} from './server/fetchCategory';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/redux/store';
-import { redirect } from 'next/navigation';
+import React from 'react';
+import { fetchAllCategories } from './server/fetchCategory';
 import { ApiResponse } from '@/server/type';
 import { Category, CategoryResponse } from './type';
 import AdminPageClient from './client/adminClient';
 const AdminPage = async () => {
-
-
   const initialCategories: ApiResponse<CategoryResponse> =
     await fetchAllCategories();
 
