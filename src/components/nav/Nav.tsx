@@ -39,14 +39,18 @@ import {
   setUserCount,
 } from '@/redux/reducer/infoReducer';
 import { FaUser, FaUserCircle, FaUserCog } from 'react-icons/fa';
-import { clientEnv, serverEnv } from '@/utils/env';
-import { marketWebsocketData, noticeWebsocketData } from './type';
+import { clientEnv } from '@/utils/env';
+import { MarketWebsocketData } from './type';
 import { clientRequest } from '@/server/fetch';
 import {
   checkUserAuth,
   requestDollar,
   requestTether,
 } from './client/dataFetch';
+import {
+  setIsNewNoticeGenerated,
+  setNotice,
+} from '@/redux/reducer/noticeReducer';
 
 interface ResponseUrl {
   response: string;
@@ -100,24 +104,16 @@ const Nav = () => {
     const infoWebsocket = new WebSocket(clientEnv.INFO_WEBSOCKET_URL);
 
     infoWebsocket.onmessage = (event) => {
-      const parsedData: marketWebsocketData | noticeWebsocketData = JSON.parse(
-        event.data
-      );
-      console.log(parsedData);
-      if (parsedData.type === 'market') {
-        const userData = parsedData.userData;
-        const marketData = parsedData.marketData;
+      const streamData: MarketWebsocketData = JSON.parse(event.data);
+
+      if (streamData.type === 'market') {
+        const { userData, marketData } = streamData.data;
         dispatch(setUserCount(userData.userCount));
         dispatch(setDollar(marketData.dollar));
         dispatch(setTether(marketData.tether));
-      } else if (parsedData.type === 'notice') {
-        console.log('******************new Notice occurred******************');
-        const exchangeName = parsedData.exchange_name;
-        const absoluteUrl = parsedData.absoluteUrl;
-        const noticeDataList = parsedData.noticeDataList;
-        console.log('exchangeName', exchangeName);
-        console.log('absoluteUrl', absoluteUrl);
-        console.log('noticeDataList', noticeDataList);
+      } else if (streamData.type === 'notice') {
+        dispatch(setNotice(streamData.data));
+        dispatch(setIsNewNoticeGenerated(true));
       }
     };
 
@@ -129,7 +125,7 @@ const Nav = () => {
     return () => {
       infoWebsocket.close();
     };
-  }, []);
+  }, [dispatch]);
 
   const handleLoginClick = () => {
     setModalSize({ width: 400, height: 300 });
