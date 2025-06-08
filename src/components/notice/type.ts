@@ -7,6 +7,7 @@ export interface Notice {
   title: string;
   url: string;
   createdAt: Date;
+  exchangeUrl?: string;
 }
 
 export interface NoticeResponse {
