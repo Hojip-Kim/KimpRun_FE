@@ -13,7 +13,7 @@ import {
   REHYDRATE,
 } from 'redux-persist';
 import createWebStorage from 'redux-persist/lib/storage/createWebStorage';
-
+import noticeReducer from './reducer/noticeReducer';
 const createNoopStorage = () => {
   return {
     getItem(_key) {
@@ -36,7 +36,7 @@ const storage =
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['auth', 'widget', 'info'],
+  whitelist: ['auth', 'widget', 'info', 'token', 'notice'],
 };
 
 export const rootReducer = combineReducers({
@@ -44,6 +44,7 @@ export const rootReducer = combineReducers({
   token: tokenReducer,
   info: infoReducer,
   widget: widgetReducer,
+  notice: noticeReducer,
 });
 
 export const persistedReducer = persistReducer(persistConfig, rootReducer);
