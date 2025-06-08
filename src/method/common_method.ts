@@ -28,3 +28,23 @@ export function rateCompareByOriginPrice(number: number) {
 
   return num % 100;
 }
+
+export const formatNoticeDate = (date : Date) => {
+  const now = new Date();
+  const noticeDate = new Date(date);
+    const diffTime = Math.abs(now.getTime() - noticeDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1) {
+      return '오늘';
+    } else if (diffDays === 2) {
+      return '어제';
+    } else if (diffDays <= 7) {
+      return `${diffDays - 1}일 전`;
+    } else {
+      return noticeDate.toLocaleDateString('ko-KR', {
+        month: 'short',
+        day: 'numeric',
+      });
+    }
+}
