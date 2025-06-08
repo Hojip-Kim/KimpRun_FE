@@ -255,32 +255,58 @@ export const RetryButton = styled.button`
 export const SelectorWrapper = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 `;
 
 export const ExchangeSelector = styled.select`
-  background-color: #131722;
-  color: #e0e0e0;
-  border: 1px solid #333333;
+  padding: 8px 12px;
+  border: 1px solid #333;
   border-radius: 4px;
-  padding: 6px 12px;
-  font-size: 0.8rem;
+  background-color: #2a2a2a;
+  color: #ffffff;
+  font-size: 14px;
   cursor: pointer;
-  transition: all 0.2s ease;
 
   &:hover {
-    border-color: #ffd700;
+    border-color: #555;
   }
 
   &:focus {
     outline: none;
-    border-color: #ffd700;
-    box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+    border-color: #007bff;
   }
+`;
 
-  option {
-    background-color: #131722;
-    color: #e0e0e0;
-    padding: 8px;
+export const InfiniteScrollContainer = styled.div`
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
+`;
+
+export const LoadingIndicator = styled.div`
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  color: #ffd700;
+  font-size: 14px;
+`;
+
+export const LoadingText = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+export const NoticeLoadingSpinner = styled.div`
+  width: '16px',
+  height: 16px;
+  border: 2px solid #333;
+  border-top: 2px solid #ffd700;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 `;
