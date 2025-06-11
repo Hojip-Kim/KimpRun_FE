@@ -16,7 +16,7 @@ export default async function CoinCommunityPage() {
       );
     }
 
-    const firstCategoryId = categories[0].id;
+    const firstCategoryId = categories.data[0].id;
     const postOfCategory = await getPosts(firstCategoryId, 1);
 
     if (!postOfCategory) {

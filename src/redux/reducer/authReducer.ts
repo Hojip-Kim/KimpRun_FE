@@ -1,10 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
-interface User {
-  name: string;
-  email: string;
-  role: string;
-}
+import { AuthState, User } from '../type';
 
 const getOrCreateGuestName = () => {
   if (typeof window !== 'undefined') {
@@ -19,10 +14,7 @@ const getOrCreateGuestName = () => {
   return '익명_0000';
 };
 
-interface AuthState {
-  isAuthenticated: boolean;
-  user: User | null;
-}
+
 const initialState: AuthState = {
   isAuthenticated: false,
   user: null,
@@ -30,7 +22,7 @@ const initialState: AuthState = {
 
 const authSlices = createSlice({
   name: 'auth',
-  initialState,
+  initialState: initialState,
   reducers: {
     setIsAuthenticated: (state) => {
       state.isAuthenticated = true;

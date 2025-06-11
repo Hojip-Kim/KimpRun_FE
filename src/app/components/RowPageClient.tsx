@@ -12,21 +12,12 @@ import { AppDispatch, RootState } from '@/redux/store';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Search from '@/components/search/Search';
-import Chat from '@/components/chat/Chat';
-import TradingViewWidget from '@/components/tradingview/TradingViewWidget';
 import { checkAuth } from '@/components/login/server/checkAuth';
-import TwitterFeed from '@/components/twitter/TwitterFeed';
 import { setGuestUser } from '@/redux/reducer/authReducer';
 import { MainPageProps, firstDataSet, secondDataSet } from '../types';
-import {
-  ChartContainer,
-  ChatContainer,
-  LeftSideContainer,
-  MainContainer,
-  RowContainer,
-} from './style';
+import { RowContainer } from './style';
 
-const MainPageClient: React.FC<MainPageProps> = ({
+const RowPageClient: React.FC<MainPageProps> = ({
   initialTokenNames,
   initialCombinedData,
 }) => {
@@ -181,29 +172,18 @@ const MainPageClient: React.FC<MainPageProps> = ({
   }, [tokenFirstList, tokenSecondList]);
 
   return (
-    <MainContainer>
-      <LeftSideContainer>
-        <ChartContainer>
-          <TradingViewWidget />
-        </ChartContainer>
-        <TwitterFeed />
-      </LeftSideContainer>
-      <RowContainer>
-        <Search onSearch={handleSearch} />
-        <Row
-          firstTokenNameList={tokenFirstList}
-          firstTokenDataList={tokenFirstSet}
-          secondTokenDataList={tokenSecondSet}
-          firstDataset={firstDataset}
-          secondDataset={secondDataset}
-          filteredTokens={filteredTokens}
-        />
-      </RowContainer>
-      <ChatContainer>
-        <Chat />
-      </ChatContainer>
-    </MainContainer>
+    <RowContainer>
+      <Search onSearch={handleSearch} />
+      <Row
+        firstTokenNameList={tokenFirstList}
+        firstTokenDataList={tokenFirstSet}
+        secondTokenDataList={tokenSecondSet}
+        firstDataset={firstDataset}
+        secondDataset={secondDataset}
+        filteredTokens={filteredTokens}
+      />
+    </RowContainer>
   );
 };
 
-export default MainPageClient;
+export default RowPageClient;

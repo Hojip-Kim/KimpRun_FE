@@ -11,12 +11,26 @@ export const RowContainer = styled.div`
 export const TableWrapper = styled.div`
   width: 100%;
   margin: 0 20px 0px 0px;
-  height: 100%;
+  flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   border: 1px solid #333333;
   border-radius: 8px;
   background-color: #1a1a1a;
   box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: rgba(0, 0, 0, 0.2);
+  }
 `;
 
 export const StyledTable = styled.table`
@@ -121,8 +135,8 @@ export const TableRow = styled.tr<{ $isExpanded?: boolean }>`
 
   &:hover {
     td {
-      color: rgba(255, 215, 0);
-      background-color: rgba(255, 215, 0, 0.2);
+      color: rgba(255, 215, 0); /* 🔧 hover 시 노란색 */
+      background-color: rgba(255, 215, 0, 0.2); /* 🔧 hover 시 배경색 */
     }
     cursor: pointer;
   }
