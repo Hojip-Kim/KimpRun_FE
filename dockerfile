@@ -4,11 +4,13 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-COPY . .
-
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV SKIP_ENV_VALIDATION=true
+
+COPY .env.production ./
+
+COPY . .
 
 RUN npm run build:production
 
