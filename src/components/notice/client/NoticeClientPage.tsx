@@ -9,7 +9,6 @@ import {
   NoticeHeader,
   NoticeTitle,
   NoticeList,
-  NoticeItem,
   NoticeItemHeader,
   ExchangeBadge,
   NoticeDate,
@@ -27,6 +26,7 @@ import {
   NewNoticeItem,
   NewBadge,
   NoticeItemHeaderLeft,
+  NoticeCompleteBanner,
 } from './style';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
@@ -53,7 +53,6 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const [isAnimating, setIsAnimating] = useState(false);
-  const [isSliding, setIsSliding] = useState(false);
 
   const isNewNoticeGenerated = useSelector(
     (state: RootState) => state.notice.isNewNoticeGenerated
@@ -69,22 +68,16 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
   }, [isNewNoticeGenerated, newNoticeData]);
 
   const handleNewNoticeAnimation = async () => {
-
     if (!Array.isArray(newNoticeData) || newNoticeData.length === 0) {
       return;
     }
 
-    setIsSliding(true);
+    setNoticeData((prev) => [newNoticeData[0], ...prev]);
+    setIsAnimating(true);
 
     setTimeout(() => {
-      setNoticeData((prev) => [newNoticeData[0], ...prev]);
-      setIsAnimating(true);
-    }, 400);
-
-    setTimeout(() => {
-      setIsSliding(false);
       setIsAnimating(false);
-    }, 1200);
+    }, 600);
   };
 
   const handleNoticeClick = (exchangeUrl: string, url: string) => {
@@ -240,11 +233,16 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
           </EmptyNotice>
         ) : (
           <>
-            <AnimatedNoticeList isSliding={isSliding}>
+            <AnimatedNoticeList isSliding={isAnimating}>
               {noticeData.map((notice, index) => {
                 return (
-                  <NewNoticeContainer key={`${notice.id}-${index}`}>
+                  <NewNoticeContainer
+                    key={`${notice.id}-${index}`}
+                    isNewItem={index > 0}
+                    isAnimating={isAnimating}
+                  >
                     <NewNoticeItem
+                      isAnimating={isAnimating && index === 0}
                       onClick={() =>
                         handleNoticeClick(notice.exchangeUrl || '', notice.url)
                       }
@@ -294,18 +292,9 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
 
             {/* 더 이상 로드할 데이터가 없을 때 */}
             {!hasMore && noticeData.length > 0 && (
-              <div
-                style={{
-                  textAlign: 'center',
-                  padding: '20px',
-                  color: '#666',
-                  fontSize: '14px',
-                  borderTop: '1px solid #333',
-                  marginTop: '10px',
-                }}
-              >
+              <NoticeCompleteBanner>
                 모든 공지사항을 확인했습니다.
-              </div>
+              </NoticeCompleteBanner>
             )}
           </>
         )}

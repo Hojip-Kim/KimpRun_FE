@@ -300,18 +300,9 @@ export const NoticeLoadingSpinner = styled.div`
   animation: spin 1s linear infinite;
 `;
 
-export const NewNoticeContainer = styled.div`
-  position: relative;
-  width: 100%;
-`;
-
 export const AnimatedNoticeList = styled.div.withConfig({
   shouldForwardProp: (prop) => prop !== 'isSliding',
-})<{ isSliding: boolean }>`
-  transition: transform 0.5s ease-in-out;
-  transform: ${(props) =>
-    props.isSliding ? 'translateY(20px)' : 'translateY(0)'};
-`;
+})<{ isSliding: boolean }>``;
 
 export const NewNoticeItem = styled.div.withConfig({
   shouldForwardProp: (prop) => !['isAnimating'].includes(prop),
@@ -329,7 +320,7 @@ export const NewNoticeItem = styled.div.withConfig({
   ${(props) =>
     props.isAnimating &&
     `
-    animation: slideInFromTop 0.5s ease-out;
+    animation: slideInFromTop 0.6s ease-out;
   `}
 
   &:hover {
@@ -341,10 +332,33 @@ export const NewNoticeItem = styled.div.withConfig({
   @keyframes slideInFromTop {
     from {
       opacity: 0;
-      transform: translateY(-20px);
+      transform: translateY(-100px);
     }
     to {
       opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`;
+
+export const NewNoticeContainer = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['isNewItem', 'isAnimating'].includes(prop),
+})<{ isNewItem?: boolean; isAnimating?: boolean }>`
+  position: relative;
+  width: 100%;
+
+  ${(props) =>
+    props.isNewItem &&
+    props.isAnimating &&
+    `
+    animation: pushDown 0.6s ease-out;
+  `}
+
+  @keyframes pushDown {
+    from {
+      transform: translateY(-100px);
+    }
+    to {
       transform: translateY(0);
     }
   }
@@ -390,7 +404,10 @@ export const ModalOverlay = styled.div<{ isVisible: boolean }>`
   transition: all 0.3s ease-in-out;
 `;
 
-export const NoticeModal = styled.div<{ isVisible: boolean }>`
+export const NoticeModal = styled.div<{
+  isVisible: boolean;
+  isClosing?: boolean;
+}>`
   position: fixed;
   top: 20px;
   right: 20px;
@@ -401,15 +418,19 @@ export const NoticeModal = styled.div<{ isVisible: boolean }>`
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  transform: ${(props) =>
-    props.isVisible ? 'translateX(0)' : 'translateX(calc(100% + 60px))'};
-  opacity: ${(props) => (props.isVisible ? 1 : 0)};
+  transform: ${(props) => {
+    if (props.isClosing) {
+      return 'translateX(calc(100% + 60px))';
+    }
+    return props.isVisible ? 'translateX(0)' : 'translateX(calc(100% + 60px))';
+  }};
+  opacity: ${(props) => (props.isVisible && !props.isClosing ? 1 : 0)};
   transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   z-index: 1001;
 
-  /* 초기 상태에서 완전히 숨김 */
   ${(props) =>
     !props.isVisible &&
+    !props.isClosing &&
     `
     visibility: hidden;
   `}
@@ -582,4 +603,13 @@ export const NoticeItemHeaderLeft = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
+`;
+
+export const NoticeCompleteBanner = styled.div`
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-size: 14px;
+  border-top: 1px solid #333;
+  margin-top: 10px;
 `;
