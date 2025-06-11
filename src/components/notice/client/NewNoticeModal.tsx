@@ -33,10 +33,12 @@ const NewNoticeModal: React.FC<NewNoticeModalProps> = ({
   const [timeLeft, setTimeLeft] = useState(autoCloseTime);
   const [progress, setProgress] = useState(100);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
     if (isVisible) {
       setIsAnimating(true);
+      setIsClosing(false);
     }
   }, [isVisible]);
 
@@ -51,7 +53,7 @@ const NewNoticeModal: React.FC<NewNoticeModalProps> = ({
       setTimeLeft((prev) => {
         const newTime = prev - 0.1;
         if (newTime <= 0) {
-          onClose();
+          handleClose();
           return autoCloseTime;
         }
         return newTime;
@@ -64,7 +66,15 @@ const NewNoticeModal: React.FC<NewNoticeModalProps> = ({
     }, 100);
 
     return () => clearInterval(timer);
-  }, [isVisible, notice, onClose, autoCloseTime]);
+  }, [isVisible, notice, autoCloseTime]);
+
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      onClose();
+      setIsClosing(false);
+    }, 600);
+  };
 
   const handleViewNotice = () => {
     if (notice?.exchangeUrl && notice?.url) {
@@ -72,21 +82,22 @@ const NewNoticeModal: React.FC<NewNoticeModalProps> = ({
     } else if (notice?.url) {
       window.open(notice.url, '_blank');
     }
-    onClose();
+    handleClose();
   };
 
   if (!notice) return null;
 
   return (
     <NoticeModal
-      isVisible={isVisible}
+      isVisible={isVisible && !isClosing}
+      isClosing={isClosing}
       style={{
         top: `${20 + modalIndex * 180}px`,
       }}
     >
       <ModalHeader>
         <ModalTitle>새로운 공지사항</ModalTitle>
-        <ModalCloseButton onClick={onClose}>×</ModalCloseButton>
+        <ModalCloseButton onClick={handleClose}>×</ModalCloseButton>
       </ModalHeader>
 
       <ModalContent>
@@ -102,7 +113,7 @@ const NewNoticeModal: React.FC<NewNoticeModalProps> = ({
       </ModalContent>
 
       <ModalActions>
-        <ModalButton variant="secondary" onClick={onClose}>
+        <ModalButton variant="secondary" onClick={handleClose}>
           나중에 보기
         </ModalButton>
         <ModalButton variant="primary" onClick={handleViewNotice}>
