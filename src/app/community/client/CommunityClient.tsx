@@ -1,13 +1,11 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components';
+import React, { useState } from 'react';
 import { Category } from '@/app/admin/type';
-import { Post } from '../coin/types';
-import { fetchAllPostData } from '../server/communityFetchData';
 import Board from '../coin/client/Board';
 import { CommunityPageProps } from '../types';
 import { AllPostData } from '../types';
+import ErrorMessage from '@/components/error/ErrorMessage';
 
 const CommunityClient: React.FC<CommunityPageProps> = ({
   initialCategories,
@@ -15,14 +13,23 @@ const CommunityClient: React.FC<CommunityPageProps> = ({
 }) => {
   const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [allPosts, setAllPosts] = useState<AllPostData>(initialAllPosts);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   if (categories.length === 0) {
-    return <div>카테고리가 비어있습니다.</div>;
+    return (
+      <ErrorMessage
+        title="카테고리가 비어있습니다."
+        message="카테고리를 불러오는데 실패했습니다."
+      />
+    );
   }
 
   if (allPosts.boards.length === 0) {
-    return <div>게시글이 비어있습니다.</div>;
+    return (
+      <ErrorMessage
+        title="게시글이 비어있습니다."
+        message="게시글을 불러오는데 실패했습니다."
+      />
+    );
   }
 
   return (
