@@ -24,7 +24,10 @@ export interface InfoState {
 
 export interface TokenState {
   tokenList: { first: string[]; second: string[] };
-  tokenSet: { first: { [key: string]: string }; second: { [key: string]: string } };
+  tokenSet: {
+    first: { [key: string]: string };
+    second: { [key: string]: string };
+  };
 }
 
 export interface WidgetState {
@@ -34,4 +37,3 @@ export interface WidgetState {
   tokenPrice: number;
   kimp: number;
 }
-
