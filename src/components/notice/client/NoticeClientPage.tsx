@@ -22,11 +22,15 @@ import {
   LoadingIndicator,
   NoticeLoadingSpinner,
   LoadingText,
+  NewNoticeContainer,
+  AnimatedNoticeList,
+  NewNoticeItem,
+  NewBadge,
+  NoticeItemHeaderLeft,
 } from './style';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
-import { setIsNewNoticeGenerated } from '@/redux/reducer/noticeReducer';
-import { formatNoticeDate } from '@/method/common_method';
+import { formatNoticeDate, isNewNotice } from '@/method/common_method';
 
 interface NoticeClientProps {
   initialNoticeData: NoticeResponse;
@@ -48,29 +52,48 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
   const [pageSize] = useState(15);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [isSliding, setIsSliding] = useState(false);
+
   const isNewNoticeGenerated = useSelector(
     (state: RootState) => state.notice.isNewNoticeGenerated
   );
 
   const dispatch = useDispatch<AppDispatch>();
-
   const newNoticeData = useSelector((state: RootState) => state.notice.notice);
 
   useEffect(() => {
     if (isNewNoticeGenerated) {
-      setNoticeData([...newNoticeData, ...noticeData]);
+      handleNewNoticeAnimation();
     }
-    dispatch(setIsNewNoticeGenerated(false));
   }, [isNewNoticeGenerated, newNoticeData]);
 
-  const handleNoticeClick = (exchangeUrl: string, url: string) => {
-    window.open(exchangeUrl + url, '_blank', 'noopener,noreferrer');
+  const handleNewNoticeAnimation = async () => {
+
+    if (!Array.isArray(newNoticeData) || newNoticeData.length === 0) {
+      return;
+    }
+
+    setIsSliding(true);
+
+    setTimeout(() => {
+      setNoticeData((prev) => [newNoticeData[0], ...prev]);
+      setIsAnimating(true);
+    }, 400);
+
+    setTimeout(() => {
+      setIsSliding(false);
+      setIsAnimating(false);
+    }, 1200);
   };
 
-  // 첫 페이지 데이터 로딩 (거래소 변경 시)
+  const handleNoticeClick = (exchangeUrl: string, url: string) => {
+    const fullUrl = exchangeUrl ? exchangeUrl + url : url;
+    window.open(fullUrl, '_blank', 'noopener,noreferrer');
+  };
+
   const loadInitialData = async (marketType: MarketType) => {
     setIsLoading(true);
-
     try {
       const requestParams = {
         marketType,
@@ -217,30 +240,48 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
           </EmptyNotice>
         ) : (
           <>
-            {noticeData.map((notice, index) => (
-              <NoticeItem
-                key={`${notice.id}-${index}`}
-                onClick={() =>
-                  handleNoticeClick(notice.exchangeUrl, notice.url)
-                }
-              >
-                <NoticeItemHeader>
-                  <ExchangeBadge exchangeType={notice.exchangeType}>
-                    {notice.exchangeType}
-                  </ExchangeBadge>
-                  <NoticeDate>{formatNoticeDate(notice.createdAt)}</NoticeDate>
-                </NoticeItemHeader>
-                <NoticeItemTitle>{notice.title}</NoticeItemTitle>
-                <NoticeUrl
-                  href={notice.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  자세히 보기
-                </NoticeUrl>
-              </NoticeItem>
-            ))}
+            <AnimatedNoticeList isSliding={isSliding}>
+              {noticeData.map((notice, index) => {
+                return (
+                  <NewNoticeContainer key={`${notice.id}-${index}`}>
+                    <NewNoticeItem
+                      onClick={() =>
+                        handleNoticeClick(notice.exchangeUrl || '', notice.url)
+                      }
+                    >
+                      <NoticeItemHeader>
+                        <NoticeItemHeaderLeft>
+                          <ExchangeBadge
+                            exchangeType={notice.exchangeType.toString()}
+                          >
+                            {notice.exchangeType}
+                          </ExchangeBadge>
+                          {isNewNotice(notice.createdAt) && (
+                            <NewBadge>NEW</NewBadge>
+                          )}
+                        </NoticeItemHeaderLeft>
+                        <NoticeDate>
+                          {formatNoticeDate(notice.createdAt)}
+                        </NoticeDate>
+                      </NoticeItemHeader>
+                      <NoticeItemTitle>{notice.title}</NoticeItemTitle>
+                      <NoticeUrl
+                        href={
+                          notice.exchangeUrl
+                            ? notice.exchangeUrl + notice.url
+                            : notice.url
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        자세히 보기
+                      </NoticeUrl>
+                    </NewNoticeItem>
+                  </NewNoticeContainer>
+                );
+              })}
+            </AnimatedNoticeList>
 
             {/* 무한스크롤 로딩 인디케이터 */}
             {isLoadingMore && (

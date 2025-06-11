@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { MarketType } from '@/types/marketType';
 
 export const NoticeContainer = styled.div`
   height: 100%;
@@ -87,27 +86,15 @@ export const NoticeItemHeader = styled.div`
   margin-bottom: 8px;
 `;
 
-export const ExchangeBadge = styled.span<{ exchangeType: MarketType }>`
-  background-color: ${({ exchangeType }) => {
-    switch (exchangeType) {
-      case MarketType.UPBIT:
-        return '#0066cc';
-      case MarketType.BINANCE:
-        return '#f0b90b';
-      case MarketType.COINONE:
-        return '#00d4aa';
-      case MarketType.BITHUMB:
-        return '#ff6b35';
-      default:
-        return '#666666';
-    }
-  }};
-  color: white;
-  font-size: 0.7rem;
-  font-weight: 600;
-  padding: 3px 8px;
-  border-radius: 12px;
-  text-transform: uppercase;
+export const ExchangeBadge = styled.span.withConfig({
+  shouldForwardProp: (prop) => prop !== 'exchangeType',
+})<{ exchangeType: string }>`
+  background: #333;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
 `;
 
 export const NoticeDate = styled.span`
@@ -300,13 +287,299 @@ export const LoadingText = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+  color: #ffd700;
+  font-size: 14px;
 `;
 
 export const NoticeLoadingSpinner = styled.div`
-  width: '16px',
+  width: 16px;
   height: 16px;
   border: 2px solid #333;
   border-top: 2px solid #ffd700;
   border-radius: 50%;
   animation: spin 1s linear infinite;
+`;
+
+export const NewNoticeContainer = styled.div`
+  position: relative;
+  width: 100%;
+`;
+
+export const AnimatedNoticeList = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== 'isSliding',
+})<{ isSliding: boolean }>`
+  transition: transform 0.5s ease-in-out;
+  transform: ${(props) =>
+    props.isSliding ? 'translateY(20px)' : 'translateY(0)'};
+`;
+
+export const NewNoticeItem = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['isAnimating'].includes(prop),
+})<{ isAnimating?: boolean }>`
+  background: #1a1a1a;
+  border: 1px solid #333333;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  color: #ffffff;
+
+  ${(props) =>
+    props.isAnimating &&
+    `
+    animation: slideInFromTop 0.5s ease-out;
+  `}
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    background: #2a2a2a;
+  }
+
+  @keyframes slideInFromTop {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`;
+
+export const NewBadge = styled.span`
+  display: inline-block;
+  background: linear-gradient(45deg, #ffd700, #ff8e8e);
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 8px;
+  margin-left: 8px;
+  animation: pulse 2s infinite;
+
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(255, 107, 107, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(255, 107, 107, 0);
+    }
+  }
+`;
+
+export const ModalOverlay = styled.div<{ isVisible: boolean }>`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: ${(props) => (props.isVisible ? 1 : 0)};
+  visibility: ${(props) => (props.isVisible ? 'visible' : 'hidden')};
+  transition: all 0.3s ease-in-out;
+`;
+
+export const NoticeModal = styled.div<{ isVisible: boolean }>`
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 400px;
+  max-width: 90vw;
+  background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+  border: 1px solid #ffd700;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  transform: ${(props) =>
+    props.isVisible ? 'translateX(0)' : 'translateX(calc(100% + 60px))'};
+  opacity: ${(props) => (props.isVisible ? 1 : 0)};
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 1001;
+
+  /* 초기 상태에서 완전히 숨김 */
+  ${(props) =>
+    !props.isVisible &&
+    `
+    visibility: hidden;
+  `}
+`;
+
+export const ModalHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #333;
+`;
+
+export const ModalTitle = styled.h3`
+  color: #ffd700;
+  font-size: 16px;
+  font-weight: bold;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &::before {
+    content: '🔔';
+    font-size: 18px;
+  }
+`;
+
+export const ModalCloseButton = styled.button`
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+  }
+`;
+
+export const ModalContent = styled.div`
+  color: #e0e0e0;
+`;
+
+export const ModalExchangeBadge = styled.div<{ exchangeType: number }>`
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  background: ${(props) => {
+    switch (props.exchangeType) {
+      case 3:
+        return 'linear-gradient(45deg, #1976d2, #42a5f5)'; // UPBIT
+      case 2:
+        return 'linear-gradient(45deg, #f57c00, #ffb74d)'; // BINANCE
+      case 4:
+        return 'linear-gradient(45deg, #388e3c, #66bb6a)'; // COINONE
+      case 5:
+        return 'linear-gradient(45deg, #d32f2f, #ef5350)'; // BITHUMB
+      default:
+        return 'linear-gradient(45deg, #616161, #9e9e9e)'; // ALL
+    }
+  }};
+  color: white;
+`;
+
+export const ModalNoticeTitle = styled.h4`
+  color: #fff;
+  font-size: 14px;
+  margin: 10px 0;
+  line-height: 1.4;
+`;
+
+export const ModalActions = styled.div`
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #333;
+`;
+
+export const ModalButton = styled.button<{ variant?: 'primary' | 'secondary' }>`
+  flex: 1;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  ${(props) =>
+    props.variant === 'primary'
+      ? `
+    background: linear-gradient(45deg, #ffd700, #ffed4e);
+    color: #000;
+    font-weight: bold;
+    
+    &:hover {
+      background: linear-gradient(45deg, #ffed4e, #fff176);
+      transform: translateY(-1px);
+    }
+  `
+      : `
+    background: rgba(255, 255, 255, 0.1);
+    color: #e0e0e0;
+    border: 1px solid #333;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: #555;
+    }
+  `}
+`;
+
+export const ModalAutoCloseTimer = styled.div`
+  margin-top: 10px;
+  text-align: center;
+  color: #888;
+  font-size: 12px;
+`;
+
+export const TimerBar = styled.div<{ progress: number }>`
+  width: 100%;
+  height: 3px;
+  background: #333;
+  border-radius: 2px;
+  margin-top: 8px;
+  overflow: hidden;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: ${(props) => props.progress}%;
+    height: 100%;
+    background: linear-gradient(90deg, #ffd700, #ffed4e);
+    transition: width 0.1s linear;
+    border-radius: 2px;
+  }
+`;
+
+export const NoticeModalContainer = styled.div`
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1001;
+  pointer-events: none;
+
+  > * {
+    pointer-events: auto;
+    margin-bottom: 15px;
+  }
+`;
+
+export const NoticeItemHeaderLeft = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
 `;
