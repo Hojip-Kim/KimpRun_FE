@@ -21,5 +21,5 @@ export type MarketWebsocketData =
     }
   | {
       type: 'notice';
-      data: Notice;
+      data: Notice[];
     };

@@ -7,6 +7,9 @@ import Modal from '@/components/modal/modal';
 import LoginForm from '@/components/login/loginForm';
 import { logout, setUser } from '@/redux/reducer/authReducer';
 import ProfileForm from '../profile/ProfileForm';
+import NewNoticeModal from '../notice/client/NewNoticeModal';
+import { Notice } from '../notice/type';
+import { NoticeModalContainer } from '../notice/client/style';
 import {
   ActionButton,
   ActionButtons,
@@ -57,9 +60,18 @@ interface ResponseUrl {
 }
 
 const Nav = () => {
-  const [userSize, setUserSize] = useState(0);
   const [isModalActive, setIsModalActive] = useState<boolean>(false);
   const [modalSize, setModalSize] = useState({ width: 400, height: 300 });
+
+  // 여러 모달을 관리하기 위한 상태
+  const [noticeModals, setNoticeModals] = useState<
+    {
+      id: string;
+      notice: Notice;
+      isVisible: boolean;
+    }[]
+  >([]);
+
   const router = useRouter();
 
   const isAuthenticated = useSelector(
@@ -71,6 +83,12 @@ const Nav = () => {
 
   const user = useSelector((state: RootState) => state.auth.user);
   const userCount = useSelector((state: RootState) => state.info.user);
+
+  const isNewNoticeGenerated = useSelector(
+    (state: RootState) => state.notice.isNewNoticeGenerated
+  );
+  const newNoticeData = useSelector((state: RootState) => state.notice.notice);
+
   const dispatch = useDispatch<AppDispatch>();
 
   const setReduxDollar = async () => {
@@ -103,29 +121,83 @@ const Nav = () => {
   useEffect(() => {
     const infoWebsocket = new WebSocket(clientEnv.INFO_WEBSOCKET_URL);
 
-    infoWebsocket.onmessage = (event) => {
-      const streamData: MarketWebsocketData = JSON.parse(event.data);
+    infoWebsocket.onopen = (event) => {
+      console.log('🔌 웹소켓 연결 성공:', event);
+    };
 
-      if (streamData.type === 'market') {
-        const { userData, marketData } = streamData.data;
-        dispatch(setUserCount(userData.userCount));
-        dispatch(setDollar(marketData.dollar));
-        dispatch(setTether(marketData.tether));
-      } else if (streamData.type === 'notice') {
-        dispatch(setNotice(streamData.data));
-        dispatch(setIsNewNoticeGenerated(true));
+    infoWebsocket.onmessage = (event) => {
+      try {
+        const streamData = JSON.parse(event.data) as MarketWebsocketData;
+
+        if (streamData.type === 'market') {
+          const { userData, marketData } = streamData.data;
+          dispatch(setUserCount(userData.userCount));
+          dispatch(setDollar(marketData.dollar));
+          dispatch(setTether(marketData.tether));
+        } else if (streamData.type === 'notice') {
+          console.log('📢 웹소켓 notice 데이터:', streamData.data);
+
+          // 데이터가 배열이 아닌 경우 배열로 변환
+          const noticeArray = Array.isArray(streamData.data)
+            ? streamData.data
+            : [streamData.data];
+
+          dispatch(setNotice(noticeArray));
+          dispatch(setIsNewNoticeGenerated(true));
+        } else {
+          console.log('❓ 알 수 없는 메시지 타입:', streamData);
+        }
+      } catch (error) {
+        console.error('❌ JSON 파싱 오류:', error);
+        console.error('원본 데이터:', event.data);
       }
     };
 
     infoWebsocket.onerror = (error) => {
-      console.error('Info Websocket Error:', error);
-      infoWebsocket.close();
+      console.error('❌ 웹소켓 오류:', error);
+      console.error('웹소켓 상태:', infoWebsocket.readyState);
+    };
+
+    infoWebsocket.onclose = (event) => {
+      console.log('🔌 웹소켓 연결 종료:', event.code, event.reason);
     };
 
     return () => {
       infoWebsocket.close();
     };
   }, [dispatch]);
+
+  useEffect(() => {
+    if (isNewNoticeGenerated && newNoticeData.length > 0) {
+      const newModals = newNoticeData.map((notice, index) => ({
+        id: `${notice.id}-${Date.now()}-${index}`,
+        notice: notice,
+        isVisible: false,
+      }));
+
+      setNoticeModals((prevModals) => [...prevModals, ...newModals]);
+
+      setTimeout(() => {
+        setNoticeModals((prevModals) =>
+          prevModals.map((modal) =>
+            newModals.some((newModal) => newModal.id === modal.id)
+              ? { ...modal, isVisible: true }
+              : modal
+          )
+        );
+      }, 50);
+
+      setTimeout(() => {
+        dispatch(setIsNewNoticeGenerated(false));
+      }, 2000);
+    }
+  }, [isNewNoticeGenerated, newNoticeData, dispatch]);
+
+  const handleNoticeModalClose = (id: string) => {
+    setNoticeModals((prevModals) =>
+      prevModals.filter((modal) => modal.id !== id)
+    );
+  };
 
   const handleLoginClick = () => {
     setModalSize({ width: 400, height: 300 });
@@ -314,6 +386,21 @@ const Nav = () => {
           }
           setModal={setIsModalActive}
         />
+      )}
+
+      {noticeModals.length > 0 && (
+        <NoticeModalContainer>
+          {noticeModals.map((modal, index) => (
+            <NewNoticeModal
+              key={modal.id}
+              notice={modal.notice}
+              isVisible={modal.isVisible}
+              onClose={() => handleNoticeModalClose(modal.id)}
+              modalIndex={index}
+              autoCloseTime={12} // 12초로 설정
+            />
+          ))}
+        </NoticeModalContainer>
       )}
     </NavbarWrapper>
   );
