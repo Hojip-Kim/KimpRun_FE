@@ -17,6 +17,8 @@ RUN npm run build:production
 FROM node:20-alpine
 WORKDIR /app
 
+RUN apk add --no-cache dumb-init
+
 COPY --from=builder /app/package.json /app/package-lock.json ./
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
