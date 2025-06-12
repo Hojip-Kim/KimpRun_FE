@@ -54,14 +54,6 @@ const nextConfig = {
     MARKET_BINANCE_DATA: process.env.MARKET_BINANCE_DATA,
     MARKET_DATA: process.env.MARKET_DATA,
   },
-  generateBuildId: async () => {
-    console.log('🔍 빌드 시점 환경변수 확인:');
-    console.log('NODE_ENV:', process.env.NODE_ENV);
-    console.log('MARKET_FIRST_NAME:', process.env.MARKET_FIRST_NAME);
-    console.log('MARKET_COMBINE_DATA:', process.env.MARKET_COMBINE_DATA);
-    console.log('NOTICE_URL:', process.env.NOTICE_URL);
-    return `build-${Date.now()}`;
-  },
 };
 
 export default nextConfig;
