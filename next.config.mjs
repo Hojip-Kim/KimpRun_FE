@@ -6,7 +6,14 @@ const nextConfig = {
   },
   reactStrictMode: false,
   webpack: (config, options) => {
-    config.cache = false;
+    // 프로덕션에서는 캐시 활성화
+    if (process.env.NODE_ENV === 'production') {
+      config.cache = {
+        type: 'filesystem',
+      };
+    } else {
+      config.cache = false;
+    }
     return config;
   },
   poweredByHeader: false,
@@ -37,8 +44,6 @@ const nextConfig = {
     skipTrailingSlashRedirect: true,
   },
   env: {
-    SKIP_ENV_VALIDATION:
-      process.env.NODE_ENV === 'production' ? 'true' : undefined,
     MARKET_FIRST_NAME: process.env.MARKET_FIRST_NAME,
     MARKET_UPBIT_DATA: process.env.MARKET_UPBIT_DATA,
     MARKET_COMBINE_DATA: process.env.MARKET_COMBINE_DATA,
