@@ -16,6 +16,9 @@ import { createApiClient } from './request';
   integrity: 서브 리소스 무결성 (SRI) 체크를 위한 문자열
 */
 
+console.log('🏗️ [SERVER API CLIENT INITIALIZING]');
+console.log('🌍 Environment:', process.env.NODE_ENV);
+
 const serverApi = createApiClient('', {
   headers: {
     'Content-Type': 'application/json',
@@ -27,9 +30,24 @@ export async function serverFetch(
   route: string,
   init?: RequestInit
 ): Promise<ServerFetchResponse> {
+  console.log('🚀 [SERVER FETCH START]');
+  console.log('📍 URL:', route);
+  console.log('⚙️ Options:', init);
+  console.log('🌍 Environment:', process.env.NODE_ENV);
+
   try {
+    const startTime = Date.now();
     const response = await fetch(route, init);
+    const endTime = Date.now();
+    const duration = endTime - startTime;
+
     const text = await response.text();
+
+    console.log('✅ [SERVER FETCH SUCCESS]');
+    console.log('📍 URL:', route);
+    console.log('📊 Status:', response.status);
+    console.log('⏱️ Duration:', `${duration}ms`);
+    console.log('📦 Response Preview:', text.substring(0, 200));
 
     return {
       ok: response.ok,
@@ -37,7 +55,15 @@ export async function serverFetch(
       text,
     };
   } catch (error) {
-    console.error('Server fetch error:', error);
+    console.error('❌ [SERVER FETCH ERROR]');
+    console.error('📍 URL:', route);
+    console.error('💥 Error:', error);
+    console.error(
+      '📋 Error Message:',
+      error instanceof Error ? error.message : 'Unknown error'
+    );
+    console.error('🌍 Environment:', process.env.NODE_ENV);
+
     return {
       ok: false,
       status: 500,
@@ -51,6 +77,7 @@ export async function serverGet<T = any>(
   url: string,
   config?: Partial<FetchConfig>
 ): Promise<ApiResponse<T>> {
+  console.log('📥 [SERVER GET REQUEST]', url);
   return serverApi.get<T>(url, config);
 }
 
@@ -60,6 +87,7 @@ export async function serverPost<T = any>(
   data?: any,
   config?: Partial<FetchConfig>
 ): Promise<ApiResponse<T>> {
+  console.log('📤 [SERVER POST REQUEST]', url, 'Data:', data);
   return serverApi.post<T>(url, data, config);
 }
 
@@ -69,6 +97,7 @@ export async function serverPut<T = any>(
   data?: any,
   config?: Partial<FetchConfig>
 ): Promise<ApiResponse<T>> {
+  console.log('🔄 [SERVER PUT REQUEST]', url, 'Data:', data);
   return serverApi.put<T>(url, data, config);
 }
 
@@ -78,6 +107,7 @@ export async function serverPatch<T = any>(
   data?: any,
   config?: Partial<FetchConfig>
 ): Promise<ApiResponse<T>> {
+  console.log('🔧 [SERVER PATCH REQUEST]', url, 'Data:', data);
   return serverApi.patch<T>(url, data, config);
 }
 
@@ -86,6 +116,7 @@ export async function serverDelete<T = any>(
   url: string,
   config?: Partial<FetchConfig>
 ): Promise<ApiResponse<T>> {
+  console.log('🗑️ [SERVER DELETE REQUEST]', url);
   return serverApi.delete<T>(url, config);
 }
 
@@ -95,8 +126,17 @@ export async function cachedRequest<T = any>(
   cacheKey: string,
   config?: Partial<FetchConfig>
 ): Promise<ApiResponse<T>> {
+  console.log('💾 [CACHED REQUEST]', url, 'Cache Key:', cacheKey);
   // 차후 Redis로 대체
   const cache = new Map();
 
   return cache.get(cacheKey);
 }
+
+export const serverRequest = {
+  get: serverGet,
+  post: serverPost,
+  put: serverPut,
+  patch: serverPatch,
+  delete: serverDelete,
+};
