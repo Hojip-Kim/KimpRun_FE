@@ -2,7 +2,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci --only=production
+RUN npm ci
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
