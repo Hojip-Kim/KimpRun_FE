@@ -83,6 +83,8 @@ export const createApiClient = (
 ) => {
   const request = createRequest(baseConfig);
 
+  console.log('createApiClient', baseUrl, baseConfig);
+
   return {
     get: <T = any>(endpoint: string, config?: Partial<FetchConfig>) =>
       request<T>(`${baseUrl}${endpoint}`, { ...config, method: 'GET' }),

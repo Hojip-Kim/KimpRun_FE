@@ -31,6 +31,8 @@ export async function serverFetch(
     const response = await fetch(route, init);
     const text = await response.text();
 
+    console.log('serverFetch', route, init, response, text);
+
     return {
       ok: response.ok,
       status: response.status,

@@ -5,8 +5,7 @@ export type {
   ApiResponse,
 } from '../type';
 
-export { createRequest, createApiClient } from './request';
-import { createApiClient } from './request';
+export { createRequest } from './request';
 
 export { clientFetch, clientRequest } from './client';
 
