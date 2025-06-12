@@ -18,8 +18,8 @@ const nextConfig = {
   },
   poweredByHeader: false,
   compress: true,
-  assetPrefix: process.env.NODE_ENV === 'production' ? '' : undefined,
   staticPageGenerationTimeout: 180,
+  assetPrefix: process.env.NODE_ENV === 'production' ? '' : undefined,
   async headers() {
     return [
       {
@@ -41,7 +41,6 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '2mb',
     },
-    skipTrailingSlashRedirect: true,
   },
   env: {
     MARKET_FIRST_NAME: process.env.MARKET_FIRST_NAME,
