@@ -7,6 +7,9 @@ import TradingViewWidget from '@/components/tradingview/TradingViewWidget';
 import './page.css';
 import Chat from '@/components/chat/Chat';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const MainPage = async () => {
   const [initialTokenNames, initialCombinedData] = await Promise.all([
     getInitialTokenNames(),
