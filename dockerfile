@@ -20,14 +20,10 @@ WORKDIR /app
 RUN apk add --no-cache dumb-init
 
 COPY --from=builder /app/package.json /app/package-lock.json ./
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
+COPY --from=builder /app/node_modules ./node_modules
 COPY .env.production ./
-
-RUN npm ci --only=production && \
-    npm cache clean --force && \
-    rm -rf /tmp/* /var/cache/apk/*
 
 ENV NODE_ENV=production
 ENV PORT=3000
@@ -36,4 +32,4 @@ ENV HOST=0.0.0.0
 EXPOSE 3000
 
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node", "server.js"]
+CMD ["npm", "start"]
