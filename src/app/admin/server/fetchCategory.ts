@@ -126,6 +126,7 @@ export async function updateCategory(
 ): Promise<ApiResponse<Category>> {
   try {
     if (!serverEnv.CATEGORY_URL) {
+      console.warn('❌ CATEGORY_URL 환경변수가 설정되지 않았습니다.');
       return {
         success: false,
         error: 'CATEGORY_URL not configured',
@@ -133,6 +134,15 @@ export async function updateCategory(
         data: null,
       };
     }
+
+    console.log('🔍 updateCategory 호출:', {
+      url: serverEnv.CATEGORY_URL,
+      updateData: { id, name, description },
+      serverEnv: {
+        CATEGORY_URL: serverEnv.CATEGORY_URL,
+      },
+      timestamp: new Date().toISOString(),
+    });
 
     const response = await serverRequest.put<Category>(
       serverEnv.CATEGORY_URL,
@@ -144,9 +154,13 @@ export async function updateCategory(
     );
 
     if (response.success && response.data) {
+      console.log('✅ 카테고리 수정 성공:', {
+        categoryId: id,
+        categoryName: name,
+      });
       return response;
     } else {
-      console.error('카테고리 수정 실패:', response.error);
+      console.error('❌ 카테고리 수정 실패:', response.error);
       return {
         success: false,
         error: response.error || 'Failed to update category',
@@ -155,7 +169,7 @@ export async function updateCategory(
       };
     }
   } catch (error) {
-    console.error('카테고리 수정 오류:', error);
+    console.error('❌ 카테고리 수정 요청 오류:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -171,6 +185,7 @@ export async function deleteCategory(
 ): Promise<ApiResponse<Boolean>> {
   try {
     if (!serverEnv.CATEGORY_URL) {
+      console.warn('❌ CATEGORY_URL 환경변수가 설정되지 않았습니다.');
       return {
         success: false,
         error: 'CATEGORY_URL not configured',
@@ -179,18 +194,29 @@ export async function deleteCategory(
       };
     }
 
-    const response = await serverRequest.delete(
-      `${serverEnv.CATEGORY_URL}/${id}`,
-      {
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
+    const deleteUrl = `${serverEnv.CATEGORY_URL}/${id}`;
+
+    console.log('🔍 deleteCategory 호출:', {
+      url: deleteUrl,
+      categoryId: id,
+      serverEnv: {
+        CATEGORY_URL: serverEnv.CATEGORY_URL,
+      },
+      timestamp: new Date().toISOString(),
+    });
+
+    const response = await serverRequest.delete(deleteUrl, {
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
 
     if (response.success) {
+      console.log('✅ 카테고리 삭제 성공:', {
+        categoryId: id,
+      });
       return response;
     } else {
-      console.error('카테고리 삭제 실패:', response.error);
+      console.error('❌ 카테고리 삭제 실패:', response.error);
       return {
         success: false,
         error: response.error || 'Failed to delete category',
@@ -199,7 +225,7 @@ export async function deleteCategory(
       };
     }
   } catch (error) {
-    console.error('카테고리 삭제 오류:', error);
+    console.error('❌ 카테고리 삭제 요청 오류:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',

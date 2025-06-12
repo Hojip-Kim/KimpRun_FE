@@ -35,14 +35,15 @@ const AdminPageClient = ({ initialCategories }: AdminPageProps) => {
   const handleSubmit = async (formData: React.FormEvent<HTMLFormElement>) => {
     formData.preventDefault();
     try {
-      const response: ApiResponse<Category> = await createCategory(
-        categoryName,
-        ''
-      );
-      if (response.status === 200) {
-        setCategories([...categories, response.data]);
+      const response: ApiResponse<CategoryResponse> = await createCategory({
+        name: categoryName,
+        description: '',
+      });
+      if (response.success && response.data) {
+        // 새로 생성된 카테고리를 목록에 추가 (전체 카테고리 목록을 다시 설정)
+        setCategories(response.data.categories);
         setCategoryName('');
-        alert(`카테고리 추가 완료 : ${response.data.name}`);
+        alert(`카테고리 추가 완료`);
       } else {
         alert('카테고리 추가 실패');
       }
@@ -58,7 +59,7 @@ const AdminPageClient = ({ initialCategories }: AdminPageProps) => {
         editCategoryName,
         ''
       );
-      if (response.status === 200) {
+      if (response.success && response.data) {
         setCategories(
           categories.map((category) =>
             category.id === id ? response.data : category
@@ -79,7 +80,7 @@ const AdminPageClient = ({ initialCategories }: AdminPageProps) => {
   const handleDelete = async (id: number) => {
     try {
       const response: ApiResponse<Boolean> = await deleteCategory(id);
-      if (response.status === 200) {
+      if (response.success) {
         setCategories(categories.filter((category) => category.id !== id));
         alert(`카테고리 삭제 완료 : ${id}`);
       } else {
