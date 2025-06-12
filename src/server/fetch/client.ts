@@ -13,8 +13,26 @@ export const clientFetch = async (
   init?: RequestInit
 ): Promise<ClientFetchResponse> => {
   try {
-    console.log('clientFetch', route, init);
+    console.log('💻 Client Fetch Request:', {
+      url: route,
+      method: init?.method || 'GET',
+      timestamp: new Date().toISOString(),
+      environment: {
+        NODE_ENV: process.env.NODE_ENV,
+        // 클라이언트에서는 NEXT_PUBLIC_ 환경변수만 접근 가능
+        NEXT_PUBLIC_NOTICE_URL: process.env.NEXT_PUBLIC_NOTICE_URL,
+        NEXT_PUBLIC_LOGIN_URL: process.env.NEXT_PUBLIC_LOGIN_URL,
+      },
+    });
+
     const response = await fetch(route, init);
+
+    console.log('✅ Client Fetch Response:', {
+      url: route,
+      status: response.status,
+      ok: response.ok,
+      timestamp: new Date().toISOString(),
+    });
 
     return {
       ok: response.ok,
@@ -22,7 +40,12 @@ export const clientFetch = async (
       json: () => response.json(),
     };
   } catch (error) {
-    console.error('Client fetch error:', error);
+    console.error('❌ Client Fetch Error:', {
+      url: route,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString(),
+    });
+
     return {
       ok: false,
       status: 500,

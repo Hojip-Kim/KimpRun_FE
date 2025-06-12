@@ -8,3 +8,8 @@ export interface CategoryResponse {
   categories: Category[];
   total: number;
 }
+
+export interface CreateCategoryRequest {
+  name: string;
+  description: string;
+}

@@ -15,6 +15,17 @@ let secondMarketList: string[] = [];
 export async function getTokenNames() {
   try {
     const url = serverEnv.MARKET_FIRST_NAME;
+
+    console.log('🔍 getTokenNames 호출:', {
+      url,
+      serverEnv: {
+        MARKET_FIRST_NAME: serverEnv.MARKET_FIRST_NAME,
+        MARKET_COMBINE_DATA: serverEnv.MARKET_COMBINE_DATA,
+        NOTICE_URL: serverEnv.NOTICE_URL,
+      },
+      timestamp: new Date().toISOString(),
+    });
+
     const response = await serverRequest.get(url, {
       credentials: 'include',
       headers: { 'Content-type': 'application/json' },
@@ -23,13 +34,14 @@ export async function getTokenNames() {
     if (response.success) {
       firstMarketList = response.data.firstMarketList;
       secondMarketList = response.data.secondMarketList;
+      console.log('✅ 토큰 이름 가져오기 성공:', response.data);
       return response.data;
     } else {
-      console.error('토큰 이름 가져오기 실패:', response.error);
+      console.error('❌ 토큰 이름 가져오기 실패:', response.error);
       return null;
     }
   } catch (error) {
-    console.error('토큰 이름 요청 오류:', error);
+    console.error('❌ 토큰 이름 요청 오류:', error);
     return null;
   }
 }
@@ -78,6 +90,40 @@ export async function getCombinedTokenData(
     }
   } catch (error) {
     console.error('결합 토큰 데이터 요청 오류:', error);
+    return null;
+  }
+}
+
+export async function getCombineTokenData() {
+  try {
+    const url = new URL(serverEnv.MARKET_COMBINE_DATA);
+    url.searchParams.set('first', firstMarketList.join(','));
+    url.searchParams.set('second', secondMarketList.join(','));
+
+    console.log('🔍 getCombineTokenData 호출:', {
+      baseUrl: serverEnv.MARKET_COMBINE_DATA,
+      fullUrl: url.toString(),
+      params: {
+        first: firstMarketList.join(','),
+        second: secondMarketList.join(','),
+      },
+      timestamp: new Date().toISOString(),
+    });
+
+    const response = await serverRequest.get(url.toString(), {
+      credentials: 'include',
+      headers: { 'Content-type': 'application/json' },
+    });
+
+    if (response.success) {
+      console.log('✅ 결합 토큰 데이터 가져오기 성공');
+      return response.data;
+    } else {
+      console.error('❌ 결합 토큰 데이터 가져오기 실패:', response.error);
+      return null;
+    }
+  } catch (error) {
+    console.error('❌ 결합 토큰 데이터 요청 오류:', error);
     return null;
   }
 }

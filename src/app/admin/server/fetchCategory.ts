@@ -1,6 +1,6 @@
 import { serverEnv } from '@/utils/env';
 import { ApiResponse, serverRequest } from '@/server/fetch';
-import { Category, CategoryResponse } from '../type';
+import { Category, CategoryResponse, CreateCategoryRequest } from '../type';
 
 // 모든 카테고리 가져오기
 export async function fetchAllCategories(): Promise<
@@ -8,7 +8,7 @@ export async function fetchAllCategories(): Promise<
 > {
   try {
     if (!serverEnv.CATEGORY_URL) {
-      console.warn('CATEGORY_URL 환경변수가 설정되지 않았습니다.');
+      console.warn('❌ CATEGORY_URL 환경변수가 설정되지 않았습니다.');
       return {
         success: false,
         error: 'CATEGORY_URL not configured',
@@ -16,6 +16,14 @@ export async function fetchAllCategories(): Promise<
         data: { categories: [], total: 0 },
       };
     }
+
+    console.log('🔍 fetchAllCategories 호출:', {
+      url: serverEnv.CATEGORY_URL,
+      serverEnv: {
+        CATEGORY_URL: serverEnv.CATEGORY_URL,
+      },
+      timestamp: new Date().toISOString(),
+    });
 
     const response = await serverRequest.get<CategoryResponse>(
       serverEnv.CATEGORY_URL,
@@ -26,9 +34,13 @@ export async function fetchAllCategories(): Promise<
     );
 
     if (response.success && response.data) {
+      console.log('✅ 카테고리 가져오기 성공:', {
+        total: response.data.total,
+        categoriesLength: response.data.categories?.length || 0,
+      });
       return response;
     } else {
-      console.error('카테고리 가져오기 실패:', response.error);
+      console.error('❌ 카테고리 가져오기 실패:', response.error);
       return {
         success: false,
         error: response.error || 'Failed to fetch categories',
@@ -37,7 +49,7 @@ export async function fetchAllCategories(): Promise<
       };
     }
   } catch (error) {
-    console.error('카테고리 요청 오류:', error);
+    console.error('❌ 카테고리 요청 오류:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -49,46 +61,59 @@ export async function fetchAllCategories(): Promise<
 
 // 카테고리 생성
 export async function createCategory(
-  name: string,
-  description: string
-): Promise<ApiResponse<Category>> {
+  categoryData: CreateCategoryRequest
+): Promise<ApiResponse<CategoryResponse>> {
   try {
     if (!serverEnv.CATEGORY_URL) {
+      console.warn('❌ CATEGORY_URL 환경변수가 설정되지 않았습니다.');
       return {
         success: false,
         error: 'CATEGORY_URL not configured',
         status: 500,
-        data: null,
+        data: { categories: [], total: 0 },
       };
     }
 
-    const response = await serverRequest.post<Category>(
+    console.log('🔍 createCategory 호출:', {
+      url: serverEnv.CATEGORY_URL,
+      categoryData,
+      serverEnv: {
+        CATEGORY_URL: serverEnv.CATEGORY_URL,
+      },
+      timestamp: new Date().toISOString(),
+    });
+
+    const response = await serverRequest.post<CategoryResponse>(
       serverEnv.CATEGORY_URL,
-      { name, description },
+      categoryData,
       {
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
       }
     );
 
-    if (response.success && response.data) {
+    if (response.success) {
+      console.log('✅ 카테고리 생성 성공:', {
+        categoryName: categoryData.name,
+        total: response.data?.total || 0,
+      });
       return response;
     } else {
-      console.error('카테고리 생성 실패:', response.error);
+      console.error('❌ 카테고리 생성 실패:', response.error);
       return {
         success: false,
-        error: response.error || '카테고리 생성 실패',
+        error: response.error || 'Failed to create category',
         status: response.status || 500,
-        data: null,
+        data: { categories: [], total: 0 },
       };
     }
   } catch (error) {
-    console.error('카테고리 생성 오류:', error);
+    console.error('❌ 카테고리 생성 요청 오류:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : '카테고리 생성 오류',
+      error: error instanceof Error ? error.message : 'Unknown error',
       status: 500,
-      data: null,
+      data: { categories: [], total: 0 },
     };
   }
 }
