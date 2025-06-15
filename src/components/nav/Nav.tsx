@@ -122,7 +122,6 @@ const Nav = () => {
     const infoWebsocket = new WebSocket(clientEnv.INFO_WEBSOCKET_URL);
 
     infoWebsocket.onopen = (event) => {
-      console.log('🔌 웹소켓 연결 성공:', event);
     };
 
     infoWebsocket.onmessage = (event) => {
@@ -135,7 +134,6 @@ const Nav = () => {
           dispatch(setDollar(marketData.dollar));
           dispatch(setTether(marketData.tether));
         } else if (streamData.type === 'notice') {
-          console.log('📢 웹소켓 notice 데이터:', streamData.data);
 
           // 데이터가 배열이 아닌 경우 배열로 변환
           const noticeArray = Array.isArray(streamData.data)
@@ -144,8 +142,6 @@ const Nav = () => {
 
           dispatch(setNotice(noticeArray));
           dispatch(setIsNewNoticeGenerated(true));
-        } else {
-          console.log('❓ 알 수 없는 메시지 타입:', streamData);
         }
       } catch (error) {
         console.error('❌ JSON 파싱 오류:', error);
@@ -159,7 +155,6 @@ const Nav = () => {
     };
 
     infoWebsocket.onclose = (event) => {
-      console.log('🔌 웹소켓 연결 종료:', event.code, event.reason);
     };
 
     return () => {

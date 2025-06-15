@@ -28,30 +28,9 @@ export async function serverFetch(
   init?: RequestInit
 ): Promise<ServerFetchResponse> {
   try {
-    console.log('🖥️ Server Fetch Request:', {
-      url: route,
-      method: init?.method || 'GET',
-      timestamp: new Date().toISOString(),
-      environment: {
-        NODE_ENV: process.env.NODE_ENV,
-        MARKET_FIRST_NAME: process.env.MARKET_FIRST_NAME,
-        NOTICE_URL: process.env.NOTICE_URL,
-        BOARD_URL: process.env.BOARD_URL,
-        CATEGORY_URL: process.env.CATEGORY_URL,
-        MARKET_COMBINE_DATA: process.env.MARKET_COMBINE_DATA,
-      },
-    });
-
     const response = await fetch(route, init);
     const text = await response.text();
 
-    console.log('✅ Server Fetch Response:', {
-      url: route,
-      status: response.status,
-      ok: response.ok,
-      timestamp: new Date().toISOString(),
-      responseLength: text.length,
-    });
 
     return {
       ok: response.ok,

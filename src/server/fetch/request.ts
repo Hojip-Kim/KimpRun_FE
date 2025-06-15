@@ -49,20 +49,6 @@ export const createRequest = (baseConfig: Partial<FetchConfig> = {}) => {
     const finalConfig = { ...config, ...options };
     const { timeout, retries, retryDelay, ...fetchOptions } = finalConfig;
 
-    // URL과 환경변수 상태 로깅
-    console.log('🌐 Fetch Request:', {
-      url,
-      method: finalConfig.method || 'GET',
-      timestamp: new Date().toISOString(),
-      environment: {
-        NODE_ENV: process.env.NODE_ENV,
-        MARKET_FIRST_NAME: process.env.MARKET_FIRST_NAME,
-        NOTICE_URL: process.env.NOTICE_URL,
-        BOARD_URL: process.env.BOARD_URL,
-        CATEGORY_URL: process.env.CATEGORY_URL,
-      },
-    });
-
     try {
       const response = await withRetry(
         () => withTimeout(fetch(url, fetchOptions), timeout!),
@@ -74,13 +60,6 @@ export const createRequest = (baseConfig: Partial<FetchConfig> = {}) => {
         .get('content-type')
         ?.includes('application/json');
       const data = isJson ? await response.json() : await response.text();
-
-      console.log('✅ Fetch Response:', {
-        url,
-        status: response.status,
-        ok: response.ok,
-        timestamp: new Date().toISOString(),
-      });
 
       return {
         success: response.ok,
@@ -110,7 +89,6 @@ export const createApiClient = (
 ) => {
   const request = createRequest(baseConfig);
 
-  console.log('createApiClient', baseUrl, baseConfig);
 
   return {
     get: <T = any>(endpoint: string, config?: Partial<FetchConfig>) =>

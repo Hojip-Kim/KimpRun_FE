@@ -108,26 +108,11 @@ export async function getCommunityData(
     const url = new URL(`${serverEnv.BOARD_URL}/all/page`);
     url.searchParams.set('page', page.toString());
 
-    console.log('🔍 getCommunityData 호출:', {
-      baseUrl: serverEnv.BOARD_URL,
-      fullUrl: url.toString(),
-      page,
-      serverEnv: {
-        BOARD_URL: serverEnv.BOARD_URL,
-        ALL_POSTS_URL: serverEnv.ALL_POSTS_URL,
-      },
-      timestamp: new Date().toISOString(),
-    });
-
     const response = await serverRequest.get<AllPostData>(url.toString(), {
       cache: 'no-store',
     });
 
     if (response.success && response.data) {
-      console.log('✅ 커뮤니티 데이터 가져오기 성공:', {
-        boardCount: response.data.boardCount,
-        boardsLength: response.data.boards?.length || 0,
-      });
       return response;
     } else {
       console.error('❌ 커뮤니티 데이터 가져오기 실패:', response.error);

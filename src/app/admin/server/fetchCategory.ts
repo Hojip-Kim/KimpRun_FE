@@ -8,7 +8,6 @@ export async function fetchAllCategories(): Promise<
 > {
   try {
     if (!serverEnv.CATEGORY_URL) {
-      console.warn('❌ CATEGORY_URL 환경변수가 설정되지 않았습니다.');
       return {
         success: false,
         error: 'CATEGORY_URL not configured',
@@ -16,14 +15,6 @@ export async function fetchAllCategories(): Promise<
         data: { categories: [], total: 0 },
       };
     }
-
-    console.log('🔍 fetchAllCategories 호출:', {
-      url: serverEnv.CATEGORY_URL,
-      serverEnv: {
-        CATEGORY_URL: serverEnv.CATEGORY_URL,
-      },
-      timestamp: new Date().toISOString(),
-    });
 
     const response = await serverRequest.get<CategoryResponse>(
       serverEnv.CATEGORY_URL,
@@ -34,10 +25,6 @@ export async function fetchAllCategories(): Promise<
     );
 
     if (response.success && response.data) {
-      console.log('✅ 카테고리 가져오기 성공:', {
-        total: response.data.total,
-        categoriesLength: response.data.categories?.length || 0,
-      });
       return response;
     } else {
       console.error('❌ 카테고리 가져오기 실패:', response.error);
@@ -74,15 +61,6 @@ export async function createCategory(
       };
     }
 
-    console.log('🔍 createCategory 호출:', {
-      url: serverEnv.CATEGORY_URL,
-      categoryData,
-      serverEnv: {
-        CATEGORY_URL: serverEnv.CATEGORY_URL,
-      },
-      timestamp: new Date().toISOString(),
-    });
-
     const response = await serverRequest.post<CategoryResponse>(
       serverEnv.CATEGORY_URL,
       categoryData,
@@ -93,10 +71,6 @@ export async function createCategory(
     );
 
     if (response.success) {
-      console.log('✅ 카테고리 생성 성공:', {
-        categoryName: categoryData.name,
-        total: response.data?.total || 0,
-      });
       return response;
     } else {
       console.error('❌ 카테고리 생성 실패:', response.error);
@@ -135,15 +109,6 @@ export async function updateCategory(
       };
     }
 
-    console.log('🔍 updateCategory 호출:', {
-      url: serverEnv.CATEGORY_URL,
-      updateData: { id, name, description },
-      serverEnv: {
-        CATEGORY_URL: serverEnv.CATEGORY_URL,
-      },
-      timestamp: new Date().toISOString(),
-    });
-
     const response = await serverRequest.put<Category>(
       serverEnv.CATEGORY_URL,
       { id, name, description },
@@ -154,10 +119,6 @@ export async function updateCategory(
     );
 
     if (response.success && response.data) {
-      console.log('✅ 카테고리 수정 성공:', {
-        categoryId: id,
-        categoryName: name,
-      });
       return response;
     } else {
       console.error('❌ 카테고리 수정 실패:', response.error);
@@ -196,24 +157,12 @@ export async function deleteCategory(
 
     const deleteUrl = `${serverEnv.CATEGORY_URL}/${id}`;
 
-    console.log('🔍 deleteCategory 호출:', {
-      url: deleteUrl,
-      categoryId: id,
-      serverEnv: {
-        CATEGORY_URL: serverEnv.CATEGORY_URL,
-      },
-      timestamp: new Date().toISOString(),
-    });
-
     const response = await serverRequest.delete(deleteUrl, {
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
     });
 
     if (response.success) {
-      console.log('✅ 카테고리 삭제 성공:', {
-        categoryId: id,
-      });
       return response;
     } else {
       console.error('❌ 카테고리 삭제 실패:', response.error);
