@@ -16,7 +16,7 @@ export async function getTokenNames() {
   try {
     const url = serverEnv.MARKET_FIRST_NAME;
 
-    console.log('🔍 getTokenNames 호출:', {
+    console.log('🔍 getTokenNames 호출 : ', {
       url,
       serverEnv: {
         MARKET_FIRST_NAME: serverEnv.MARKET_FIRST_NAME,
