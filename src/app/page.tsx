@@ -1,5 +1,4 @@
 import React from 'react';
-import { getInitialTokenNames, getInitialCombinedTokenData } from './server';
 import RowPageClient from './components/RowPageClient';
 import NoticeServerPage from '@/components/notice/server/NoticeServerPage';
 import { MarketType } from '@/types/marketType';
@@ -8,14 +7,8 @@ import './page.css';
 import Chat from '@/components/chat/Chat';
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 0;
 
 const MainPage = async () => {
-  const [initialTokenNames, initialCombinedData] = await Promise.all([
-    getInitialTokenNames(),
-    getInitialCombinedTokenData(),
-  ]);
-
   return (
     <div className="main-page-container">
       <div className="left-aside-container">
@@ -27,10 +20,7 @@ const MainPage = async () => {
         </div>
       </div>
       <div className="center-aside-container">
-        <RowPageClient
-          initialTokenNames={initialTokenNames}
-          initialCombinedData={initialCombinedData}
-        />
+        <RowPageClient />
       </div>
       <div className="right-aside-container">
         <Chat />
