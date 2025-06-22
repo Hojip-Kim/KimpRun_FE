@@ -358,13 +358,6 @@ const Row = ({
                   (token) => filteredTokens.includes(token) && rowData[token]
                 );
 
-                console.log("🎨 렌더링할 토큰들:", renderTokens);
-                console.log("🎨 현재 filteredTokens:", filteredTokens);
-                console.log(
-                  "🎨 현재 tokenOrderList:",
-                  tokenOrderList.slice(0, 10)
-                );
-
                 return renderTokens.map((token) => (
                   <TableRowComponent
                     key={token}
