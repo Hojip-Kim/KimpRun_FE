@@ -1,4 +1,5 @@
 import { Notice } from '@/components/notice/type';
+import { MarketType } from '@/types/marketType';
 
 export interface User {
   name: string;
@@ -36,4 +37,9 @@ export interface WidgetState {
   interval: string;
   tokenPrice: number;
   kimp: number;
+}
+
+export interface MarketState {
+  selectedMainMarket: MarketType;
+  selectedCompareMarket: MarketType;
 }

@@ -3,6 +3,7 @@ import tokenReducer from './reducer/tokenReducer';
 import infoReducer from './reducer/infoReducer';
 import widgetReducer from './reducer/widgetReduce';
 import authReducer, { setGuestUser } from './reducer/authReducer';
+import marketReducer from './reducer/marketReducer';
 import {
   FLUSH,
   PAUSE,
@@ -36,7 +37,7 @@ const storage =
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['auth', 'widget', 'info', 'token', 'notice'],
+  whitelist: ['auth', 'widget', 'info', 'token', 'notice', 'market'],
 };
 
 export const rootReducer = combineReducers({
@@ -45,6 +46,7 @@ export const rootReducer = combineReducers({
   info: infoReducer,
   widget: widgetReducer,
   notice: noticeReducer,
+  market: marketReducer,
 });
 
 export const persistedReducer = persistReducer(persistConfig, rootReducer);
