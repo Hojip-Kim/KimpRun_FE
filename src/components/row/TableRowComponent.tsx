@@ -1,63 +1,54 @@
-'use client';
+"use client";
 
-import React, { useEffect } from 'react';
-import { numberToKorean, rateCompareByOriginPrice } from '@/method';
+import React from "react";
+import { numberToKorean, rateCompareByOriginPrice } from "@/method";
 import {
   TableCell,
   TableRow as StyledTableRow,
   ExpandableContent,
-} from './styled';
-import { dataListType } from './types';
+} from "./styled";
+import { dataListType } from "./types";
 
 interface TableRowProps {
   token: string;
   data: dataListType;
-  secondPrice: number;
-  secondData: secondData;
   prevData: dataListType;
   expandedRow: string | null;
   fadeOutClass: string;
   onRowClick: (token: string) => void;
 }
 
-interface secondData {
-  token: string;
-  trade_price: number;
-}
-
 const getChangeRateStyle = (rate, change?) => {
-  if ((rate > 0 && change === 'RISE') || rate > 0) {
-    return { color: '#45E8BC' };
-  } else if ((rate < 0 && change === 'FALL') || rate < 0) {
-    return { color: 'red' };
+  if ((rate > 0 && change === "RISE") || rate > 0) {
+    return { color: "#45E8BC" };
+  } else if ((rate < 0 && change === "FALL") || rate < 0) {
+    return { color: "red" };
   } else {
-    return { color: 'white' };
+    return { color: "white" };
   }
 };
 
 const priceChangeStyle = (prev: number, cur: number) => {
   if (prev === undefined)
-    return { transition: 'background-color 0.4s ease-in-out' };
+    return { transition: "background-color 0.4s ease-in-out" };
   if (prev < cur) {
     return {
-      backgroundColor: 'rgba(0, 255, 0, 0.3)',
-      transition: 'background-color 0.4s ease-in-out',
+      backgroundColor: "rgba(0, 255, 0, 0.3)",
+      transition: "background-color 0.4s ease-in-out",
     };
   } else if (prev > cur) {
     return {
-      backgroundColor: 'rgba(255, 0, 0, 0.3)',
-      transition: 'background-color 0.4s ease-in-out',
+      backgroundColor: "rgba(255, 0, 0, 0.3)",
+      transition: "background-color 0.4s ease-in-out",
     };
   } else {
-    return { transition: 'background-color 0.4s ease-in-out' };
+    return { transition: "background-color 0.4s ease-in-out" };
   }
 };
 const TableRowComponent = React.memo(
   ({
     token,
     data,
-    secondPrice,
-    secondData,
     prevData,
     expandedRow,
     fadeOutClass,
@@ -68,25 +59,25 @@ const TableRowComponent = React.memo(
         <StyledTableRow
           $isExpanded={expandedRow === token}
           onClick={() => onRowClick(token)}
-          className={fadeOutClass || ''}
+          className={fadeOutClass || ""}
           style={priceChangeStyle(prevData?.trade_price, data.trade_price)}
         >
           <TableCell>{data.token}</TableCell>
           {/* 코인 가격 */}
           <TableCell>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: "flex", flexDirection: "column" }}>
               <span>{data.trade_price?.toLocaleString()}</span>
-              <span style={{ color: 'gray' }}>
+              <span style={{ color: "gray" }}>
                 {data.secondPrice
                   ? (() => {
                       const decimalPlaces =
-                        data.trade_price.toString().split('.')[1]?.length || 1;
+                        data.trade_price.toString().split(".")[1]?.length || 1;
                       return data.secondPrice.toLocaleString(undefined, {
                         minimumFractionDigits: decimalPlaces,
                         maximumFractionDigits: decimalPlaces,
                       });
                     })()
-                  : ''}
+                  : ""}
               </span>
             </div>
           </TableCell>
@@ -97,11 +88,9 @@ const TableRowComponent = React.memo(
             )}
           >
             {data.secondPrice ? (
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span>
-                  {rateCompareByOriginPrice(data.kimp + 1).toFixed(2)}%
-                </span>
-                <span style={{ color: 'gray' }}>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <span>{(data.kimp * 100).toFixed(2)}%</span>
+                <span style={{ color: "gray" }}>
                   {(() => {
                     const priceDiff = Math.abs(
                       data.trade_price - data.secondPrice
@@ -116,16 +105,16 @@ const TableRowComponent = React.memo(
                 </span>
               </div>
             ) : (
-              ''
+              ""
             )}
           </TableCell>
           {/* 변동률 */}
           <TableCell
             style={getChangeRateStyle(data.change_rate, data.rate_change)}
           >
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: "flex", flexDirection: "column" }}>
               <span>{(data.change_rate * 10).toFixed(2)}%</span>
-              <span style={{ color: 'gray' }}>
+              <span style={{ color: "gray" }}>
                 {data.opening_price?.toLocaleString()}
               </span>
             </div>
@@ -161,7 +150,7 @@ const TableRowComponent = React.memo(
               %
             </div>
           </TableCell>
-          <TableCell style={{ fontSize: '0.6rem', color: 'gray' }}>
+          <TableCell style={{ fontSize: "0.6rem", color: "gray" }}>
             {numberToKorean(data.acc_trade_price24 / 10000)}
           </TableCell>
         </StyledTableRow>
