@@ -1,7 +1,8 @@
 import { serverEnv } from '@/utils/env';
 import { tokenNameList } from '@/app/types';
-import { ApiResponse, serverRequest } from '@/server/fetch';
-import { DollarInfo, TetherInfo } from './type';
+import { serverRequest } from '@/server/fetch';
+
+import { MarketType } from '@/types/marketType';
 
 export async function getTokenNames() {
   try {
@@ -54,9 +55,9 @@ export async function getCombinedTokenData(
 }
 
 // 단일 마켓 토큰 데이터 가져오기
-export async function getSingleMarketData(market: string) {
+export async function getSingleMarketData(market: MarketType) {
   try {
-    const url = new URL(serverEnv.MARKET_UPBIT_DATA);
+    const url = new URL(serverEnv.MARKET_SINGLE_DATA);
     url.searchParams.set('market', market);
 
     const response = await serverRequest.get(url.toString(), {
