@@ -28,7 +28,8 @@ import {
 } from "./style";
 import { MarketType } from "@/types/marketType";
 import { getClientSingleMarketData } from "./clientApi";
-import { useWebSocket } from "@/hooks/useWebSocket";
+import { useMarketDataWebSocket } from "@/hooks/useMarketDataWebSocket";
+import { MarketDataMap } from "@/types/marketData";
 
 const RowPageClient: React.FC = () => {
   // 기본 거래소 설정
@@ -89,41 +90,66 @@ const RowPageClient: React.FC = () => {
     { value: MarketType.BITHUMB, label: "BITHUMB", hasWebsocket: true },
   ];
 
-  // 웹소켓 메시지 핸들러
-  const handleWebSocketMessage = useCallback(
-    (market: MarketType, data: any) => {
-      let processedData = data;
+  // 마켓 데이터 매핑 함수 - 백엔드 DTO를 기존 타입으로 변환
+  const mapToFirstDataSet = useCallback((data: any): firstDataSet => {
+    return {
+      acc_trade_price24: data.acc_trade_price24 || 0,
+      change_rate: data.change_rate || 0,
+      highest_price: data.highest_price || 0,
+      lowest_price: data.lowest_price || 0,
+      opening_price: data.opening_price || 0,
+      rate_change: data.rate_change || "EVEN",
+      token: data.token || "",
+      trade_price: data.trade_price || 0,
+      trade_volume: data.trade_volume || 0,
+    };
+  }, []);
 
-      // 메인 거래소 또는 비교 거래소에 따라 데이터 설정
-      if (market === selectedMainMarket) {
-        setFirstDataset((prevState) => {
-          const newState = { ...prevState };
-          Object.entries(processedData).forEach(([key, value]) => {
-            newState[key] = value as firstDataSet;
-          });
-          return newState;
+  const mapToSecondDataSet = useCallback((data: any): secondDataSet => {
+    return {
+      token: data.token || "",
+      trade_price: data.trade_price || 0,
+    };
+  }, []);
+
+  // 공통 마켓 데이터 핸들러 - 재사용성을 위해 통합
+  const handleMarketData = useCallback(
+    (marketType: MarketType, data: MarketDataMap) => {
+      // 메인 거래소인 경우
+      if (selectedMainMarket === marketType) {
+        const mappedData: { [key: string]: firstDataSet } = {};
+        Object.entries(data).forEach(([token, marketData]) => {
+          mappedData[token] = mapToFirstDataSet(marketData);
         });
-      } else if (market === selectedCompareMarket) {
-        setSecondDateset((prevState) => {
-          const newState = { ...prevState };
-          Object.entries(processedData).forEach(([key, value]) => {
-            newState[key] = value as secondDataSet;
-          });
-          return newState;
+        setFirstDataset((prevData) => ({
+          ...prevData,
+          ...mappedData,
+        }));
+      }
+
+      // 비교 거래소인 경우
+      if (selectedCompareMarket === marketType) {
+        const mappedData: { [key: string]: secondDataSet } = {};
+        Object.entries(data).forEach(([token, marketData]) => {
+          mappedData[token] = mapToSecondDataSet(marketData);
         });
+        setSecondDateset((prevData) => ({
+          ...prevData,
+          ...mappedData,
+        }));
       }
     },
-    [selectedMainMarket, selectedCompareMarket, dollar]
+    [
+      selectedMainMarket,
+      selectedCompareMarket,
+      mapToFirstDataSet,
+      mapToSecondDataSet,
+    ]
   );
 
-  // 웹소켓 연결 관리
-  const websocketMarkets = [selectedMainMarket, selectedCompareMarket].filter(
-    (market, index, arr) => market && arr.indexOf(market) === index
-  ) as MarketType[];
-
-  const { disconnect } = useWebSocket({
-    markets: websocketMarkets,
-    onMessage: handleWebSocketMessage,
+  // 통합 마켓 데이터 웹소켓 사용
+  const { disconnect } = useMarketDataWebSocket({
+    onMarketData: handleMarketData,
     enabled: !loading && !initialLoading,
   });
 
@@ -181,7 +207,7 @@ const RowPageClient: React.FC = () => {
 
       // 5. 비교 거래소에서 메인 거래소와 공통된 코인만 필터링
       const filteredCompareData: { [key: string]: any } = {};
-      if (compareMarketData && mainMarketData) {
+      if (mainMarketData && compareMarketData) {
         Object.keys(mainMarketData).forEach((token) => {
           if (compareMarketData[token]) {
             filteredCompareData[token] = compareMarketData[token];
