@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Notice, NoticeResponse } from '../type';
-import { MarketType } from '@/types/marketType';
-import { fetchClientNotice } from '../api/clientDataFetch';
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { Notice, NoticeResponse } from "../type";
+import { MarketType } from "@/types/marketType";
+import { fetchClientNotice } from "../api/clientDataFetch";
 import {
   NoticeContainer,
   NoticeHeader,
@@ -27,19 +27,20 @@ import {
   NewBadge,
   NoticeItemHeaderLeft,
   NoticeCompleteBanner,
-} from './style';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '@/redux/store';
-import { formatNoticeDate, isNewNotice } from '@/method/common_method';
+} from "./style";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/redux/store";
+import { formatNoticeDate, isNewNotice } from "@/method/common_method";
 
 interface NoticeClientProps {
   initialNoticeData: NoticeResponse;
 }
 
 const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
-  const [noticeData, setNoticeData] = useState<Notice[]>(
-    initialNoticeData.data.content
-  );
+  const initialContent = initialNoticeData?.data?.content || [];
+  const initialLast = initialNoticeData?.data?.last ?? true;
+
+  const [noticeData, setNoticeData] = useState<Notice[]>(initialContent);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [selectedMarket, setSelectedMarket] = useState<MarketType>(
@@ -48,7 +49,7 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
 
   // 무한스크롤을 위한 상태 제공
   const [currentPage, setCurrentPage] = useState(0);
-  const [hasMore, setHasMore] = useState(!initialNoticeData.data.last);
+  const [hasMore, setHasMore] = useState(!initialLast);
   const [pageSize] = useState(15);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -82,7 +83,7 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
 
   const handleNoticeClick = (exchangeUrl: string, url: string) => {
     const fullUrl = exchangeUrl ? exchangeUrl + url : url;
-    window.open(fullUrl, '_blank', 'noopener,noreferrer');
+    window.open(fullUrl, "_blank", "noopener,noreferrer");
   };
 
   const loadInitialData = async (marketType: MarketType) => {
@@ -102,12 +103,12 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
         const hasMoreData = !response.data.data.last;
         setHasMore(hasMoreData);
       } else {
-        console.error('❌ 공지사항 로딩 실패:', response.error);
+        console.error("❌ 공지사항 로딩 실패:", response.error);
         setNoticeData([]);
         setHasMore(false);
       }
     } catch (error) {
-      console.error('❌ 공지사항 로딩 중 오류:', error);
+      console.error("❌ 공지사항 로딩 중 오류:", error);
       setNoticeData([]);
       setHasMore(false);
     } finally {
@@ -138,11 +139,11 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
         setCurrentPage(nextPage);
         setHasMore(!response.data.data.last);
       } else {
-        console.error('❌ 추가 공지사항 로딩 실패:', response.error);
+        console.error("❌ 추가 공지사항 로딩 실패:", response.error);
         setHasMore(false);
       }
     } catch (error) {
-      console.error('❌ 추가 공지사항 로딩 중 오류:', error);
+      console.error("❌ 추가 공지사항 로딩 중 오류:", error);
       setHasMore(false);
     } finally {
       setIsLoadingMore(false);
@@ -168,8 +169,8 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (container) {
-      container.addEventListener('scroll', handleScroll);
-      return () => container.removeEventListener('scroll', handleScroll);
+      container.addEventListener("scroll", handleScroll);
+      return () => container.removeEventListener("scroll", handleScroll);
     }
   }, [handleScroll]);
 
@@ -187,9 +188,7 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
           <SelectorWrapper>
             <ExchangeSelector
               value={selectedMarket}
-              onChange={(e) =>
-                handleMarketChange(Number(e.target.value) as MarketType)
-              }
+              onChange={(e) => handleMarketChange(e.target.value as MarketType)}
             >
               <option value={MarketType.ALL}>전체</option>
               <option value={MarketType.UPBIT}>UPBIT</option>
@@ -211,9 +210,7 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
         <SelectorWrapper>
           <ExchangeSelector
             value={selectedMarket}
-            onChange={(e) =>
-              handleMarketChange(Number(e.target.value) as MarketType)
-            }
+            onChange={(e) => handleMarketChange(e.target.value as MarketType)}
           >
             <option value={MarketType.ALL}>전체</option>
             <option value={MarketType.UPBIT}>UPBIT</option>
@@ -228,7 +225,7 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
         {noticeData.length === 0 ? (
           <EmptyNotice>
             {selectedMarket === MarketType.ALL
-              ? '공지사항이 없습니다.'
+              ? "공지사항이 없습니다."
               : `${selectedMarket} 공지사항이 없습니다.`}
           </EmptyNotice>
         ) : (
@@ -244,7 +241,7 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
                     <NewNoticeItem
                       isAnimating={isAnimating && index === 0}
                       onClick={() =>
-                        handleNoticeClick(notice.exchangeUrl || '', notice.url)
+                        handleNoticeClick(notice.exchangeUrl || "", notice.url)
                       }
                     >
                       <NoticeItemHeader>
@@ -280,8 +277,6 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
                 );
               })}
             </AnimatedNoticeList>
-
-            {/* 무한스크롤 로딩 인디케이터 */}
             {isLoadingMore && (
               <LoadingIndicator>
                 <LoadingText>
@@ -289,8 +284,6 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
                 </LoadingText>
               </LoadingIndicator>
             )}
-
-            {/* 더 이상 로드할 데이터가 없을 때 */}
             {!hasMore && noticeData.length > 0 && (
               <NoticeCompleteBanner>
                 모든 공지사항을 확인했습니다.
