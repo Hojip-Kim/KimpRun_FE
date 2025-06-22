@@ -57,6 +57,7 @@ const RowPageClient: React.FC = () => {
   const [filteredTokens, setFilteredTokens] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [currentSearchTerm, setCurrentSearchTerm] = useState<string>("");
 
   // 리덕스에서 거래소 선택 상태 가져오기
   const selectedMainMarket = useSelector(
@@ -271,6 +272,7 @@ const RowPageClient: React.FC = () => {
       // 메인 거래소의 모든 코인을 기반으로 필터링
       const baseTokens = tokenFirstList || []; // 메인 거래소의 모든 코인
 
+      setCurrentSearchTerm(searchTerm);
       if (!searchTerm) {
         setFilteredTokens(baseTokens);
       } else {
@@ -284,11 +286,24 @@ const RowPageClient: React.FC = () => {
   );
 
   useEffect(() => {
-    // 메인 거래소의 모든 토큰을 기본으로 설정
+    // 메인 거래소의 모든 토큰을 기본으로 설정하되, 현재 검색어가 있다면 필터링 유지
     if (tokenFirstList && tokenFirstList.length > 0) {
-      setFilteredTokens(tokenFirstList);
+      if (currentSearchTerm) {
+        // 현재 검색어로 다시 필터링
+        const filtered = tokenFirstList.filter((token) =>
+          token.toLowerCase().includes(currentSearchTerm.toLowerCase())
+        );
+        setFilteredTokens(filtered);
+      } else {
+        setFilteredTokens(tokenFirstList);
+      }
     }
-  }, [tokenFirstList, selectedMainMarket, selectedCompareMarket]);
+  }, [
+    tokenFirstList,
+    selectedMainMarket,
+    selectedCompareMarket,
+    currentSearchTerm,
+  ]);
 
   // 웹소켓 데이터 사용 (정적 데이터는 이미 초기값으로 설정됨)
   const displayFirstDataset = firstDataset;

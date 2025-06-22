@@ -71,16 +71,60 @@ const Row = ({
       direction = "asc";
     }
 
-    const sortedData = sortDataByConfig(rowData, key, direction);
-
-    // 정렬된 순서대로 토큰 이름 배열 생성
-    const sortedTokenOrder = sortedData.map(([token, data]) => token);
-
-    // 리덕스에 정렬된 토큰 순서 저장
-    dispatch(setTokenFirstList(sortedTokenOrder));
-
+    // 정렬 상태만 업데이트 (실제 정렬은 useEffect에서 처리)
     setSortConfig({ key, direction });
   };
+
+  // 정렬 적용 함수 분리
+  const applySorting = (
+    dataToSort: { [key: string]: dataListType },
+    config: { key: string; direction: string }
+  ) => {
+    if (!config.key || !config.direction) return;
+
+    // 현재 필터링된 토큰들만 대상으로 정렬
+    const filteredRowData = {};
+    filteredTokens.forEach((token) => {
+      if (dataToSort[token]) {
+        filteredRowData[token] = dataToSort[token];
+      }
+    });
+
+    const sortedData = sortDataByConfig(
+      filteredRowData,
+      config.key,
+      config.direction
+    );
+
+    // 정렬된 필터링 토큰들의 순서만 업데이트
+    const sortedFilteredTokenOrder = sortedData.map(([token, data]) => token);
+
+    // 기존 리덕스 토큰 순서에서 필터링되지 않은 토큰들은 유지하고, 필터링된 토큰들만 정렬된 순서로 교체
+    const currentTokenOrder = [...tokenOrderList];
+    const nonFilteredTokens = currentTokenOrder.filter(
+      (token) => !filteredTokens.includes(token)
+    );
+    const newTokenOrder = [...sortedFilteredTokenOrder, ...nonFilteredTokens];
+
+    // 순서가 실제로 변경된 경우에만 업데이트
+    const currentOrderString = tokenOrderList.join(",");
+    const newOrderString = newTokenOrder.join(",");
+    if (currentOrderString !== newOrderString) {
+      dispatch(setTokenFirstList(newTokenOrder));
+    }
+  };
+
+  // 정렬 상태가 변경될 때 정렬 적용
+  useEffect(() => {
+    if (
+      sortConfig.key &&
+      sortConfig.direction &&
+      rowData &&
+      Object.keys(rowData).length > 0
+    ) {
+      applySorting(rowData, sortConfig);
+    }
+  }, [sortConfig, filteredTokens]);
 
   const rowClick = async (token: string) => {
     if (expandedRow === token) {
@@ -172,14 +216,7 @@ const Row = ({
 
           // 현재 정렬 상태가 있다면 웹소켓 데이터 업데이트 후에도 다시 정렬
           if (sortConfig.key && sortConfig.direction) {
-            const sortedData = sortDataByConfig(
-              updatedData,
-              sortConfig.key,
-              sortConfig.direction
-            );
-            // 정렬된 순서대로 토큰 순서 업데이트
-            const sortedTokenOrder = sortedData.map(([token, data]) => token);
-            dispatch(setTokenFirstList(sortedTokenOrder));
+            applySorting(updatedData, sortConfig);
           }
 
           const newFadeOutClass = {};
@@ -317,21 +354,28 @@ const Row = ({
           <BodyTable>
             <tbody>
               {(() => {
-                return tokenOrderList
-                  .filter(
-                    (token) => filteredTokens.includes(token) && rowData[token]
-                  )
-                  .map((token) => (
-                    <TableRowComponent
-                      key={token}
-                      token={token}
-                      data={rowData[token]}
-                      prevData={prevRowData[token]}
-                      expandedRow={expandedRow}
-                      fadeOutClass={fadeOutClass[token]}
-                      onRowClick={rowClick}
-                    />
-                  ));
+                const renderTokens = tokenOrderList.filter(
+                  (token) => filteredTokens.includes(token) && rowData[token]
+                );
+
+                console.log("🎨 렌더링할 토큰들:", renderTokens);
+                console.log("🎨 현재 filteredTokens:", filteredTokens);
+                console.log(
+                  "🎨 현재 tokenOrderList:",
+                  tokenOrderList.slice(0, 10)
+                );
+
+                return renderTokens.map((token) => (
+                  <TableRowComponent
+                    key={token}
+                    token={token}
+                    data={rowData[token]}
+                    prevData={prevRowData[token]}
+                    expandedRow={expandedRow}
+                    fadeOutClass={fadeOutClass[token]}
+                    onRowClick={rowClick}
+                  />
+                ));
               })()}
             </tbody>
           </BodyTable>
