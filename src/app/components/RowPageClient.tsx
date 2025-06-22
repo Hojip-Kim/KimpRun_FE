@@ -90,7 +90,6 @@ const RowPageClient: React.FC = () => {
     { value: MarketType.BITHUMB, label: "BITHUMB", hasWebsocket: true },
   ];
 
-  // 마켓 데이터 매핑 함수 - 모든 거래소가 동일한 구조이므로 단순화
   const mapToFirstDataSet = useCallback((data: any): firstDataSet => {
     return {
       acc_trade_price24: data.acc_trade_price24 || 0,
@@ -112,7 +111,6 @@ const RowPageClient: React.FC = () => {
     };
   }, []);
 
-  // 공통 마켓 데이터 핸들러 - 모든 거래소가 동일한 구조이므로 처리가 단순함
   const handleMarketData = useCallback(
     (marketType: MarketType, data: MarketDataMap) => {
       // 메인 거래소인 경우 - 모든 필드 사용
