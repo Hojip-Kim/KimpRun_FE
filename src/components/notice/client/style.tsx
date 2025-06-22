@@ -1,3 +1,4 @@
+import { MarketType } from '@/types/marketType';
 import styled from 'styled-components';
 
 export const NoticeContainer = styled.div`
@@ -485,7 +486,7 @@ export const ModalContent = styled.div`
   color: #e0e0e0;
 `;
 
-export const ModalExchangeBadge = styled.div<{ exchangeType: number }>`
+export const ModalExchangeBadge = styled.div<{ exchangeType: MarketType }>`
   display: inline-block;
   padding: 4px 8px;
   border-radius: 4px;
@@ -494,13 +495,13 @@ export const ModalExchangeBadge = styled.div<{ exchangeType: number }>`
   margin-bottom: 10px;
   background: ${(props) => {
     switch (props.exchangeType) {
-      case 3:
+      case MarketType.UPBIT:
         return 'linear-gradient(45deg, #1976d2, #42a5f5)'; // UPBIT
-      case 2:
+      case MarketType.BINANCE:
         return 'linear-gradient(45deg, #f57c00, #ffb74d)'; // BINANCE
-      case 4:
+      case MarketType.COINONE:
         return 'linear-gradient(45deg, #388e3c, #66bb6a)'; // COINONE
-      case 5:
+      case MarketType.BITHUMB:
         return 'linear-gradient(45deg, #d32f2f, #ef5350)'; // BITHUMB
       default:
         return 'linear-gradient(45deg, #616161, #9e9e9e)'; // ALL
