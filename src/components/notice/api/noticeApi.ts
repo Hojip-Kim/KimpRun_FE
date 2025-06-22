@@ -3,13 +3,10 @@ import { NoticeParameter } from '../type';
 
 export const noticeEndPoint = {
   getNotices: (parameter: NoticeParameter) => {
-    const marketTypeValue = Number(parameter.marketType);
-
-    // NaN 체크 및 기본값 설정
-    const finalMarketTypeValue = isNaN(marketTypeValue) ? 1 : marketTypeValue;
+    const marketTypeValue = parameter.marketType;
 
     const searchParameters = new URLSearchParams({
-      marketType: finalMarketTypeValue.toString(),
+      marketType: marketTypeValue,
       page: (parameter.page || 0).toString(),
       size: (parameter.size || 15).toString(),
     });
@@ -17,10 +14,10 @@ export const noticeEndPoint = {
     return {
       clientUrl: `${
         clientEnv.NOTICE_URL
-      }/${finalMarketTypeValue}?${searchParameters.toString()}`,
+      }/${marketTypeValue}?${searchParameters.toString()}`,
       serverUrl: `${
         serverEnv.NOTICE_URL
-      }/${finalMarketTypeValue}?${searchParameters.toString()}`,
+      }/${marketTypeValue}?${searchParameters.toString()}`,
     };
   },
 };
