@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { setKimp, setToken, setTokenPrice } from "@/redux/reducer/widgetReduce";
+import { setTokenFirstList } from "@/redux/reducer/tokenReducer";
 import {
   getRowData,
   updateRowData,
@@ -52,6 +53,10 @@ const Row = ({
     (state: RootState) => state.market.selectedCompareMarket
   );
 
+  const tokenOrderList = useSelector(
+    (state: RootState) => state.token.tokenList.first
+  );
+
   const token = useSelector((state: RootState) => state.widget.token);
 
   const updateWidgetToken = (token: string) => {
@@ -67,9 +72,13 @@ const Row = ({
     }
 
     const sortedData = sortDataByConfig(rowData, key, direction);
-    setRowData(
-      Object.fromEntries(sortedData) as { [key: string]: dataListType }
-    );
+
+    // 정렬된 순서대로 토큰 이름 배열 생성
+    const sortedTokenOrder = sortedData.map(([token, data]) => token);
+
+    // 리덕스에 정렬된 토큰 순서 저장
+    dispatch(setTokenFirstList(sortedTokenOrder));
+
     setSortConfig({ key, direction });
   };
 
@@ -159,17 +168,20 @@ const Row = ({
       setPrevRowData(rowData);
       updateRowData(rowData, firstDataset, secondDataset).then(
         (updatedData) => {
-          // 정렬 상태가 있다면 정렬된 상태로 데이터 업데이트
-          if (sortConfig.key) {
+          setRowData(updatedData);
+
+          // 현재 정렬 상태가 있다면 웹소켓 데이터 업데이트 후에도 다시 정렬
+          if (sortConfig.key && sortConfig.direction) {
             const sortedData = sortDataByConfig(
               updatedData,
               sortConfig.key,
               sortConfig.direction
             );
-            updatedData = Object.fromEntries(sortedData);
+            // 정렬된 순서대로 토큰 순서 업데이트
+            const sortedTokenOrder = sortedData.map(([token, data]) => token);
+            dispatch(setTokenFirstList(sortedTokenOrder));
           }
 
-          setRowData(updatedData);
           const newFadeOutClass = {};
           Object.keys(firstDataset).forEach((token) => {
             const prev = prevRowData[token]?.trade_price;
@@ -305,13 +317,15 @@ const Row = ({
           <BodyTable>
             <tbody>
               {(() => {
-                return Object.entries(rowData)
-                  .filter(([token]) => filteredTokens.includes(token))
-                  .map(([token, data]) => (
+                return tokenOrderList
+                  .filter(
+                    (token) => filteredTokens.includes(token) && rowData[token]
+                  )
+                  .map((token) => (
                     <TableRowComponent
                       key={token}
                       token={token}
-                      data={data}
+                      data={rowData[token]}
                       prevData={prevRowData[token]}
                       expandedRow={expandedRow}
                       fadeOutClass={fadeOutClass[token]}
