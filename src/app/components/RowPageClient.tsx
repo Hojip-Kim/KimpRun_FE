@@ -90,7 +90,7 @@ const RowPageClient: React.FC = () => {
     { value: MarketType.BITHUMB, label: "BITHUMB", hasWebsocket: true },
   ];
 
-  // 마켓 데이터 매핑 함수 - 백엔드 DTO를 기존 타입으로 변환
+  // 마켓 데이터 매핑 함수 - 모든 거래소가 동일한 구조이므로 단순화
   const mapToFirstDataSet = useCallback((data: any): firstDataSet => {
     return {
       acc_trade_price24: data.acc_trade_price24 || 0,
@@ -112,10 +112,10 @@ const RowPageClient: React.FC = () => {
     };
   }, []);
 
-  // 공통 마켓 데이터 핸들러 - 재사용성을 위해 통합
+  // 공통 마켓 데이터 핸들러 - 모든 거래소가 동일한 구조이므로 처리가 단순함
   const handleMarketData = useCallback(
     (marketType: MarketType, data: MarketDataMap) => {
-      // 메인 거래소인 경우
+      // 메인 거래소인 경우 - 모든 필드 사용
       if (selectedMainMarket === marketType) {
         const mappedData: { [key: string]: firstDataSet } = {};
         Object.entries(data).forEach(([token, marketData]) => {
@@ -127,7 +127,7 @@ const RowPageClient: React.FC = () => {
         }));
       }
 
-      // 비교 거래소인 경우
+      // 비교 거래소인 경우 - 가격 정보만 사용
       if (selectedCompareMarket === marketType) {
         const mappedData: { [key: string]: secondDataSet } = {};
         Object.entries(data).forEach(([token, marketData]) => {
