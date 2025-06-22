@@ -2,6 +2,7 @@
 
 import { serverEnv } from '@/utils/env';
 import { serverRequest } from '@/server/fetch';
+import { MarketType } from '@/types/marketType';
 
 // market들의 토큰 네임들을 추출합니다.
 // 예를들어, firstmarketList : ['BTC', 'ETH', 'XRP']
@@ -12,12 +13,15 @@ import { serverRequest } from '@/server/fetch';
 let firstMarketList: string[] = [];
 let secondMarketList: string[] = [];
 
-export async function getTokenNames() {
+export async function getTokenNames(firstMarket: MarketType, secondMarket: MarketType) {
   try {
     const url = serverEnv.MARKET_FIRST_NAME;
 
+    const requestUrl = new URL(url);
+    requestUrl.searchParams.set('first', firstMarket);
+    requestUrl.searchParams.set('second', secondMarket);
 
-    const response = await serverRequest.get(url, {
+    const response = await serverRequest.get(requestUrl.toString(), {
       credentials: 'include',
       headers: { 'Content-type': 'application/json' },
     });
@@ -35,17 +39,17 @@ export async function getTokenNames() {
     return null;
   }
 }
-export async function getInitialTokenNames() {
-  return await getTokenNames();
+export async function getInitialTokenNames(firstMarket: MarketType, secondMarket: MarketType) {
+  return await getTokenNames(firstMarket, secondMarket);
 }
 
 // 초기 결합된 토큰 데이터 가져오기
 // 초기 firstmarket, secondMarket으로 토큰리스트에 해당하는 토큰들의 데이터를 가져옴.
-export async function getInitialCombinedTokenData() {
+export async function getInitialCombinedTokenData(firstMarket: MarketType, secondMarket: MarketType) {
   try {
     const tokenNames = [firstMarketList, secondMarketList];
     if (tokenNames.length >= 2) {
-      return await getCombinedTokenData('upbit', 'binance');
+      return await getCombinedTokenData(firstMarket, secondMarket);
     }
     return null;
   } catch (error) {
@@ -56,8 +60,8 @@ export async function getInitialCombinedTokenData() {
 
 // first market, second market 결합된 데이터 fetching
 export async function getCombinedTokenData(
-  firstMarket: string,
-  secondMarket: string
+  firstMarket: MarketType,
+  secondMarket: MarketType
 ) {
   try {
     const url = new URL(serverEnv.MARKET_COMBINE_DATA);
