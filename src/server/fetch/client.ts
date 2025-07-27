@@ -1,4 +1,8 @@
-import { ClientFetchResponse, FetchConfig, ApiResponse } from '../type';
+import {
+  ClientFetchResponse,
+  FetchConfig,
+  ProcessedApiResponse,
+} from '../type';
 import { createApiClient } from './request';
 
 const clientApi = createApiClient('', {
@@ -40,7 +44,7 @@ export const clientRequest = {
   get: async <T = any>(
     url: string,
     config?: Partial<FetchConfig>
-  ): Promise<ApiResponse<T>> => {
+  ): Promise<ProcessedApiResponse<T>> => {
     return clientApi.get<T>(url, config);
   },
 
@@ -49,7 +53,7 @@ export const clientRequest = {
     url: string,
     data?: any,
     config?: Partial<FetchConfig>
-  ): Promise<ApiResponse<T>> => {
+  ): Promise<ProcessedApiResponse<T>> => {
     return clientApi.post<T>(url, data, config);
   },
 
@@ -58,7 +62,7 @@ export const clientRequest = {
     url: string,
     data?: any,
     config?: Partial<FetchConfig>
-  ): Promise<ApiResponse<T>> => {
+  ): Promise<ProcessedApiResponse<T>> => {
     return clientApi.put<T>(url, data, config);
   },
 
@@ -67,7 +71,7 @@ export const clientRequest = {
     url: string,
     data?: any,
     config?: Partial<FetchConfig>
-  ): Promise<ApiResponse<T>> => {
+  ): Promise<ProcessedApiResponse<T>> => {
     return clientApi.patch<T>(url, data, config);
   },
 
@@ -75,7 +79,7 @@ export const clientRequest = {
   delete: async <T = any>(
     url: string,
     config?: Partial<FetchConfig>
-  ): Promise<ApiResponse<T>> => {
+  ): Promise<ProcessedApiResponse<T>> => {
     return clientApi.delete<T>(url, config);
   },
 };

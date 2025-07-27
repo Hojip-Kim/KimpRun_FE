@@ -2,7 +2,7 @@ import React from 'react';
 import { getInitialCommunityData } from './server';
 import CommunityClient from './client/CommunityClient';
 import { Category, CategoryResponse } from '../admin/type';
-import { ApiResponse } from '@/server/type';
+import { ProcessedApiResponse } from '@/server/type';
 import { AllPostData } from './types';
 
 // 🔧 동적 렌더링 강제 (빌드 시점에 정적 생성하지 않음)
@@ -23,7 +23,8 @@ const CommunityPage = async () => {
       typeof categories === 'object' &&
       'success' in categories
     ) {
-      const apiCategoryResponse = categories as ApiResponse<CategoryResponse>;
+      const apiCategoryResponse =
+        categories as ProcessedApiResponse<CategoryResponse>;
       if (apiCategoryResponse.success && apiCategoryResponse.data?.categories) {
         parsedCategories = Array.isArray(apiCategoryResponse.data.categories)
           ? apiCategoryResponse.data.categories
@@ -34,7 +35,7 @@ const CommunityPage = async () => {
     }
 
     if (allPosts && typeof allPosts === 'object' && 'success' in allPosts) {
-      const apiAllPostsResponse = allPosts as ApiResponse<AllPostData>;
+      const apiAllPostsResponse = allPosts as ProcessedApiResponse<AllPostData>;
       if (apiAllPostsResponse.success && apiAllPostsResponse.data) {
         parsedAllPosts = apiAllPostsResponse.data;
       } else {

@@ -1,4 +1,4 @@
-import { FetchConfig, ApiResponse } from '../type';
+import { FetchConfig, ApiResponse, ProcessedApiResponse } from '../type';
 
 const DEFAULT_CONFIG: FetchConfig = {
   method: 'GET',
@@ -45,7 +45,7 @@ export const createRequest = (baseConfig: Partial<FetchConfig> = {}) => {
   return async <T = any>(
     url: string,
     options: Partial<FetchConfig> = {}
-  ): Promise<ApiResponse<T>> => {
+  ): Promise<ProcessedApiResponse<T>> => {
     const finalConfig = { ...config, ...options };
     const { timeout, retries, retryDelay, ...fetchOptions } = finalConfig;
 
@@ -59,12 +59,73 @@ export const createRequest = (baseConfig: Partial<FetchConfig> = {}) => {
       const isJson = response.headers
         .get('content-type')
         ?.includes('application/json');
-      const data = isJson ? await response.json() : await response.text();
+
+      if (!isJson) {
+        const text = await response.text();
+        return {
+          success: response.ok,
+          data: response.ok ? (text as any) : undefined,
+          error: response.ok ? undefined : text,
+          status: response.status,
+        };
+      }
+
+      const apiResponse: any = await response.json();
+
+      if (typeof apiResponse.status === 'number') {
+        if (
+          'error' in apiResponse &&
+          'data' in apiResponse &&
+          'trace' in apiResponse
+        ) {
+          const isSuccess =
+            apiResponse.status >= 200 &&
+            apiResponse.status < 300 &&
+            apiResponse.error === null;
+
+          return {
+            success: isSuccess,
+            data: isSuccess ? apiResponse.data : undefined,
+            error: isSuccess ? undefined : apiResponse.error || 'Unknown error',
+            status: apiResponse.status,
+            trace: apiResponse.trace,
+          };
+        }
+
+        if ('success' in apiResponse && 'data' in apiResponse) {
+          const isSuccess =
+            apiResponse.success === true &&
+            apiResponse.status >= 200 &&
+            apiResponse.status < 300;
+
+          return {
+            success: isSuccess,
+            data: isSuccess ? apiResponse.data : undefined,
+            error: isSuccess
+              ? undefined
+              : apiResponse.message || apiResponse.detail || 'Unknown error',
+            status: apiResponse.status,
+            trace: apiResponse.detail,
+          };
+        }
+
+        const isSuccess = apiResponse.status >= 200 && apiResponse.status < 300;
+        return {
+          success: isSuccess,
+          data: isSuccess ? apiResponse.data : undefined,
+          error: isSuccess
+            ? undefined
+            : apiResponse.message || apiResponse.error || 'Unknown error',
+          status: apiResponse.status,
+        };
+      }
 
       return {
         success: response.ok,
-        data: response.ok ? data : undefined,
-        error: response.ok ? undefined : data,
+        data: response.ok ? (apiResponse as any) : undefined,
+        error: response.ok
+          ? undefined
+          : (apiResponse as any)?.message || 'Unknown error',
         status: response.status,
       };
     } catch (error) {
@@ -88,7 +149,6 @@ export const createApiClient = (
   baseConfig: Partial<FetchConfig> = {}
 ) => {
   const request = createRequest(baseConfig);
-
 
   return {
     get: <T = any>(endpoint: string, config?: Partial<FetchConfig>) =>

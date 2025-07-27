@@ -1,10 +1,10 @@
 import { serverEnv } from '@/utils/env';
-import { ApiResponse, serverRequest } from '@/server/fetch';
+import { ProcessedApiResponse, serverRequest } from '@/server/fetch';
 import { Category, CategoryResponse, CreateCategoryRequest } from '../type';
 
 // 모든 카테고리 가져오기
 export async function fetchAllCategories(): Promise<
-  ApiResponse<CategoryResponse>
+  ProcessedApiResponse<CategoryResponse>
 > {
   try {
     if (!serverEnv.CATEGORY_URL) {
@@ -49,7 +49,7 @@ export async function fetchAllCategories(): Promise<
 // 카테고리 생성
 export async function createCategory(
   categoryData: CreateCategoryRequest
-): Promise<ApiResponse<CategoryResponse>> {
+): Promise<ProcessedApiResponse<CategoryResponse>> {
   try {
     if (!serverEnv.CATEGORY_URL) {
       console.warn('❌ CATEGORY_URL 환경변수가 설정되지 않았습니다.');
@@ -97,7 +97,7 @@ export async function updateCategory(
   id: number,
   name: string,
   description: string
-): Promise<ApiResponse<Category>> {
+): Promise<ProcessedApiResponse<Category>> {
   try {
     if (!serverEnv.CATEGORY_URL) {
       console.warn('❌ CATEGORY_URL 환경변수가 설정되지 않았습니다.');
@@ -143,7 +143,7 @@ export async function updateCategory(
 // 카테고리 삭제
 export async function deleteCategory(
   id: number
-): Promise<ApiResponse<Boolean>> {
+): Promise<ProcessedApiResponse<Boolean>> {
   try {
     if (!serverEnv.CATEGORY_URL) {
       console.warn('❌ CATEGORY_URL 환경변수가 설정되지 않았습니다.');

@@ -1,4 +1,4 @@
-import { ApiResponse } from '@/server/type';
+import { ProcessedApiResponse } from '@/server/type';
 import { NoticeParameter, NoticeResponse } from '../type';
 import { noticeEndPoint } from './noticeApi';
 import { createNoticeRequestConfig } from './noticeApi';
@@ -6,7 +6,7 @@ import { serverRequest } from '@/server/fetch';
 
 export const fetchServerNotice = async (
   parameter: NoticeParameter
-): Promise<ApiResponse<NoticeResponse>> => {
+): Promise<ProcessedApiResponse<NoticeResponse>> => {
   try {
     const url = noticeEndPoint.getNotices(parameter).serverUrl;
     const config = createNoticeRequestConfig(parameter);

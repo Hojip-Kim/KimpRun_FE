@@ -1,7 +1,8 @@
 import { fetchUserInfo } from '@/components/auth/fetchUserInfo';
 import { clientRequest } from '@/server/fetch';
-import { ApiResponse, DollarInfo, TetherInfo } from '@/server/type';
+import { ProcessedApiResponse, DollarInfo, TetherInfo } from '@/server/type';
 import { clientEnv } from '@/utils/env';
+
 export const checkUserAuth = async (isAuthenticated: boolean) => {
   if (isAuthenticated) {
     const response = await fetchUserInfo();
@@ -23,7 +24,9 @@ export const requestDollar = async () => {
 };
 
 // 달러 정보 가져오기
-export async function getDollarInfo(): Promise<ApiResponse<DollarInfo>> {
+export async function getDollarInfo(): Promise<
+  ProcessedApiResponse<DollarInfo>
+> {
   try {
     const response = await clientRequest.get<DollarInfo>(
       clientEnv.DOLLAR_API_URL,
@@ -46,7 +49,9 @@ export async function getDollarInfo(): Promise<ApiResponse<DollarInfo>> {
 }
 
 // 테더 정보 가져오기
-export async function getTetherInfo(): Promise<ApiResponse<TetherInfo>> {
+export async function getTetherInfo(): Promise<
+  ProcessedApiResponse<TetherInfo>
+> {
   try {
     const response = await clientRequest.get<TetherInfo>(
       clientEnv.TETHER_API_URL,

@@ -48,7 +48,8 @@ const Chat = () => {
         const prevScrollTop = scrollContainer.scrollTop;
 
         const parsedData = await getChatLogs(page, 30);
-        if (parsedData) {
+
+        if (Array.isArray(parsedData) && parsedData.length > 0) {
           setMessages((prev) => [...parsedData, ...prev]);
           setPage((prev) => prev + 1);
 

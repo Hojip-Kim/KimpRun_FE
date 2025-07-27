@@ -1,6 +1,10 @@
 'use server';
 
-import { ServerFetchResponse, FetchConfig, ApiResponse } from '../type';
+import {
+  ServerFetchResponse,
+  FetchConfig,
+  ProcessedApiResponse,
+} from '../type';
 import { createApiClient } from './request';
 
 /* RequestInit : Fetch함수 호출 옵션 명확히 정의
@@ -31,7 +35,6 @@ export async function serverFetch(
     const response = await fetch(route, init);
     const text = await response.text();
 
-
     return {
       ok: response.ok,
       status: response.status,
@@ -56,7 +59,7 @@ export async function serverFetch(
 export async function serverGet<T = any>(
   url: string,
   config?: Partial<FetchConfig>
-): Promise<ApiResponse<T>> {
+): Promise<ProcessedApiResponse<T>> {
   return serverApi.get<T>(url, config);
 }
 
@@ -65,7 +68,7 @@ export async function serverPost<T = any>(
   url: string,
   data?: any,
   config?: Partial<FetchConfig>
-): Promise<ApiResponse<T>> {
+): Promise<ProcessedApiResponse<T>> {
   return serverApi.post<T>(url, data, config);
 }
 
@@ -74,7 +77,7 @@ export async function serverPut<T = any>(
   url: string,
   data?: any,
   config?: Partial<FetchConfig>
-): Promise<ApiResponse<T>> {
+): Promise<ProcessedApiResponse<T>> {
   return serverApi.put<T>(url, data, config);
 }
 
@@ -83,7 +86,7 @@ export async function serverPatch<T = any>(
   url: string,
   data?: any,
   config?: Partial<FetchConfig>
-): Promise<ApiResponse<T>> {
+): Promise<ProcessedApiResponse<T>> {
   return serverApi.patch<T>(url, data, config);
 }
 
@@ -91,7 +94,7 @@ export async function serverPatch<T = any>(
 export async function serverDelete<T = any>(
   url: string,
   config?: Partial<FetchConfig>
-): Promise<ApiResponse<T>> {
+): Promise<ProcessedApiResponse<T>> {
   return serverApi.delete<T>(url, config);
 }
 
@@ -100,7 +103,7 @@ export async function cachedRequest<T = any>(
   url: string,
   cacheKey: string,
   config?: Partial<FetchConfig>
-): Promise<ApiResponse<T>> {
+): Promise<ProcessedApiResponse<T>> {
   // 차후 Redis로 대체
   const cache = new Map();
 

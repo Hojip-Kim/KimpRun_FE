@@ -17,11 +17,20 @@ export interface FetchConfig extends RequestInit {
 }
 
 export interface ApiResponse<T = any> {
+  status: number;
+  error: string | null;
+  data: T | null;
+  trace: string | null;
+}
+
+export interface ProcessedApiResponse<T = any> {
   success: boolean;
   data?: T;
   error?: string;
   status: number;
+  trace?: string | null;
 }
+
 export interface TetherInfo {
   tether: number;
 }
@@ -29,4 +38,3 @@ export interface TetherInfo {
 export interface DollarInfo {
   dollar: number;
 }
-
