@@ -19,14 +19,18 @@ export async function getBoardData(id: string): Promise<BoardData | null> {
 
     const apiResponse: ApiResponse<BoardData> = await response.json();
 
+    // 새로운 API 응답 형식 처리: {status, message, data, detail, success}
     if (
       apiResponse.status >= 200 &&
       apiResponse.status < 300 &&
-      apiResponse.error === null
+      apiResponse.success === true
     ) {
       return apiResponse.data;
     } else {
-      console.error('게시글 데이터 로드 실패:', apiResponse.error);
+      console.error(
+        '게시글 데이터 로드 실패:',
+        apiResponse.message || apiResponse.detail
+      );
       return null;
     }
   } catch (error) {
@@ -62,15 +66,18 @@ export async function createComment(
 
     const apiResponse: ApiResponse<Comment> = await response.json();
 
-    // 새로운 API 응답 형식 처리
+    // 새로운 API 응답 형식 처리: {status, message, data, detail, success}
     if (
       apiResponse.status >= 200 &&
       apiResponse.status < 300 &&
-      apiResponse.error === null
+      apiResponse.success === true
     ) {
       return apiResponse.data;
     } else {
-      console.error('댓글 작성 실패:', apiResponse.error);
+      console.error(
+        '댓글 작성 실패:',
+        apiResponse.message || apiResponse.detail
+      );
       return null;
     }
   } catch (error) {

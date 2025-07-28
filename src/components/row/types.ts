@@ -1,12 +1,14 @@
 import { firstDataSet, secondDataSet } from '@/app/types';
+import { TokenNameMapping } from '@/app/types';
 
 export interface RowType {
   firstTokenNameList: string[];
   firstTokenDataList: any;
   secondTokenDataList: any;
-  firstDataset: { [key: string]: firstDataSet };
-  secondDataset: { [key: string]: secondDataSet };
+  firstDataset: any;
+  secondDataset: any;
   filteredTokens: string[];
+  tokenMapping?: TokenNameMapping; // 추가: symbol-id 매핑 정보
 }
 
 export type dataListType = {
@@ -22,3 +24,18 @@ export type dataListType = {
   secondPrice: number | undefined;
   kimp: number | undefined;
 };
+
+// Coin 상세 정보 타입
+export interface CoinDetail {
+  symbol: string;
+  name: string;
+  logo: string;
+  maxSupply: string;
+  totalSupply: string;
+  circulatingSupply: string;
+  marketCap: string;
+  explorerUrl: string[];
+  platforms: string[];
+  rank: number;
+  lastUpdated: string;
+}

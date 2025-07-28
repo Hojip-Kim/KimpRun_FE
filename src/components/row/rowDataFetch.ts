@@ -1,4 +1,6 @@
-import { firstDataSet, secondDataSet } from "@/app/types";
+import { firstDataSet, secondDataSet } from '@/app/types';
+import { clientRequest } from '@/server/fetch';
+import { CoinDetail } from './types';
 
 export async function getRowData(
   firstTokenNameList: string[],
@@ -12,7 +14,7 @@ export async function getRowData(
     for (let i = 0; i < firstTokenNameList.length; i++) {
       mergeData[firstTokenNameList[i]] = firstTokenDataList[i];
     }
-  } else if (firstTokenDataList && typeof firstTokenDataList === "object") {
+  } else if (firstTokenDataList && typeof firstTokenDataList === 'object') {
     // 객체인 경우 (거래소 변경 후)
     firstTokenNameList.forEach((tokenName) => {
       if (firstTokenDataList[tokenName]) {
@@ -22,6 +24,31 @@ export async function getRowData(
   }
 
   return mergeData;
+}
+
+// Coin 상세 정보 가져오기
+export async function getCoinDetail(
+  coinId: string
+): Promise<CoinDetail | null> {
+  const url = new URL('http://localhost:8080/api/cmc/coin');
+  url.searchParams.set('coinId', coinId);
+
+  try {
+    const response = await clientRequest.get<CoinDetail>(url.toString(), {
+      credentials: 'include',
+      headers: { 'Content-type': 'application/json' },
+    });
+
+    if (response.success && response.data) {
+      return response.data;
+    } else {
+      console.error('코인 상세 정보 가져오기 실패:', response.error);
+      return null;
+    }
+  } catch (error) {
+    console.error('코인 상세 정보 요청 오류:', error);
+    return null;
+  }
 }
 
 export async function updateRowDataFirstRender(

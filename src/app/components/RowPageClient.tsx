@@ -1,35 +1,29 @@
-"use client";
+'use client';
 
-import Row from "@/components/row/Row";
+import Row from '@/components/row/Row';
 import {
   setTokenFirstList,
   setTokenFirstDataset,
   setTokenSecondList,
   setTokenSecondDataset,
-} from "@/redux/reducer/tokenReducer";
+} from '@/redux/reducer/tokenReducer';
 import {
   setSelectedMainMarket,
   setSelectedCompareMarket,
-} from "@/redux/reducer/marketReducer";
-import { AppDispatch, RootState } from "@/redux/store";
-import React, { useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import Search from "@/components/search/Search";
-import { checkAuth } from "@/components/login/server/checkAuth";
-import { setGuestUser } from "@/redux/reducer/authReducer";
-import { firstDataSet, secondDataSet } from "../types";
-import {
-  RowContainer,
-  MarketSelectorContainer,
-  MarketSelectorGroup,
-  MarketSelectorLabel,
-  MarketSelect,
-  LoadingOverlay,
-} from "./style";
-import { MarketType } from "@/types/marketType";
-import { getClientSingleMarketData } from "./clientApi";
-import { useMarketDataWebSocket } from "@/hooks/useMarketDataWebSocket";
-import { MarketDataMap } from "@/types/marketData";
+} from '@/redux/reducer/marketReducer';
+import { AppDispatch, RootState } from '@/redux/store';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import Search from '@/components/search/Search';
+import { checkAuth } from '@/components/login/server/checkAuth';
+import { setGuestUser } from '@/redux/reducer/authReducer';
+import { firstDataSet, secondDataSet, TokenNameMapping } from '../types';
+import { RowContainer, LoadingOverlay } from './style';
+import { MarketType } from '@/types/marketType';
+import { getClientSingleMarketData, getClientTokenMapping } from './clientApi';
+import { useMarketDataWebSocket } from '@/hooks/useMarketDataWebSocket';
+import { MarketDataMap } from '@/types/marketData';
+import MarketSelector from '@/components/market-selector/MarketSelector';
 
 const RowPageClient: React.FC = () => {
   // 기본 거래소 설정
@@ -57,7 +51,12 @@ const RowPageClient: React.FC = () => {
   const [filteredTokens, setFilteredTokens] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
-  const [currentSearchTerm, setCurrentSearchTerm] = useState<string>("");
+  const [currentSearchTerm, setCurrentSearchTerm] = useState<string>('');
+
+  // 토큰 매핑 정보를 위한 state 추가
+  const [tokenMapping, setTokenMapping] = useState<TokenNameMapping | null>(
+    null
+  );
 
   // 리덕스에서 거래소 선택 상태 가져오기
   const selectedMainMarket = useSelector(
@@ -85,10 +84,10 @@ const RowPageClient: React.FC = () => {
 
   // 현재 웹소켓이 지원되는 거래소만 선택 가능하도록 제한
   const marketOptions = [
-    { value: MarketType.UPBIT, label: "UPBIT", hasWebsocket: true },
-    { value: MarketType.BINANCE, label: "BINANCE", hasWebsocket: true },
-    { value: MarketType.COINONE, label: "COINONE", hasWebsocket: true },
-    { value: MarketType.BITHUMB, label: "BITHUMB", hasWebsocket: true },
+    { value: MarketType.UPBIT, label: 'UPBIT', hasWebsocket: true },
+    { value: MarketType.BINANCE, label: 'BINANCE', hasWebsocket: true },
+    { value: MarketType.COINONE, label: 'COINONE', hasWebsocket: true },
+    { value: MarketType.BITHUMB, label: 'BITHUMB', hasWebsocket: true },
   ];
 
   const mapToFirstDataSet = useCallback((data: any): firstDataSet => {
@@ -98,8 +97,8 @@ const RowPageClient: React.FC = () => {
       highest_price: data.highest_price || 0,
       lowest_price: data.lowest_price || 0,
       opening_price: data.opening_price || 0,
-      rate_change: data.rate_change || "EVEN",
-      token: data.token || "",
+      rate_change: data.rate_change || 'EVEN',
+      token: data.token || '',
       trade_price: data.trade_price || 0,
       trade_volume: data.trade_volume || 0,
     };
@@ -107,7 +106,7 @@ const RowPageClient: React.FC = () => {
 
   const mapToSecondDataSet = useCallback((data: any): secondDataSet => {
     return {
-      token: data.token || "",
+      token: data.token || '',
       trade_price: data.trade_price || 0,
     };
   }, []);
@@ -204,19 +203,21 @@ const RowPageClient: React.FC = () => {
       // 4. 메인 거래소의 코인 리스트 생성
       const mainTokenList = mainMarketData ? Object.keys(mainMarketData) : [];
 
-      // 5. 비교 거래소에서 메인 거래소와 공통된 코인만 필터링
-      const filteredCompareData: { [key: string]: any } = {};
+      // 5. 메인 거래소의 모든 토큰에 대해 비교 거래소 데이터 매핑 (있는 것만)
+      const compareDataForMain: { [key: string]: any } = {};
       if (mainMarketData && compareMarketData) {
         Object.keys(mainMarketData).forEach((token) => {
+          // 비교 거래소에 해당 토큰이 있으면 추가, 없으면 제외
           if (compareMarketData[token]) {
-            filteredCompareData[token] = compareMarketData[token];
+            compareDataForMain[token] = compareMarketData[token];
           }
+          // 없는 경우는 compareDataForMain에 포함하지 않음 (undefined로 처리)
         });
       }
 
       // 6. Redux store에 코인 리스트 저장
       updateTokenFirstList(mainTokenList); // 메인 거래소의 모든 코인
-      updateTokenSecondList(Object.keys(filteredCompareData)); // 공통 코인만
+      updateTokenSecondList(Object.keys(compareDataForMain)); // 비교 데이터가 있는 코인만
 
       // 7. 정적 데이터를 웹소켓 데이터의 초기값으로 설정
       if (mainMarketData) {
@@ -224,13 +225,17 @@ const RowPageClient: React.FC = () => {
         updateTokenFirstDataSet(mainMarketData);
       }
 
-      if (filteredCompareData) {
-        setSecondDateset(filteredCompareData);
-        updateTokenSecondDataSet(filteredCompareData);
+      if (compareDataForMain) {
+        setSecondDateset(compareDataForMain);
+        updateTokenSecondDataSet(compareDataForMain);
       }
+
+      // 토큰 매핑 정보 로드
+      const mapping = await getClientTokenMapping(mainMarket, compareMarket);
+      setTokenMapping(mapping);
     } catch (error) {
-      console.error("❌ 데이터 로딩 오류:", error);
-      alert("데이터를 불러오는 중 오류가 발생했습니다. 다시 시도해주세요.");
+      console.error('❌ 데이터 로딩 오류:', error);
+      alert('데이터를 불러오는 중 오류가 발생했습니다. 다시 시도해주세요.');
     } finally {
       setLoading(false);
     }
@@ -238,24 +243,24 @@ const RowPageClient: React.FC = () => {
 
   // 거래소 선택 변경 핸들러
   const handleMarketChange = async (
-    type: "main" | "compare",
+    type: 'main' | 'compare',
     market: MarketType
   ) => {
     const selectedOption = marketOptions.find((opt) => opt.value === market);
 
     // 웹소켓이 지원되지 않는 거래소 선택 시 경고 (추후 확장을 위함)
     if (!selectedOption?.hasWebsocket) {
-      alert("해당 거래소는 아직 실시간 데이터가 지원되지 않습니다.");
+      alert('해당 거래소는 아직 실시간 데이터가 지원되지 않습니다.');
       return;
     }
 
-    const newMainMarket = type === "main" ? market : selectedMainMarket;
+    const newMainMarket = type === 'main' ? market : selectedMainMarket;
     const newCompareMarket =
-      type === "compare" ? market : selectedCompareMarket;
+      type === 'compare' ? market : selectedCompareMarket;
 
     // 같은 거래소 선택 방지
     if (newMainMarket === newCompareMarket) {
-      alert("메인 거래소와 비교 거래소는 다르게 선택해주세요.");
+      alert('메인 거래소와 비교 거래소는 다르게 선택해주세요.');
       return;
     }
 
@@ -310,7 +315,7 @@ const RowPageClient: React.FC = () => {
   const displaySecondDataset = secondDataset;
 
   return (
-    <RowContainer style={{ position: "relative" }}>
+    <RowContainer style={{ position: 'relative' }}>
       {initialLoading && (
         <LoadingOverlay>
           <div>로딩 중</div>
@@ -323,49 +328,13 @@ const RowPageClient: React.FC = () => {
         </LoadingOverlay>
       )}
 
-      <MarketSelectorContainer>
-        <MarketSelectorGroup>
-          <MarketSelectorLabel>메인 거래소</MarketSelectorLabel>
-          <MarketSelect
-            value={selectedMainMarket}
-            onChange={(e) =>
-              handleMarketChange("main", e.target.value as MarketType)
-            }
-            disabled={loading || initialLoading}
-          >
-            {marketOptions.map((option) => (
-              <option
-                key={option.value}
-                value={option.value}
-                disabled={!option.hasWebsocket}
-              >
-                {option.label} {!option.hasWebsocket && "(준비중)"}
-              </option>
-            ))}
-          </MarketSelect>
-        </MarketSelectorGroup>
-
-        <MarketSelectorGroup>
-          <MarketSelectorLabel>비교 거래소</MarketSelectorLabel>
-          <MarketSelect
-            value={selectedCompareMarket}
-            onChange={(e) =>
-              handleMarketChange("compare", e.target.value as MarketType)
-            }
-            disabled={loading || initialLoading}
-          >
-            {marketOptions.map((option) => (
-              <option
-                key={option.value}
-                value={option.value}
-                disabled={!option.hasWebsocket}
-              >
-                {option.label} {!option.hasWebsocket && "(준비중)"}
-              </option>
-            ))}
-          </MarketSelect>
-        </MarketSelectorGroup>
-      </MarketSelectorContainer>
+      <MarketSelector
+        selectedMainMarket={selectedMainMarket}
+        selectedCompareMarket={selectedCompareMarket}
+        onMarketChange={handleMarketChange}
+        disabled={loading || initialLoading}
+        marketOptions={marketOptions}
+      />
 
       <Search onSearch={handleSearch} />
 
@@ -377,6 +346,7 @@ const RowPageClient: React.FC = () => {
           firstDataset={displayFirstDataset}
           secondDataset={displaySecondDataset}
           filteredTokens={filteredTokens}
+          tokenMapping={tokenMapping}
         />
       )}
     </RowContainer>
