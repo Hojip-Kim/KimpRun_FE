@@ -1,13 +1,13 @@
-'use client';
-import { useEffect, useState } from 'react';
-import './loginForm.css';
-import { useDispatch, useSelector } from 'react-redux';
-import { setIsAuthenticated, setUser } from '@/redux/reducer/authReducer';
-import SignupForm from '../signup/SignupForm';
-import { loginDataFetch, responseData } from './server/loginDataFetch';
-import { fetchUserInfo } from '../auth/fetchUserInfo';
-import { clientEnv } from '@/utils/env';
-import { FormContainer, LoginButton, GoogleLoginButton } from './style';
+"use client";
+import { useEffect, useState } from "react";
+import "./loginForm.css";
+import { useDispatch, useSelector } from "react-redux";
+import { setIsAuthenticated, setUser } from "@/redux/reducer/authReducer";
+import SignupForm from "../signup/SignupForm";
+import { loginDataFetch, responseData } from "./server/loginDataFetch";
+import { fetchUserInfo } from "../auth/fetchUserInfo";
+import { clientEnv } from "@/utils/env";
+import { FormContainer, LoginButton, GoogleLoginButton } from "./style";
 interface LoginFormProps {
   closeModal: () => void;
   setModalSize: React.Dispatch<
@@ -21,14 +21,14 @@ interface LoginFormProps {
 const googleLoginUrl = clientEnv.GOOGLE_LOGIN_URL;
 
 interface loginResponse {
-  result: 'check' | 'success';
+  result: "check" | "success";
   message: string;
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({ closeModal, setModalSize }) => {
   const dispatch = useDispatch();
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const [isLoginForm, setIsLoginForm] = useState<boolean>(true);
   const [rememberMe, setRememberMe] = useState<boolean>(false);
 
@@ -41,7 +41,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ closeModal, setModalSize }) => {
     } else {
       setModalSize({ width: 450, height: 450 });
     }
-    const savedEmail = localStorage.getItem('email');
+    const savedEmail = localStorage.getItem("email");
     if (savedEmail) {
       setEmail(savedEmail);
       setRememberMe(true);
@@ -53,9 +53,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ closeModal, setModalSize }) => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (rememberMe) {
-      localStorage.setItem('email', email);
+      localStorage.setItem("email", email);
     } else {
-      localStorage.removeItem('email');
+      localStorage.removeItem("email");
     }
 
     // Spring Boot의 /login 엔드포인트로 POST 요청
@@ -65,12 +65,12 @@ const LoginForm: React.FC<LoginFormProps> = ({ closeModal, setModalSize }) => {
       password
     );
     if (loginResponse) {
-      if (loginResponse.result === 'success') {
+      if (loginResponse.result === "success") {
         await dispatch(setIsAuthenticated());
         await fetchUserInfo();
-        alert('로그인 성공');
+        alert("로그인 성공");
         closeModal();
-      } else if (loginResponse.result === 'check') {
+      } else if (loginResponse.result === "check") {
         const userConfirmed = window.confirm(
           `다른 기기에서 접속이 감지되었습니다.\n접속 IP: ${loginResponse.data}\n\n계속 진행하시겠습니까?`
         );
@@ -78,14 +78,14 @@ const LoginForm: React.FC<LoginFormProps> = ({ closeModal, setModalSize }) => {
         if (userConfirmed) {
           await dispatch(setIsAuthenticated());
           await fetchUserInfo();
-          alert('로그인 성공');
+          alert("로그인 성공");
           closeModal();
         } else {
-          window.location.href = '/change-password'; // 비밀번호 변경 페이지 URL로 수정 필요
+          window.location.href = "/change-password"; // 비밀번호 변경 페이지 URL로 수정 필요
         }
       }
     } else {
-      alert('로그인 실패');
+      alert("로그인 실패");
     }
   };
 
