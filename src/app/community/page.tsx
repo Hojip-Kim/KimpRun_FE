@@ -1,60 +1,58 @@
-'use client';
-import React, { useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components';
-import { category, getCategories } from '../admin/server/fetchCategory';
-import { Post } from './coin/types';
-import fetchAllPostData, { allPostData } from './components/server/fetchData';
-import Board from './coin/client/Board';
+import React from 'react';
+import { getInitialCommunityData } from './server';
+import CommunityClient from './client/CommunityClient';
+import { Category, CategoryResponse } from '../admin/type';
+import { ProcessedApiResponse } from '@/server/type';
+import { AllPostData } from './types';
 
-const CommunityPage = () => {
-  const [categories, setCategories] = useState<category[]>([]);
-  const [allPosts, setAllPosts] = useState<Post[]>([]);
-  const [boardCount, setBoardCount] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+// 🔧 동적 렌더링 강제 (빌드 시점에 정적 생성하지 않음)
+export const dynamic = 'force-dynamic';
 
-  const fetchCategories = useCallback(async () => {
-    try {
-      const response: category[] = await getCategories();
-      setCategories(response);
-    } catch (error) {
-      console.error('category fetch failed.', error);
-    }
-  }, []);
+const CommunityPage = async () => {
+  let parsedCategories: Category[] = [];
+  let parsedAllPosts: AllPostData = {
+    boards: [],
+    boardCount: 0,
+  };
 
-  const fetchAllPost = useCallback(async () => {
-    try {
-      const response: allPostData = await fetchAllPostData(1);
-      setAllPosts(response.boards);
-      setBoardCount(response.boardCount);
-    } catch (error) {
-      console.error('post loading failed', error);
-    }
-  }, []);
+  try {
+    const { categories, allPosts } = await getInitialCommunityData();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await Promise.all([fetchCategories(), fetchAllPost()]);
-      } catch (error) {
-        console.error('데이터 로딩 실패:', error);
-      } finally {
-        setIsLoading(false);
+    if (
+      categories &&
+      typeof categories === 'object' &&
+      'success' in categories
+    ) {
+      const apiCategoryResponse =
+        categories as ProcessedApiResponse<CategoryResponse>;
+      if (apiCategoryResponse.success && apiCategoryResponse.data?.categories) {
+        parsedCategories = Array.isArray(apiCategoryResponse.data.categories)
+          ? apiCategoryResponse.data.categories
+          : [];
       }
-    };
+    } else if (Array.isArray(categories)) {
+      parsedCategories = categories;
+    }
 
-    fetchData();
-  }, [fetchCategories, fetchAllPost]);
-  if (isLoading || categories.length === 0 || allPosts.length === 0) {
-    return <div>Loading...</div>;
+    if (allPosts && typeof allPosts === 'object' && 'success' in allPosts) {
+      const apiAllPostsResponse = allPosts as ProcessedApiResponse<AllPostData>;
+      if (apiAllPostsResponse.success && apiAllPostsResponse.data) {
+        parsedAllPosts = apiAllPostsResponse.data;
+      } else {
+        parsedAllPosts = {
+          boards: [],
+          boardCount: 0,
+        };
+      }
+    }
+  } catch (error) {
+    console.error('커뮤니티 페이지 초기 데이터 로드 실패:', error);
   }
 
   return (
-    <Board
-      initialCategoryId={-1}
-      initialPage={1}
-      categories={categories}
-      initialPosts={{ boardResponseDtos: allPosts, count: boardCount }}
-      isError={false}
+    <CommunityClient
+      initialCategories={parsedCategories}
+      initialAllPosts={parsedAllPosts}
     />
   );
 };

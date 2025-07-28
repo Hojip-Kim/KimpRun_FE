@@ -1,34 +1,23 @@
-import { UserFetch } from '@/types';
-import { AppDispatch } from '@/redux/store';
-import {
-  setIsAuthenticated,
-  setUser,
-  setGuestUser,
-  logout,
-} from '@/redux/reducer/authReducer';
+import { clientEnv } from "@/utils/env";
+import { clientRequest } from "@/server/fetch";
+import { UserInfo } from "../market-selector/type";
 
-export const fetchUserInfo = async (
-  statusUrl: string,
-  dispatch: AppDispatch
-): Promise<void> => {
+const statusUrl = clientEnv.STATUS_URL;
+
+export const fetchUserInfo = async (): Promise<UserInfo | null> => {
   try {
-    const response = await fetch(statusUrl, {
-      method: 'GET',
-      credentials: 'include',
+    const response = await clientRequest.get<UserInfo>(statusUrl, {
+      credentials: "include",
     });
 
-    if (response.ok) {
-      const data: UserFetch = await response.json();
-      if (data && data.member) {
-        dispatch(setUser(data.member));
-        dispatch(setIsAuthenticated());
-      } else {
-        dispatch(setGuestUser());
-      }
+    if (response.success && response.data) {
+      return response.data;
     } else {
-      dispatch(logout());
+      console.error("사용자 정보 가져오기 실패:", response.error);
+      return null;
     }
   } catch (error) {
-    console.error('Error fetching user info:', error);
+    console.error("사용자 정보 요청 오류:", error);
+    return null;
   }
 };

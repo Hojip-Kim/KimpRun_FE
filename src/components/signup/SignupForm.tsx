@@ -1,7 +1,15 @@
+'use client';
+
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { signupDataFetch } from './server/signupDataFetch';
 import { clientEnv } from '@/utils/env';
+import {
+  emailValidation,
+  emailVerification,
+  signupValidation,
+  verifyEmail,
+} from './client/client';
 
 interface SignupFormProps {
   setIsLoginForm: React.Dispatch<React.SetStateAction<boolean>>;
@@ -68,42 +76,36 @@ const SignupForm: React.FC<SignupFormProps> = ({ setIsLoginForm }) => {
 
   useEffect(() => {
     validateForm();
-  }, [username, email, password, confirmPassword]);
+  }, [username, email, password, confirmPassword, isVerified]);
 
   const validateForm = () => {
-    const isValid =
-      username.trim() !== '' &&
-      email.trim() !== '' &&
-      password.trim() !== '' &&
-      confirmPassword.trim() !== '' &&
-      password === confirmPassword &&
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) &&
-      isVerified;
+    const isValid = signupValidation(
+      username,
+      email,
+      password,
+      confirmPassword,
+      isVerified
+    );
 
-    setIsFormValid(isValid);
+    isValid ? setIsFormValid(true) : setIsFormValid(false);
   };
 
   const handleEmailVerification = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!emailValidation(email)) {
       alert('유효한 이메일을 입력해주세요.');
       return;
     }
 
-    const requestInit: RequestInit = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email }),
-    };
-
     try {
-      const response = await fetch(sendVerificationCodeEmailUrl, requestInit);
-
-      setIsEmailVerifying(true);
-      setRemainingTime(300); // 5분
+      const response = await emailVerification(email);
+      if (response) {
+        setIsEmailVerifying(true);
+        setRemainingTime(300); // 5분
+      } else {
+        alert('이메일 인증 요청 중 오류 발생');
+      }
     } catch (error) {
       alert('이메일 인증 요청 중 오류 발생');
     }
@@ -113,31 +115,16 @@ const SignupForm: React.FC<SignupFormProps> = ({ setIsLoginForm }) => {
     e.preventDefault();
 
     try {
-      const response = await fetch(verifyEmailUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          verifyCode,
-        }),
-      });
-
-      if (response.ok) {
-        const verified: verifyCodeResponse = await response.json();
-        if (verified.isVerified) {
-          setIsVerified(true);
-          setIsEmailVerifying(false);
-          alert('이메일 인증이 완료되었습니다.');
-        } else {
-          alert('인증번호가 일치하지 않습니다.');
-        }
+      const response = await verifyEmail(email, verifyCode);
+      if (response) {
+        setIsVerified(true);
+        setIsEmailVerifying(false);
+        alert('이메일 인증이 완료되었습니다.');
       } else {
-        alert('인증확인중 오류 발생');
+        alert('인증번호가 일치하지 않습니다.');
       }
     } catch (error) {
-      alert('인증 확인 중 오류가 발생했습니다.');
+      alert('인증확인중 오류 발생');
     }
   };
 

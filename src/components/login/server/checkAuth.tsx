@@ -7,13 +7,9 @@ import {
 import { AppDispatch } from '@/redux/store';
 import { User } from '@/types';
 import { clientEnv } from '@/utils/env';
+import { clientRequest } from '@/server/fetch';
 
 const statusUrl = clientEnv.STATUS_URL;
-
-const reuqestInit: RequestInit = {
-  method: 'GET',
-  credentials: 'include',
-};
 
 interface ResponseAuth {
   isAuthenticated: boolean;
@@ -22,20 +18,31 @@ interface ResponseAuth {
 
 export const checkAuth = async (dispatch: AppDispatch) => {
   try {
-    const response = await fetch(statusUrl, reuqestInit);
+    const response = await clientRequest.get(statusUrl, {
+      credentials: 'include',
+    });
 
     if (response.status === 401) {
       dispatch(setGuestUser());
       return;
     }
 
-    const text = await response.json();
-    if (!text || text.trim() === '') {
+    if (!response.success || !response.data) {
       dispatch(setGuestUser());
       return;
     }
 
-    const responseJson: ResponseAuth = JSON.parse(text);
+    // 응답이 문자열인 경우 JSON 파싱
+    let responseData = response.data;
+    if (typeof responseData === 'string') {
+      if (!responseData || responseData.trim() === '') {
+        dispatch(setGuestUser());
+        return;
+      }
+      responseData = JSON.parse(responseData);
+    }
+
+    const responseJson: ResponseAuth = responseData;
 
     if (responseJson.isAuthenticated === true) {
       await dispatch(setIsAuthenticated());

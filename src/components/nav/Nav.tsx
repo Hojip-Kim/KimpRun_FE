@@ -5,9 +5,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import Modal from '@/components/modal/modal';
 import LoginForm from '@/components/login/loginForm';
-import { logout } from '@/redux/reducer/authReducer';
-import { fetchUserInfo } from '@/components/auth/fetchUserInfo';
+import { logout, setUser } from '@/redux/reducer/authReducer';
 import ProfileForm from '../profile/ProfileForm';
+import NewNoticeModal from '../notice/client/NewNoticeModal';
+import { Notice } from '../notice/type';
+import { NoticeModalContainer } from '../notice/client/style';
 import {
   ActionButton,
   ActionButtons,
@@ -39,19 +41,37 @@ import {
   setTether,
   setUserCount,
 } from '@/redux/reducer/infoReducer';
-import { getDollarInfo, getTetherInfo } from '@/server/serverDataLoader';
 import { FaUser, FaUserCircle, FaUserCog } from 'react-icons/fa';
-import { List } from 'postcss/lib/list';
-import { clientEnv, serverEnv } from '@/utils/env';
-import { marketWebsocketData, noticeWebsocketData } from './type';
+import { clientEnv } from '@/utils/env';
+import { MarketWebsocketData } from './type';
+import { clientRequest } from '@/server/fetch';
+import {
+  checkUserAuth,
+  requestDollar,
+  requestTether,
+} from './client/dataFetch';
+import {
+  setIsNewNoticeGenerated,
+  setNotice,
+} from '@/redux/reducer/noticeReducer';
+
 interface ResponseUrl {
   response: string;
 }
 
 const Nav = () => {
-  const [userSize, setUserSize] = useState(0);
   const [isModalActive, setIsModalActive] = useState<boolean>(false);
   const [modalSize, setModalSize] = useState({ width: 400, height: 300 });
+
+  // 여러 모달을 관리하기 위한 상태
+  const [noticeModals, setNoticeModals] = useState<
+    {
+      id: string;
+      notice: Notice;
+      isVisible: boolean;
+    }[]
+  >([]);
+
   const router = useRouter();
 
   const isAuthenticated = useSelector(
@@ -63,77 +83,113 @@ const Nav = () => {
 
   const user = useSelector((state: RootState) => state.auth.user);
   const userCount = useSelector((state: RootState) => state.info.user);
+
+  const isNewNoticeGenerated = useSelector(
+    (state: RootState) => state.notice.isNewNoticeGenerated
+  );
+  const newNoticeData = useSelector((state: RootState) => state.notice.notice);
+
   const dispatch = useDispatch<AppDispatch>();
 
-  const statusUrl = clientEnv.STATUS_URL;
-  const logoutUrl = clientEnv.LOGOUT_URL;
-  const adminUrl = clientEnv.ADMIN_URL;
-
-  const checkUserAuth = async () => {
-    if (isAuthenticated) {
-      await fetchUserInfo(statusUrl, dispatch);
-    }
+  const setReduxDollar = async () => {
+    const response = await requestDollar();
+    dispatch(setDollar(response));
   };
 
-  const requestTether = async () => {
-    const requestInit: RequestInit = {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    };
-    const response = await getTetherInfo();
-    dispatch(setTether(response.tether));
+  const setReduxTether = async () => {
+    const response = await requestTether();
+    dispatch(setTether(response));
   };
 
-  const requestDollar = async () => {
-    const requestInit: RequestInit = {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    };
-    const response = await getDollarInfo();
-
-    dispatch(setDollar(response.dollar));
+  const setReduxUserAuth = async () => {
+    const response = await checkUserAuth(isAuthenticated);
+    dispatch(
+      setUser({
+        name: response?.nickname,
+        email: response?.email,
+        role: response?.role,
+      })
+    );
   };
 
   useEffect(() => {
-    requestDollar();
-    requestTether();
-    checkUserAuth();
+    setReduxDollar();
+    setReduxTether();
+    setReduxUserAuth();
   }, [dispatch]);
 
   useEffect(() => {
     const infoWebsocket = new WebSocket(clientEnv.INFO_WEBSOCKET_URL);
 
+    infoWebsocket.onopen = (event) => {};
+
     infoWebsocket.onmessage = (event) => {
-      const parsedData: marketWebsocketData | noticeWebsocketData = JSON.parse(
-        event.data
-      );
-      console.log(parsedData);
-      if (parsedData.type === 'market') {
-        const userData = parsedData.userData;
-        const marketData = parsedData.marketData;
-        dispatch(setUserCount(userData.userCount));
-        dispatch(setDollar(marketData.dollar));
-        dispatch(setTether(marketData.tether));
-      } else if (parsedData.type === 'notice') {
-        console.log('******************new Notice occurred******************');
-        const exchangeName = parsedData.exchange_name;
-        const absoluteUrl = parsedData.absoluteUrl;
-        const noticeDataList = parsedData.noticeDataList;
-        console.log('exchangeName', exchangeName);
-        console.log('absoluteUrl', absoluteUrl);
-        console.log('noticeDataList', noticeDataList);
+      try {
+        const streamData = JSON.parse(event.data) as MarketWebsocketData;
+
+        if (streamData.type === 'market') {
+          const { userData, marketData } = streamData.data;
+          dispatch(setUserCount(userData.userCount));
+          dispatch(setDollar(marketData.dollar));
+          dispatch(setTether(marketData.tether));
+        } else if (streamData.type === 'notice') {
+          // 데이터가 배열이 아닌 경우 배열로 변환
+          const noticeArray = Array.isArray(streamData.data)
+            ? streamData.data
+            : [streamData.data];
+
+          dispatch(setNotice(noticeArray));
+          dispatch(setIsNewNoticeGenerated(true));
+        }
+      } catch (error) {
+        console.error('❌ JSON 파싱 오류:', error);
+        console.error('원본 데이터:', event.data);
       }
     };
 
     infoWebsocket.onerror = (error) => {
-      console.error('Info Websocket Error:', error);
-      infoWebsocket.close();
+      console.error('❌ 웹소켓 오류:', error);
+      console.error('웹소켓 상태:', infoWebsocket.readyState);
     };
+
+    infoWebsocket.onclose = (event) => {};
 
     return () => {
       infoWebsocket.close();
     };
-  }, []);
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (isNewNoticeGenerated && newNoticeData.length > 0) {
+      const newModals = newNoticeData.map((notice, index) => ({
+        id: `${notice.id}-${Date.now()}-${index}`,
+        notice: notice,
+        isVisible: false,
+      }));
+
+      setNoticeModals((prevModals) => [...prevModals, ...newModals]);
+
+      setTimeout(() => {
+        setNoticeModals((prevModals) =>
+          prevModals.map((modal) =>
+            newModals.some((newModal) => newModal.id === modal.id)
+              ? { ...modal, isVisible: true }
+              : modal
+          )
+        );
+      }, 50);
+
+      setTimeout(() => {
+        dispatch(setIsNewNoticeGenerated(false));
+      }, 2000);
+    }
+  }, [isNewNoticeGenerated, newNoticeData, dispatch]);
+
+  const handleNoticeModalClose = (id: string) => {
+    setNoticeModals((prevModals) =>
+      prevModals.filter((modal) => modal.id !== id)
+    );
+  };
 
   const handleLoginClick = () => {
     setModalSize({ width: 400, height: 300 });
@@ -141,16 +197,17 @@ const Nav = () => {
   };
 
   const handleLogout = async () => {
-    const requestInit: RequestInit = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-    };
-
     try {
-      const response = await fetch(logoutUrl, requestInit);
+      const response = await clientRequest.post(
+        clientEnv.LOGOUT_URL,
+        {},
+        {
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
 
-      if (response.ok) {
+      if (response.success) {
         alert('로그아웃 성공');
         dispatch(logout());
       } else {
@@ -169,15 +226,16 @@ const Nav = () => {
 
   const handleAdminClick = async () => {
     try {
-      const requestInit: RequestInit = {
-        method: 'GET',
-        credentials: 'include',
-      };
-      const response = await fetch(adminUrl, requestInit);
-      if (response.ok) {
-        const redirectUrl: ResponseUrl = await response.json();
-        if (redirectUrl) {
-          window.location.href = redirectUrl.response;
+      const response = await clientRequest.get<ResponseUrl>(
+        clientEnv.ADMIN_URL,
+        {
+          credentials: 'include',
+        }
+      );
+
+      if (response.success && response.status === 200) {
+        if (response.data.response) {
+          window.location.href = response.data.response;
         } else {
           console.error('리다이렉션 URL을 찾을 수 없음.');
         }
@@ -320,6 +378,21 @@ const Nav = () => {
           }
           setModal={setIsModalActive}
         />
+      )}
+
+      {noticeModals.length > 0 && (
+        <NoticeModalContainer>
+          {noticeModals.map((modal, index) => (
+            <NewNoticeModal
+              key={modal.id}
+              notice={modal.notice}
+              isVisible={modal.isVisible}
+              onClose={() => handleNoticeModalClose(modal.id)}
+              modalIndex={index}
+              autoCloseTime={12} // 12초로 설정
+            />
+          ))}
+        </NoticeModalContainer>
       )}
     </NavbarWrapper>
   );

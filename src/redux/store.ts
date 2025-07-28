@@ -3,6 +3,7 @@ import tokenReducer from './reducer/tokenReducer';
 import infoReducer from './reducer/infoReducer';
 import widgetReducer from './reducer/widgetReduce';
 import authReducer, { setGuestUser } from './reducer/authReducer';
+import marketReducer from './reducer/marketReducer';
 import {
   FLUSH,
   PAUSE,
@@ -13,7 +14,7 @@ import {
   REHYDRATE,
 } from 'redux-persist';
 import createWebStorage from 'redux-persist/lib/storage/createWebStorage';
-
+import noticeReducer from './reducer/noticeReducer';
 const createNoopStorage = () => {
   return {
     getItem(_key) {
@@ -36,7 +37,7 @@ const storage =
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['auth', 'widget', 'info'],
+  whitelist: ['auth', 'widget', 'info', 'token', 'notice', 'market'],
 };
 
 export const rootReducer = combineReducers({
@@ -44,6 +45,8 @@ export const rootReducer = combineReducers({
   token: tokenReducer,
   info: infoReducer,
   widget: widgetReducer,
+  notice: noticeReducer,
+  market: marketReducer,
 });
 
 export const persistedReducer = persistReducer(persistConfig, rootReducer);

@@ -1,11 +1,14 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { TokenState } from '../type';
+
+const initialState: TokenState = {
+  tokenList: { first: [], second: [] },
+  tokenSet: { first: {}, second: {} },
+};
 
 const tokenSlices = createSlice({
-  name: 'token', // slice 식별 이름
-  initialState: {
-    tokenList: { first: [], second: [] },
-    tokenSet: { first: {}, second: {} },
-  },
+  name: 'token',
+  initialState: initialState,
   reducers: {
     setTokenFirstList: (state, action) => {
       state.tokenList.first = action.payload;

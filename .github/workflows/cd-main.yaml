@@ -59,7 +59,7 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build --platform linux/amd64 -t hojipkim/kimprun_fe:${{ env.COMMIT_ID }} ./kimprun_fe
+          docker build --platform linux/amd64 --no-cache -t hojipkim/kimprun_fe:${{ env.COMMIT_ID }} ./kimprun_fe
           docker push hojipkim/kimprun_fe:${{ env.COMMIT_ID }}
           echo "✅ Docker image pushed: hojipkim/kimprun_fe:${{ env.COMMIT_ID }}"
     outputs:

@@ -1,14 +1,15 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { setKimp, setToken, setTokenPrice } from '@/redux/reducer/widgetReduce';
-import { firstDataSet, secondDataSet } from '@/app/page';
+import { setTokenFirstList } from '@/redux/reducer/tokenReducer';
 import {
   getRowData,
   updateRowData,
   updateRowDataFirstRender,
+  getCoinDetail,
 } from './rowDataFetch';
 import { FaSort, FaSortDown, FaSortUp } from 'react-icons/fa';
 import {
@@ -23,30 +24,8 @@ import {
   HeaderTable,
 } from './styled';
 import TableRowComponent from './TableRowComponent';
-
-interface RowType {
-  firstTokenNameList: string[];
-  firstTokenDataList: any;
-  secondTokenDataList: any;
-  firstDataset: { [key: string]: firstDataSet };
-  secondDataset: { [key: string]: secondDataSet };
-  filteredTokens: string[];
-}
-
-export type dataListType = {
-  acc_trade_price24: number;
-  change_rate: number;
-  highest_price: number;
-  lowest_price: number;
-  opening_price: number;
-  rate_change: number;
-  token: string;
-  trade_price: number;
-  trade_volume: number;
-  secondPrice: number | undefined;
-  kimp: number | undefined;
-};
-
+import { RowType, dataListType, CoinDetail } from './types';
+import { sortDataByConfig } from './util';
 const Row = ({
   firstTokenNameList,
   firstTokenDataList,
@@ -54,6 +33,7 @@ const Row = ({
   firstDataset,
   secondDataset,
   filteredTokens,
+  tokenMapping,
 }: RowType) => {
   const [nameList, setNameList] = useState<string[]>([]);
   const [dataList, setDataList] = useState<dataListType[]>([]);
@@ -67,78 +47,255 @@ const Row = ({
   });
   const [fadeOutClass, setFadeOutClass] = useState({});
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
+  const [coinDetails, setCoinDetails] = useState<{ [key: string]: CoinDetail }>(
+    {}
+  );
+  const [loadingCoinDetail, setLoadingCoinDetail] = useState<string | null>(
+    null
+  );
+
+  const isMountedRef = useRef(true);
 
   const dispatch: AppDispatch = useDispatch();
   const dollar = useSelector((state: RootState) => state.info.dollar);
+  const tether = useSelector((state: RootState) => state.info.tether);
+  const selectedCompareMarket = useSelector(
+    (state: RootState) => state.market.selectedCompareMarket
+  );
+  const selectedMainMarket = useSelector(
+    (state: RootState) => state.market.selectedMainMarket
+  );
+
+  const tokenOrderList = useSelector(
+    (state: RootState) => state.token.tokenList.first
+  );
 
   const token = useSelector((state: RootState) => state.widget.token);
 
-  const updateWidgetToken = (token) => {
-    dispatch(setToken(token));
-    updateTokenPrice(token);
-    updateKimp(token);
-  };
+  const updateTokenPrice = useCallback(
+    (token: string) => {
+      setRowData((currentRowData) => {
+        const tokenPrice = currentRowData[token]?.trade_price.toFixed(2);
+        dispatch(setTokenPrice(tokenPrice));
+        return currentRowData;
+      });
+    },
+    [dispatch]
+  );
 
-  const sortDataByConfig = (
-    data: { [key: string]: dataListType },
-    key: string,
-    direction: string
-  ) => {
-    return Object.entries(data).sort((a, b) => {
-      const valueA = a[1][key];
-      const valueB = b[1][key];
+  const updateKimp = useCallback(
+    (token: string) => {
+      setRowData((currentRowData) => {
+        const kimp = currentRowData[token]?.kimp;
+        dispatch(setKimp(kimp));
+        return currentRowData;
+      });
+    },
+    [dispatch]
+  );
 
-      if (key === 'kimp') {
-        const kimpA = a[1].secondPrice
-          ? (a[1].kimp + 1) * 100 // (kimp + 1) * 100 으로 퍼센트 값 계산
-          : -Infinity;
-        const kimpB = b[1].secondPrice ? (b[1].kimp + 1) * 100 : -Infinity;
-
-        return direction === 'asc' ? kimpA - kimpB : kimpB - kimpA;
-      }
-
-      if (!isFinite(valueA)) return 1;
-      if (!isFinite(valueB)) return -1;
-
-      return direction === 'asc' ? valueA - valueB : valueB - valueA;
-    });
-  };
+  const updateWidgetToken = useCallback(
+    (token: string) => {
+      dispatch(setToken(token));
+      updateTokenPrice(token);
+      updateKimp(token);
+    },
+    [dispatch, updateTokenPrice, updateKimp]
+  );
 
   const sortData = (key: string) => {
+    if (!isMountedRef.current) return;
+
     let direction = 'desc';
     if (sortConfig.key === key && sortConfig.direction === 'desc') {
       direction = 'asc';
     }
 
-    const sortedData = sortDataByConfig(rowData, key, direction);
-    setRowData(
-      Object.fromEntries(sortedData) as { [key: string]: dataListType }
-    );
+    // 정렬 상태만 업데이트 (실제 정렬은 useEffect에서 처리)
     setSortConfig({ key, direction });
   };
 
-  const rowClick = async (token: string) => {
-    if (expandedRow === token) {
-      setExpandedRow(null);
-    } else {
-      updateWidgetToken(token);
-      updateKimp(token);
-      updateTokenPrice(token);
-      setExpandedRow(token);
+  // 정렬 적용 함수 분리
+  const applySorting = (
+    dataToSort: { [key: string]: dataListType },
+    config: { key: string; direction: string }
+  ) => {
+    // 컴포넌트 언마운트 체크
+    if (!isMountedRef.current) return;
+
+    if (!config.key || !config.direction) return;
+
+    // filteredTokens가 비어있으면 정렬하지 않음 (거래소 변경 중일 수 있음)
+    if (!filteredTokens || filteredTokens.length === 0) {
+      return;
+    }
+
+    // dataToSort가 비어있으면 정렬하지 않음
+    if (!dataToSort || Object.keys(dataToSort).length === 0) {
+      return;
+    }
+
+    // 현재 필터링된 토큰들만 대상으로 정렬
+    const filteredRowData = {};
+    filteredTokens.forEach((token) => {
+      if (dataToSort[token]) {
+        filteredRowData[token] = dataToSort[token];
+      }
+    });
+
+    // 필터링된 데이터가 없으면 정렬하지 않음
+    if (Object.keys(filteredRowData).length === 0) {
+      return;
+    }
+
+    const sortedData = sortDataByConfig(
+      filteredRowData,
+      config.key,
+      config.direction
+    );
+
+    // 정렬된 필터링 토큰들의 순서만 업데이트
+    const sortedFilteredTokenOrder = sortedData.map(([token, data]) => token);
+
+    // 기존 리덕스 토큰 순서에서 필터링되지 않은 토큰들은 유지하고, 필터링된 토큰들만 정렬된 순서로 교체
+    const currentTokenOrder = [...tokenOrderList];
+    const nonFilteredTokens = currentTokenOrder.filter(
+      (token) => !filteredTokens.includes(token)
+    );
+    const newTokenOrder = [...sortedFilteredTokenOrder, ...nonFilteredTokens];
+
+    // 순서가 실제로 변경된 경우에만 업데이트
+    const currentOrderString = tokenOrderList.join(',');
+    const newOrderString = newTokenOrder.join(',');
+    if (currentOrderString !== newOrderString && isMountedRef.current) {
+      dispatch(setTokenFirstList(newTokenOrder));
     }
   };
 
-  const updateTokenPrice = (token: string) => {
-    const tokenPrice = rowData[token]?.trade_price.toFixed(2);
-    dispatch(setTokenPrice(tokenPrice));
-  };
+  // 정렬 상태가 변경될 때 정렬 적용
+  useEffect(() => {
+    if (!isMountedRef.current) return;
 
-  const updateKimp = (token: string) => {
-    const kimp = rowData[token]?.kimp;
-    dispatch(setKimp(kimp));
-  };
+    if (
+      sortConfig.key &&
+      sortConfig.direction &&
+      rowData &&
+      Object.keys(rowData).length > 0 &&
+      filteredTokens &&
+      filteredTokens.length > 0
+    ) {
+      applySorting(rowData, sortConfig);
+    }
+  }, [sortConfig, filteredTokens]);
+
+  // Symbol을 ID로 변환하는 헬퍼 함수
+  const getTokenId = useCallback(
+    (symbol: string): number | null => {
+      if (!tokenMapping) {
+        return null;
+      }
+
+      // firstMarketList에서 먼저 찾기
+      const tokenInFirst = tokenMapping.firstMarketList?.find(
+        (token) => token.symbol === symbol
+      );
+
+      if (tokenInFirst) return tokenInFirst.id;
+
+      // secondMarketList에서 찾기
+      const tokenInSecond = tokenMapping.secondMarketList?.find(
+        (token) => token.symbol === symbol
+      );
+
+      if (tokenInSecond) return tokenInSecond.id;
+
+      return null;
+    },
+    [tokenMapping, selectedMainMarket, selectedCompareMarket]
+  );
+
+  const rowClick = useCallback(
+    async (token: string) => {
+      if (expandedRow === token) {
+        setExpandedRow(null);
+        return;
+      }
+
+      // 1. 즉시 UI 상태 변경 (빠른 반응성)
+      setExpandedRow(token);
+      updateWidgetToken(token);
+
+      // 2. 코인 상세 정보 로딩 (비동기 처리)
+      // coinDetails는 함수 내부에서 최신 상태를 참조
+      setTimeout(async () => {
+        // 컴포넌트가 언마운트되었는지 확인
+        if (!isMountedRef.current) {
+          return;
+        }
+
+        setCoinDetails((currentCoinDetails) => {
+          // 이미 있으면 로딩하지 않음
+          if (currentCoinDetails[token]) {
+            return currentCoinDetails;
+          }
+
+          // 없으면 로딩 시작
+          if (isMountedRef.current) {
+            setLoadingCoinDetail(token);
+          }
+
+          // 비동기 로딩
+          (async () => {
+            try {
+              const coinId = getTokenId(token);
+              if (coinId && isMountedRef.current) {
+                const coinDetail = await getCoinDetail(coinId.toString());
+
+                // API 요청 후에도 컴포넌트가 마운트되어 있는지 재확인
+                if (coinDetail && isMountedRef.current) {
+                  setCoinDetails((prev) => ({
+                    ...prev,
+                    [token]: coinDetail,
+                  }));
+                } else {
+                  console.warn('❌ Failed to get coin detail for:', token);
+                }
+              } else {
+                console.warn(`❌ 토큰 ${token}의 ID를 찾을 수 없습니다.`);
+              }
+            } catch (error) {
+              console.error('❌ 코인 정보 로딩 실패:', error);
+            } finally {
+              if (isMountedRef.current) {
+                setLoadingCoinDetail(null);
+              }
+            }
+          })();
+
+          return currentCoinDetails;
+        });
+      }, 0);
+    },
+    [expandedRow, updateWidgetToken, getTokenId] // coinDetails 의존성 제거
+  );
+
+  // 컴포넌트 언마운트 시 cleanup
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  // 거래소 변경 시 정렬 상태 초기화
+  useEffect(() => {
+    if (isMountedRef.current) {
+      setSortConfig({ key: '', direction: '' });
+    }
+  }, [selectedMainMarket, selectedCompareMarket]);
 
   useEffect(() => {
+    if (!isMountedRef.current) return;
+
     if (firstTokenNameList && firstTokenDataList) {
       setNameList(firstTokenNameList);
       setDataList(firstTokenDataList);
@@ -146,40 +303,88 @@ const Row = ({
   }, [firstTokenNameList, firstTokenDataList]);
 
   useEffect(() => {
+    if (!isMountedRef.current) return;
+
     if (
       nameList.length > 0 &&
-      dataList.length > 0 &&
+      firstTokenDataList &&
+      Object.keys(firstTokenDataList).length > 0 &&
       !Object.keys(rowData).length
     ) {
-      getRowData(nameList, dataList).then((initialRowData) => {
+      getRowData(nameList, firstTokenDataList).then((initialRowData) => {
+        if (!isMountedRef.current) return;
+
         updateRowDataFirstRender(
           initialRowData,
           firstTokenDataList,
-          secondTokenDataList,
-          dollar
+          secondTokenDataList
         ).then((updatedData) => {
+          if (!isMountedRef.current) return;
           setRowData(updatedData);
         });
       });
     }
-  }, [nameList, dataList]);
+  }, [
+    nameList,
+    firstTokenDataList,
+    secondTokenDataList,
+    dollar,
+    tether,
+    selectedCompareMarket,
+  ]);
+
+  // firstTokenDataList 또는 secondTokenDataList가 변경될 때 데이터 새로 로드
+  useEffect(() => {
+    if (!isMountedRef.current) return;
+
+    if (
+      nameList.length > 0 &&
+      firstTokenDataList &&
+      secondTokenDataList &&
+      Object.keys(firstTokenDataList).length > 0
+    ) {
+      getRowData(nameList, firstTokenDataList).then((initialRowData) => {
+        if (!isMountedRef.current) return;
+
+        updateRowDataFirstRender(
+          initialRowData,
+          firstTokenDataList,
+          secondTokenDataList
+        ).then((updatedData) => {
+          if (!isMountedRef.current) return;
+          setRowData(updatedData);
+        });
+      });
+    }
+  }, [
+    firstTokenDataList,
+    secondTokenDataList,
+    nameList,
+    dollar,
+    tether,
+    selectedCompareMarket,
+  ]);
 
   useEffect(() => {
+    if (!isMountedRef.current) return;
+
     if (rowData && firstDataset && secondTokenDataList) {
       setPrevRowData(rowData);
-      updateRowData(rowData, firstDataset, secondDataset, dollar).then(
+      updateRowData(rowData, firstDataset, secondDataset).then(
         (updatedData) => {
-          // 정렬 상태가 있다면 정렬된 상태로 데이터 업데이트
-          if (sortConfig.key) {
-            const sortedData = sortDataByConfig(
-              updatedData,
-              sortConfig.key,
-              sortConfig.direction
-            );
-            updatedData = Object.fromEntries(sortedData);
+          if (!isMountedRef.current) return;
+          setRowData(updatedData);
+
+          // 현재 정렬 상태가 있다면 웹소켓 데이터 업데이트 후에도 다시 정렬
+          if (
+            sortConfig.key &&
+            sortConfig.direction &&
+            filteredTokens &&
+            filteredTokens.length > 0
+          ) {
+            applySorting(updatedData, sortConfig);
           }
 
-          setRowData(updatedData);
           const newFadeOutClass = {};
           Object.keys(firstDataset).forEach((token) => {
             const prev = prevRowData[token]?.trade_price;
@@ -191,14 +396,18 @@ const Row = ({
           setFadeOutClass(newFadeOutClass);
 
           setTimeout(() => {
+            if (!isMountedRef.current) return;
             setFadeOutClass({});
           }, 200);
         }
       );
     }
-    updateTokenPrice(token);
-    updateKimp(token);
-  }, [firstDataset]);
+
+    if (isMountedRef.current) {
+      updateTokenPrice(token);
+      updateKimp(token);
+    }
+  }, [firstDataset, dollar, tether, selectedCompareMarket]);
 
   return (
     <RowContainer>
@@ -314,26 +523,24 @@ const Row = ({
         <TableBody>
           <BodyTable>
             <tbody>
-              {Object.entries(rowData)
-                .filter(([token]) => filteredTokens.includes(token))
-                .map(([token, data]) => (
+              {(() => {
+                const renderTokens = tokenOrderList.filter(
+                  (token) => filteredTokens.includes(token) && rowData[token]
+                );
+                return renderTokens.map((token) => (
                   <TableRowComponent
                     key={token}
                     token={token}
-                    data={data}
-                    secondPrice={data.secondPrice}
-                    secondData={{
-                      token: token,
-                      trade_price: secondDataset[token]
-                        ? secondDataset[token].trade_price * dollar
-                        : 0,
-                    }}
+                    data={rowData[token]}
                     prevData={prevRowData[token]}
                     expandedRow={expandedRow}
                     fadeOutClass={fadeOutClass[token]}
                     onRowClick={rowClick}
+                    coinDetail={coinDetails[token]}
+                    loadingCoinDetail={loadingCoinDetail === token}
                   />
-                ))}
+                ));
+              })()}
             </tbody>
           </BodyTable>
         </TableBody>

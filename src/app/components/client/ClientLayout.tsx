@@ -6,7 +6,7 @@ import store, { RootState } from '@/redux/store';
 import Nav from '../../../components/nav/Nav';
 import { persistStore } from 'redux-persist';
 import { PersistGate } from 'redux-persist/integration/react';
-import styled from 'styled-components';
+import { LayoutWrapper, MainContent } from './style';
 
 const ClientLayout: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -16,13 +16,11 @@ const ClientLayout: React.FC<{ children: React.ReactNode }> = ({
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <html lang="en">
-          <TitleUpdater />
-          <LayoutWrapper>
-            <Nav />
-            <MainContent>{children}</MainContent>
-          </LayoutWrapper>
-        </html>
+        <TitleUpdater />
+        <LayoutWrapper>
+          <Nav />
+          <MainContent>{children}</MainContent>
+        </LayoutWrapper>
       </PersistGate>
     </Provider>
   );
@@ -40,17 +38,5 @@ const TitleUpdater = () => {
 
   return null;
 };
-
-const LayoutWrapper = styled.div`
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-`;
-
-const MainContent = styled.main`
-  flex: 1;
-  padding-top: 100px; // Nav의 높이와 동일하게 설정
-  min-height: calc(100vh - 150px); // 전체 높이에서 Nav 높이를 뺀 만큼
-`;
 
 export default ClientLayout;

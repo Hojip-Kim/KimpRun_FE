@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
-import { clientEnv } from '@/utils/env';
+import { serverEnv } from '@/utils/env';
 
-const categoryUrl = clientEnv.CATEGORY_URL;
+const categoryUrl = serverEnv.CATEGORY_URL;
 
 async function getCategories() {
   const response = await fetch(categoryUrl, {
