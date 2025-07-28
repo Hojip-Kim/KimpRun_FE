@@ -70,62 +70,37 @@ export const createRequest = (baseConfig: Partial<FetchConfig> = {}) => {
         };
       }
 
-      const apiResponse: any = await response.json();
+      // JSON 응답 처리 - 백엔드 통일 형식: {status, message, data, detail, success}
+      const apiResponse: ApiResponse<T> = await response.json();
 
-      if (typeof apiResponse.status === 'number') {
-        if (
-          'error' in apiResponse &&
-          'data' in apiResponse &&
-          'trace' in apiResponse
-        ) {
-          const isSuccess =
-            apiResponse.status >= 200 &&
-            apiResponse.status < 300 &&
-            apiResponse.error === null;
+      // API 응답이 정의된 형식인지 확인
+      if (
+        typeof apiResponse.status === 'number' &&
+        'success' in apiResponse &&
+        'data' in apiResponse &&
+        'message' in apiResponse
+      ) {
+        const isSuccess =
+          apiResponse.success === true &&
+          apiResponse.status >= 200 &&
+          apiResponse.status < 300;
 
-          return {
-            success: isSuccess,
-            data: isSuccess ? apiResponse.data : undefined,
-            error: isSuccess ? undefined : apiResponse.error || 'Unknown error',
-            status: apiResponse.status,
-            trace: apiResponse.trace,
-          };
-        }
-
-        if ('success' in apiResponse && 'data' in apiResponse) {
-          const isSuccess =
-            apiResponse.success === true &&
-            apiResponse.status >= 200 &&
-            apiResponse.status < 300;
-
-          return {
-            success: isSuccess,
-            data: isSuccess ? apiResponse.data : undefined,
-            error: isSuccess
-              ? undefined
-              : apiResponse.message || apiResponse.detail || 'Unknown error',
-            status: apiResponse.status,
-            trace: apiResponse.detail,
-          };
-        }
-
-        const isSuccess = apiResponse.status >= 200 && apiResponse.status < 300;
         return {
           success: isSuccess,
           data: isSuccess ? apiResponse.data : undefined,
           error: isSuccess
             ? undefined
-            : apiResponse.message || apiResponse.error || 'Unknown error',
+            : apiResponse.message || apiResponse.detail || 'Unknown error',
           status: apiResponse.status,
+          trace: apiResponse.detail,
         };
       }
 
+      // 백엔드에서 정의되지 않은 형식이 온 경우 (오류 상황)
+      console.error('❌ 예상하지 못한 API 응답 형식:', apiResponse);
       return {
-        success: response.ok,
-        data: response.ok ? (apiResponse as any) : undefined,
-        error: response.ok
-          ? undefined
-          : (apiResponse as any)?.message || 'Unknown error',
+        success: false,
+        error: 'Unexpected API response format',
         status: response.status,
       };
     } catch (error) {

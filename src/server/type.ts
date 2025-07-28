@@ -16,11 +16,13 @@ export interface FetchConfig extends RequestInit {
   retryDelay?: number;
 }
 
+// 백엔드에서 사용하는 통일된 API 응답 형식
 export interface ApiResponse<T = any> {
   status: number;
-  error: string | null;
+  message: string;
   data: T | null;
-  trace: string | null;
+  detail: string | null;
+  success: boolean;
 }
 
 export interface ProcessedApiResponse<T = any> {
