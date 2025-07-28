@@ -121,8 +121,7 @@ const Nav = () => {
   useEffect(() => {
     const infoWebsocket = new WebSocket(clientEnv.INFO_WEBSOCKET_URL);
 
-    infoWebsocket.onopen = (event) => {
-    };
+    infoWebsocket.onopen = (event) => {};
 
     infoWebsocket.onmessage = (event) => {
       try {
@@ -134,7 +133,6 @@ const Nav = () => {
           dispatch(setDollar(marketData.dollar));
           dispatch(setTether(marketData.tether));
         } else if (streamData.type === 'notice') {
-
           // 데이터가 배열이 아닌 경우 배열로 변환
           const noticeArray = Array.isArray(streamData.data)
             ? streamData.data
@@ -154,8 +152,7 @@ const Nav = () => {
       console.error('웹소켓 상태:', infoWebsocket.readyState);
     };
 
-    infoWebsocket.onclose = (event) => {
-    };
+    infoWebsocket.onclose = (event) => {};
 
     return () => {
       infoWebsocket.close();
