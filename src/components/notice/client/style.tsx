@@ -406,8 +406,8 @@ export const ModalOverlay = styled.div<{ isVisible: boolean }>`
 `;
 
 export const NoticeModal = styled.div<{
-  isVisible: boolean;
-  isClosing?: boolean;
+  is_visible: boolean;
+  is_closing?: boolean;
 }>`
   position: fixed;
   top: 20px;
@@ -420,18 +420,18 @@ export const NoticeModal = styled.div<{
   padding: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   transform: ${(props) => {
-    if (props.isClosing) {
+    if (props.is_closing) {
       return 'translateX(calc(100% + 60px))';
     }
-    return props.isVisible ? 'translateX(0)' : 'translateX(calc(100% + 60px))';
+    return props.is_visible ? 'translateX(0)' : 'translateX(calc(100% + 60px))';
   }};
-  opacity: ${(props) => (props.isVisible && !props.isClosing ? 1 : 0)};
+  opacity: ${(props) => (props.is_visible && !props.is_closing ? 1 : 0)};
   transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   z-index: 1001;
 
   ${(props) =>
-    !props.isVisible &&
-    !props.isClosing &&
+    !props.is_visible &&
+    !props.is_closing &&
     `
     visibility: hidden;
   `}
