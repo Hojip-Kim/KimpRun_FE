@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Notice, NoticeResponse } from "../type";
-import { MarketType } from "@/types/marketType";
-import { fetchClientNotice } from "../api/clientDataFetch";
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Notice, NoticeResponse } from '../type';
+import { MarketType } from '@/types/marketType';
+import { fetchClientNotice } from '../api/clientDataFetch';
 import {
   NoticeContainer,
   NoticeHeader,
@@ -27,10 +27,10 @@ import {
   NewBadge,
   NoticeItemHeaderLeft,
   NoticeCompleteBanner,
-} from "./style";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/redux/store";
-import { formatNoticeDate, isNewNotice } from "@/method/common_method";
+} from './style';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '@/redux/store';
+import { formatNoticeDate, isNewNotice } from '@/method/common_method';
 
 interface NoticeClientProps {
   initialNoticeData: NoticeResponse;
@@ -82,8 +82,8 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
   };
 
   const handleNoticeClick = (exchangeUrl: string, url: string) => {
-    const fullUrl = exchangeUrl ? exchangeUrl + url : url;
-    window.open(fullUrl, "_blank", "noopener,noreferrer");
+    const fullUrl = url;
+    window.open(fullUrl, '_blank', 'noopener,noreferrer');
   };
 
   const loadInitialData = async (marketType: MarketType) => {
@@ -103,12 +103,12 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
         const hasMoreData = !response.data.data.last;
         setHasMore(hasMoreData);
       } else {
-        console.error("❌ 공지사항 로딩 실패:", response.error);
+        console.error('❌ 공지사항 로딩 실패:', response.error);
         setNoticeData([]);
         setHasMore(false);
       }
     } catch (error) {
-      console.error("❌ 공지사항 로딩 중 오류:", error);
+      console.error('❌ 공지사항 로딩 중 오류:', error);
       setNoticeData([]);
       setHasMore(false);
     } finally {
@@ -139,11 +139,11 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
         setCurrentPage(nextPage);
         setHasMore(!response.data.data.last);
       } else {
-        console.error("❌ 추가 공지사항 로딩 실패:", response.error);
+        console.error('❌ 추가 공지사항 로딩 실패:', response.error);
         setHasMore(false);
       }
     } catch (error) {
-      console.error("❌ 추가 공지사항 로딩 중 오류:", error);
+      console.error('❌ 추가 공지사항 로딩 중 오류:', error);
       setHasMore(false);
     } finally {
       setIsLoadingMore(false);
@@ -169,8 +169,8 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (container) {
-      container.addEventListener("scroll", handleScroll);
-      return () => container.removeEventListener("scroll", handleScroll);
+      container.addEventListener('scroll', handleScroll);
+      return () => container.removeEventListener('scroll', handleScroll);
     }
   }, [handleScroll]);
 
@@ -225,7 +225,7 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
         {noticeData.length === 0 ? (
           <EmptyNotice>
             {selectedMarket === MarketType.ALL
-              ? "공지사항이 없습니다."
+              ? '공지사항이 없습니다.'
               : `${selectedMarket} 공지사항이 없습니다.`}
           </EmptyNotice>
         ) : (
@@ -241,7 +241,7 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
                     <NewNoticeItem
                       isAnimating={isAnimating && index === 0}
                       onClick={() =>
-                        handleNoticeClick(notice.exchangeUrl || "", notice.url)
+                        handleNoticeClick(notice.exchangeUrl || '', notice.url)
                       }
                     >
                       <NoticeItemHeader>
