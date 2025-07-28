@@ -89,8 +89,8 @@ const NewNoticeModal: React.FC<NewNoticeModalProps> = ({
 
   return (
     <NoticeModal
-      isVisible={isVisible && !isClosing}
-      isClosing={isClosing}
+      is_visible={isVisible && !isClosing}
+      is_closing={isClosing}
       style={{
         top: `${20 + modalIndex * 180}px`,
       }}
