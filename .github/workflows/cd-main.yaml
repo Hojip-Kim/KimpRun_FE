@@ -4,11 +4,11 @@ name: CD-main
 on:
   workflow_run:
     workflows:
-      - 'CI-main'
+      - "CI-main"
     types:
       - completed
     branches:
-      - 'main'
+      - "main"
 
 jobs:
   build-and-push:
@@ -24,6 +24,7 @@ jobs:
           run_id: ${{ github.event.workflow_run.id }}
           name: commit-id
           path: .
+          token: ${{ secrets.CHARTS_REPO_PAT }}
 
       - name: Read commit ID
         id: read-commit-id
