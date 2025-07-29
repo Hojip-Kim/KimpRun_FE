@@ -32,3 +32,14 @@ export interface MainPageProps {
     secondMarketDataList: { [key: string]: secondDataSet };
   } | null;
 }
+
+
+export interface TokenInfo {
+  id: number;
+  symbol: string;
+}
+
+export interface TokenNameMapping {
+  firstMarketList: TokenInfo[];
+  secondMarketList: TokenInfo[];
+}

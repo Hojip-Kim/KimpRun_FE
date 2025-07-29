@@ -1,5 +1,6 @@
 import { BoardData, Comment } from '../types';
 import { serverEnv } from '@/utils/env';
+import { ApiResponse } from '@/server/type';
 
 const boardUrl = serverEnv.BOARD_URL;
 const commentUrl = serverEnv.COMMENT_URL;
@@ -11,10 +12,27 @@ export async function getBoardData(id: string): Promise<BoardData | null> {
       method: 'GET',
       credentials: 'include',
     });
+
     if (!response.ok) {
       throw new Error('게시글 데이터를 불러오는 중 오류 발생');
     }
-    return await response.json();
+
+    const apiResponse: ApiResponse<BoardData> = await response.json();
+
+    // 새로운 API 응답 형식 처리: {status, message, data, detail, success}
+    if (
+      apiResponse.status >= 200 &&
+      apiResponse.status < 300 &&
+      apiResponse.success === true
+    ) {
+      return apiResponse.data;
+    } else {
+      console.error(
+        '게시글 데이터 로드 실패:',
+        apiResponse.message || apiResponse.detail
+      );
+      return null;
+    }
   } catch (error) {
     console.error('게시글 데이터를 불러오는 중 오류 발생:', error);
     return null;
@@ -41,10 +59,27 @@ export async function createComment(
         parentCommentId,
       }),
     });
+
     if (!response.ok) {
       throw new Error('댓글 작성 실패');
     }
-    return await response.json();
+
+    const apiResponse: ApiResponse<Comment> = await response.json();
+
+    // 새로운 API 응답 형식 처리: {status, message, data, detail, success}
+    if (
+      apiResponse.status >= 200 &&
+      apiResponse.status < 300 &&
+      apiResponse.success === true
+    ) {
+      return apiResponse.data;
+    } else {
+      console.error(
+        '댓글 작성 실패:',
+        apiResponse.message || apiResponse.detail
+      );
+      return null;
+    }
   } catch (error) {
     console.error('댓글 작성 중 오류 발생:', error);
     return null;

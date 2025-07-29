@@ -3,6 +3,7 @@ export type {
   ServerFetchResponse,
   FetchConfig,
   ApiResponse,
+  ProcessedApiResponse,
 } from '../type';
 
 export { createRequest } from './request';

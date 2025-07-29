@@ -13,14 +13,14 @@ export async function getChatLogs(page: number = 0, size: number = 20) {
       headers: { 'Content-type': 'application/json' },
     });
 
-    if (response.success) {
-      return response.data;
+    if (response.success && response.data) {
+      return Array.isArray(response.data) ? response.data : [];
     } else {
       console.error('채팅 로그 가져오기 실패:', response.error);
-      return null;
+      return [];
     }
   } catch (error) {
     console.error('채팅 로그 요청 오류:', error);
-    return null;
+    return [];
   }
 }

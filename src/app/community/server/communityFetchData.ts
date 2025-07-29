@@ -1,10 +1,10 @@
 import { serverEnv } from '@/utils/env';
-import { ApiResponse, serverRequest } from '@/server/fetch';
+import { ProcessedApiResponse, serverRequest } from '@/server/fetch';
 import { AllPostData } from '../types';
 
 export const fetchAllPostData = async (
   page: number
-): Promise<ApiResponse<AllPostData>> => {
+): Promise<ProcessedApiResponse<AllPostData>> => {
   try {
     if (!serverEnv.BOARD_URL) {
       console.warn('BOARD_URL 환경변수가 설정되지 않았습니다.');
@@ -28,7 +28,7 @@ export const fetchAllPostData = async (
     if (response.success) {
       return response;
     } else {
-      console.error('커뮤니티 데이터 가져오기 실패:', response.error);
+      console.error('커뮤니티 데이터 가져오기 실패:', response.trace);
       return {
         success: false,
         error: response.error || 'Failed to fetch community data',
@@ -49,7 +49,7 @@ export const fetchAllPostData = async (
 
 export async function fetchCommunityData(
   endpoint: string
-): Promise<ApiResponse<AllPostData>> {
+): Promise<ProcessedApiResponse<AllPostData>> {
   try {
     if (!serverEnv.BOARD_URL) {
       return {
@@ -93,7 +93,7 @@ export async function fetchCommunityData(
 
 export async function getCommunityData(
   page: number
-): Promise<ApiResponse<AllPostData>> {
+): Promise<ProcessedApiResponse<AllPostData>> {
   try {
     if (!serverEnv.BOARD_URL) {
       console.error('❌ BOARD_URL 환경변수가 설정되지 않았습니다.');

@@ -37,9 +37,10 @@ interface NoticeClientProps {
 }
 
 const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
-  const [noticeData, setNoticeData] = useState<Notice[]>(
-    initialNoticeData.data.content
-  );
+  const initialContent = initialNoticeData?.data?.content || [];
+  const initialLast = initialNoticeData?.data?.last ?? true;
+
+  const [noticeData, setNoticeData] = useState<Notice[]>(initialContent);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [selectedMarket, setSelectedMarket] = useState<MarketType>(
@@ -48,7 +49,7 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
 
   // 무한스크롤을 위한 상태 제공
   const [currentPage, setCurrentPage] = useState(0);
-  const [hasMore, setHasMore] = useState(!initialNoticeData.data.last);
+  const [hasMore, setHasMore] = useState(!initialLast);
   const [pageSize] = useState(15);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -81,7 +82,7 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
   };
 
   const handleNoticeClick = (exchangeUrl: string, url: string) => {
-    const fullUrl = exchangeUrl ? exchangeUrl + url : url;
+    const fullUrl = url;
     window.open(fullUrl, '_blank', 'noopener,noreferrer');
   };
 
@@ -187,9 +188,7 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
           <SelectorWrapper>
             <ExchangeSelector
               value={selectedMarket}
-              onChange={(e) =>
-                handleMarketChange(Number(e.target.value) as MarketType)
-              }
+              onChange={(e) => handleMarketChange(e.target.value as MarketType)}
             >
               <option value={MarketType.ALL}>전체</option>
               <option value={MarketType.UPBIT}>UPBIT</option>
@@ -211,9 +210,7 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
         <SelectorWrapper>
           <ExchangeSelector
             value={selectedMarket}
-            onChange={(e) =>
-              handleMarketChange(Number(e.target.value) as MarketType)
-            }
+            onChange={(e) => handleMarketChange(e.target.value as MarketType)}
           >
             <option value={MarketType.ALL}>전체</option>
             <option value={MarketType.UPBIT}>UPBIT</option>
@@ -280,8 +277,6 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
                 );
               })}
             </AnimatedNoticeList>
-
-            {/* 무한스크롤 로딩 인디케이터 */}
             {isLoadingMore && (
               <LoadingIndicator>
                 <LoadingText>
@@ -289,8 +284,6 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
                 </LoadingText>
               </LoadingIndicator>
             )}
-
-            {/* 더 이상 로드할 데이터가 없을 때 */}
             {!hasMore && noticeData.length > 0 && (
               <NoticeCompleteBanner>
                 모든 공지사항을 확인했습니다.

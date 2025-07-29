@@ -1,4 +1,4 @@
-import { ApiResponse, serverRequest } from '@/server/fetch';
+import { ProcessedApiResponse, serverRequest } from '@/server/fetch';
 import { AllPostData } from '../../types';
 import { serverEnv } from '@/utils/env';
 import { Category } from '@/app/admin/type';
@@ -9,7 +9,7 @@ const categoryUrl = serverEnv.CATEGORY_URL;
 
 export async function getAllPosts(
   page: number
-): Promise<ApiResponse<AllPostData>> {
+): Promise<ProcessedApiResponse<AllPostData>> {
   try {
     if (!allPostsUrl) {
       return {
@@ -51,7 +51,7 @@ export async function getAllPosts(
 export async function getPosts(
   categoryId: number,
   page: number
-): Promise<ApiResponse<AllPostData>> {
+): Promise<ProcessedApiResponse<AllPostData>> {
   try {
     if (!boardUrl) {
       return {
@@ -90,7 +90,9 @@ export async function getPosts(
   }
 }
 
-export async function getCategories(): Promise<ApiResponse<Category[]>> {
+export async function getCategories(): Promise<
+  ProcessedApiResponse<Category[]>
+> {
   try {
     if (!categoryUrl) {
       return {

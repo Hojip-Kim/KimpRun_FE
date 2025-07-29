@@ -1,4 +1,4 @@
-import { FetchConfig, ApiResponse } from '../type';
+import { FetchConfig, ApiResponse, ProcessedApiResponse } from '../type';
 
 const DEFAULT_CONFIG: FetchConfig = {
   method: 'GET',
@@ -45,7 +45,7 @@ export const createRequest = (baseConfig: Partial<FetchConfig> = {}) => {
   return async <T = any>(
     url: string,
     options: Partial<FetchConfig> = {}
-  ): Promise<ApiResponse<T>> => {
+  ): Promise<ProcessedApiResponse<T>> => {
     const finalConfig = { ...config, ...options };
     const { timeout, retries, retryDelay, ...fetchOptions } = finalConfig;
 
@@ -59,12 +59,48 @@ export const createRequest = (baseConfig: Partial<FetchConfig> = {}) => {
       const isJson = response.headers
         .get('content-type')
         ?.includes('application/json');
-      const data = isJson ? await response.json() : await response.text();
 
+      if (!isJson) {
+        const text = await response.text();
+        return {
+          success: response.ok,
+          data: response.ok ? (text as any) : undefined,
+          error: response.ok ? undefined : text,
+          status: response.status,
+        };
+      }
+
+      // JSON 응답 처리 - 백엔드 통일 형식: {status, message, data, detail, success}
+      const apiResponse: ApiResponse<T> = await response.json();
+
+      // API 응답이 정의된 형식인지 확인
+      if (
+        typeof apiResponse.status === 'number' &&
+        'success' in apiResponse &&
+        'data' in apiResponse &&
+        'message' in apiResponse
+      ) {
+        const isSuccess =
+          apiResponse.success === true &&
+          apiResponse.status >= 200 &&
+          apiResponse.status < 300;
+
+        return {
+          success: isSuccess,
+          data: isSuccess ? apiResponse.data : undefined,
+          error: isSuccess
+            ? undefined
+            : apiResponse.message || apiResponse.detail || 'Unknown error',
+          status: apiResponse.status,
+          trace: apiResponse.detail,
+        };
+      }
+
+      // 백엔드에서 정의되지 않은 형식이 온 경우 (오류 상황)
+      console.error('❌ 예상하지 못한 API 응답 형식:', apiResponse);
       return {
-        success: response.ok,
-        data: response.ok ? data : undefined,
-        error: response.ok ? undefined : data,
+        success: false,
+        error: 'Unexpected API response format',
         status: response.status,
       };
     } catch (error) {
@@ -88,7 +124,6 @@ export const createApiClient = (
   baseConfig: Partial<FetchConfig> = {}
 ) => {
   const request = createRequest(baseConfig);
-
 
   return {
     get: <T = any>(endpoint: string, config?: Partial<FetchConfig>) =>

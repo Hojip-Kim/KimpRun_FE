@@ -1,6 +1,6 @@
 import React from 'react';
 import { fetchAllCategories } from './server/fetchCategory';
-import { ApiResponse } from '@/server/type';
+import { ProcessedApiResponse } from '@/server/type';
 import { Category, CategoryResponse } from './type';
 import AdminPageClient from './client/adminClient';
 
@@ -11,7 +11,7 @@ const AdminPage = async () => {
   let initialCategories: Category[] = [];
 
   try {
-    const categoriesResponse: ApiResponse<CategoryResponse> =
+    const categoriesResponse: ProcessedApiResponse<CategoryResponse> =
       await fetchAllCategories();
 
     if (

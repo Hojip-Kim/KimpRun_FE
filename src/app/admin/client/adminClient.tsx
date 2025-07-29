@@ -8,7 +8,7 @@ import {
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { redirect } from 'next/navigation';
-import { ApiResponse } from '@/server/type';
+import { ProcessedApiResponse } from '@/server/type';
 import { Category, CategoryResponse } from '../type';
 import { InputForm } from './style';
 
@@ -35,10 +35,11 @@ const AdminPageClient = ({ initialCategories }: AdminPageProps) => {
   const handleSubmit = async (formData: React.FormEvent<HTMLFormElement>) => {
     formData.preventDefault();
     try {
-      const response: ApiResponse<CategoryResponse> = await createCategory({
-        name: categoryName,
-        description: '',
-      });
+      const response: ProcessedApiResponse<CategoryResponse> =
+        await createCategory({
+          name: categoryName,
+          description: '',
+        });
       if (response.success && response.data) {
         // 새로 생성된 카테고리를 목록에 추가 (전체 카테고리 목록을 다시 설정)
         setCategories(response.data.categories);
@@ -54,7 +55,7 @@ const AdminPageClient = ({ initialCategories }: AdminPageProps) => {
 
   const handleUpdate = async (id: number) => {
     try {
-      const response: ApiResponse<Category> = await updateCategory(
+      const response: ProcessedApiResponse<Category> = await updateCategory(
         id,
         editCategoryName,
         ''
@@ -79,7 +80,7 @@ const AdminPageClient = ({ initialCategories }: AdminPageProps) => {
 
   const handleDelete = async (id: number) => {
     try {
-      const response: ApiResponse<Boolean> = await deleteCategory(id);
+      const response: ProcessedApiResponse<Boolean> = await deleteCategory(id);
       if (response.success) {
         setCategories(categories.filter((category) => category.id !== id));
         alert(`카테고리 삭제 완료 : ${id}`);
