@@ -1,4 +1,5 @@
 import { firstDataSet, secondDataSet } from '@/app/types';
+import { clientEnv } from '@/utils/env';
 import { clientRequest } from '@/server/fetch';
 import { CoinDetail } from './types';
 
@@ -30,7 +31,7 @@ export async function getRowData(
 export async function getCoinDetail(
   coinId: string
 ): Promise<CoinDetail | null> {
-  const url = new URL('http://localhost:8080/api/cmc/coin');
+  const url = new URL(clientEnv.CMC_SINGLE_COIN_URL);
   url.searchParams.set('coinId', coinId);
 
   try {
