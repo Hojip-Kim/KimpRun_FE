@@ -1,13 +1,13 @@
-"use client";
-import { useEffect, useState } from "react";
-import "./loginForm.css";
-import { useDispatch, useSelector } from "react-redux";
-import { setIsAuthenticated, setUser } from "@/redux/reducer/authReducer";
-import SignupForm from "../signup/SignupForm";
-import { loginDataFetch, responseData } from "./server/loginDataFetch";
-import { fetchUserInfo } from "../auth/fetchUserInfo";
-import { clientEnv } from "@/utils/env";
-import { FormContainer, LoginButton, GoogleLoginButton } from "./style";
+'use client';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { setIsAuthenticated, setUser } from '@/redux/reducer/authReducer';
+import SignupForm from '../signup/SignupForm';
+import { loginDataFetch, responseData } from './server/loginDataFetch';
+import { fetchUserInfo } from '../auth/fetchUserInfo';
+import { clientEnv } from '@/utils/env';
+import { FormContainer, LoginButton, GoogleLoginButton } from './style';
+import { UserInfo } from '../market-selector/type';
 interface LoginFormProps {
   closeModal: () => void;
   setModalSize: React.Dispatch<
@@ -16,19 +16,28 @@ interface LoginFormProps {
       height: number;
     }>
   >;
+  onClickSignup?: () => void;
+  hideInlineTitle?: boolean;
+  hideInlineFooter?: boolean;
 }
 
 const googleLoginUrl = clientEnv.GOOGLE_LOGIN_URL;
 
 interface loginResponse {
-  result: "check" | "success";
+  result: 'check' | 'success';
   message: string;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ closeModal, setModalSize }) => {
+const LoginForm: React.FC<LoginFormProps> = ({
+  closeModal,
+  setModalSize,
+  onClickSignup,
+  hideInlineTitle = false,
+  hideInlineFooter = false,
+}) => {
   const dispatch = useDispatch();
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
   const [isLoginForm, setIsLoginForm] = useState<boolean>(true);
   const [rememberMe, setRememberMe] = useState<boolean>(false);
 
@@ -41,7 +50,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ closeModal, setModalSize }) => {
     } else {
       setModalSize({ width: 450, height: 450 });
     }
-    const savedEmail = localStorage.getItem("email");
+    const savedEmail = localStorage.getItem('email');
     if (savedEmail) {
       setEmail(savedEmail);
       setRememberMe(true);
@@ -53,9 +62,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ closeModal, setModalSize }) => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (rememberMe) {
-      localStorage.setItem("email", email);
+      localStorage.setItem('email', email);
     } else {
-      localStorage.removeItem("email");
+      localStorage.removeItem('email');
     }
 
     // Spring Boot의 /login 엔드포인트로 POST 요청
@@ -65,27 +74,47 @@ const LoginForm: React.FC<LoginFormProps> = ({ closeModal, setModalSize }) => {
       password
     );
     if (loginResponse) {
-      if (loginResponse.result === "success") {
+      if (loginResponse.result === 'success') {
         await dispatch(setIsAuthenticated());
-        await fetchUserInfo();
-        alert("로그인 성공");
+        const userInfo = await fetchUserInfo();
+
+        const parseUserInfo = {
+          name: userInfo?.member.name,
+          email: userInfo?.member.email,
+          role: userInfo?.member.role,
+        };
+
+        if (userInfo?.isAuthenticated) {
+          await dispatch(setUser(parseUserInfo));
+        }
+        alert('로그인 성공');
         closeModal();
-      } else if (loginResponse.result === "check") {
+      } else if (loginResponse.result === 'check') {
         const userConfirmed = window.confirm(
           `다른 기기에서 접속이 감지되었습니다.\n접속 IP: ${loginResponse.data}\n\n계속 진행하시겠습니까?`
         );
 
         if (userConfirmed) {
           await dispatch(setIsAuthenticated());
-          await fetchUserInfo();
-          alert("로그인 성공");
+          const userInfo: UserInfo = await fetchUserInfo();
+
+          const parseUserInfo = {
+            name: userInfo?.member.name,
+            email: userInfo?.member.email,
+            role: userInfo?.member.role,
+          };
+
+          if (userInfo) {
+            await dispatch(setUser(parseUserInfo));
+          }
+          alert('로그인 성공');
           closeModal();
         } else {
-          window.location.href = "/change-password"; // 비밀번호 변경 페이지 URL로 수정 필요
+          window.location.href = '/change-password'; // 비밀번호 변경 페이지 URL로 수정 필요
         }
       }
     } else {
-      alert("로그인 실패");
+      alert('로그인 실패');
     }
   };
 
@@ -97,7 +126,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ closeModal, setModalSize }) => {
     <FormContainer>
       {isLoginForm ? (
         <>
-          <h1>Login</h1>
+          {!hideInlineTitle && <h1>Login</h1>}
           <form onSubmit={handleLogin}>
             <div>
               <label>Email</label>
@@ -121,17 +150,32 @@ const LoginForm: React.FC<LoginFormProps> = ({ closeModal, setModalSize }) => {
             <img src="/google.png" alt="google icon" />
             Google로 로그인
           </GoogleLoginButton>
-          <p>
+          <div className="remember-row">
             <input
+              id="rememberMe"
               type="checkbox"
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
             />
-            아이디 기억하기
-          </p>
+            <label htmlFor="rememberMe">아이디 기억하기</label>
+          </div>
 
-          <h1>아이디가 없으세요?</h1>
-          <button onClick={() => setIsLoginForm(false)}>회원가입</button>
+          {!hideInlineFooter && (
+            <>
+              <h1>아이디가 없으세요?</h1>
+              <button
+                onClick={() => {
+                  if (onClickSignup) {
+                    onClickSignup();
+                  } else {
+                    setIsLoginForm(false);
+                  }
+                }}
+              >
+                회원가입
+              </button>
+            </>
+          )}
         </>
       ) : (
         <SignupForm setIsLoginForm={setIsLoginForm} />
