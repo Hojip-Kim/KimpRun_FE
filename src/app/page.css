@@ -12,7 +12,9 @@
   min-height: 200px;
   max-height: 30%;
 
-  #chart {
+  #chart,
+  #desktop-chart,
+  #mobile-chart {
     justify-content: center;
     background-color: #131722;
     align-items: left;
@@ -30,14 +32,14 @@
   max-height: 80%;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .main-page-container {
   width: 100%;
   display: flex;
-  background-color: #121212;
-  color: #ffffff;
+  background-color: #0b0f17;
+  color: #e6e8ee;
   height: calc(100vh - 130px);
   overflow: hidden;
   gap: 20px;
@@ -49,25 +51,102 @@
   flex: 4.5;
   min-width: 600px;
   max-width: 900px;
-  background-color: #1e1e1e;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: rgba(20, 24, 34, 0.9);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
   height: 100%;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
   padding: 20px;
+}
+
+@media (max-width: 992px) {
+  .center-aside-container {
+    min-width: auto;
+    width: 100%;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-page-container {
+    height: calc(100vh - 72px); /* viewport minus mobile nav */
+    overflow: hidden; /* prevent page scroll; scroll inside center */
+  }
+  .center-aside-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
 }
 
 .right-aside-container {
   flex: 2.5;
   min-width: 300px;
   max-width: 400px;
-  background-color: #1e1e1e;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: rgba(20, 24, 34, 0.9);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
   padding: 20px;
   height: 100%;
   display: flex;
   flex-direction: column;
+}
+
+@media (max-width: 1180px) {
+  .main-page-container {
+    height: auto;
+    min-height: calc(100vh - 130px);
+    flex-direction: column;
+    overflow: auto; /* allow page scroll */
+  }
+
+  .left-aside-container,
+  .center-aside-container,
+  .right-aside-container {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .center-aside-container {
+    order: 2;
+  }
+  .right-aside-container {
+    order: 3;
+  }
+  .left-aside-container {
+    order: 1;
+  }
+}
+
+@media (max-width: 992px) {
+  .main-page-container {
+    gap: 16px;
+    padding: 16px;
+  }
+  .left-aside-container {
+    display: none;
+  }
+  .center-aside-container {
+    order: 1;
+  }
+  .right-aside-container {
+    order: 2;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-page-container {
+    gap: 12px;
+    padding: 12px;
+  }
+  .right-aside-container {
+    display: none;
+  }
+  .center-aside-container {
+    padding: 12px;
+  }
 }

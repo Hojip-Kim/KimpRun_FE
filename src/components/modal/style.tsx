@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { palette } from '@/styles/palette';
 export const Container = styled.div<{ width: number; height: number }>`
   position: fixed;
   display: flex;
@@ -9,11 +10,12 @@ export const Container = styled.div<{ width: number; height: number }>`
   width: ${(props) => props.width}px;
   height: ${(props) => props.height}px;
   padding: 8px;
-  background-color: black;
-  border-radius: 8px;
+  background: ${palette.card};
+  border: 1px solid ${palette.border};
+  border-radius: 12px;
   z-index: 2000;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-  color: white;
+  box-shadow: ${palette.shadow};
+  color: ${palette.textPrimary};
 
   .exit-wrapper {
     position: absolute;

@@ -139,11 +139,11 @@ const AdminPageClient = ({ initialCategories }: AdminPageProps) => {
                 </form>
               ) : (
                 <>
-                  {category.id} : {category.name}
+                  {category.id} : {category.categoryName}
                   <button
                     onClick={() => {
                       setEditingCategory(category.id);
-                      setEditCategoryName(category.name);
+                      setEditCategoryName(category.categoryName);
                     }}
                   >
                     수정

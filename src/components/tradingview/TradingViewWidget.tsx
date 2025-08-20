@@ -5,7 +5,9 @@ import { RootState } from '@/redux/store';
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
-const TradingViewWidget = () => {
+interface Props { containerId?: string }
+
+const TradingViewWidget: React.FC<Props> = ({ containerId = 'chart' }) => {
   const widgetToken = useSelector((state: RootState) => state.widget.token);
   const currency = useSelector((state: RootState) => state.widget.currency);
   const interval = useSelector((state: RootState) => state.widget.interval);
@@ -37,7 +39,7 @@ const TradingViewWidget = () => {
         hotlist: true,
         calendar: true,
         studies: ['STD;SMA'],
-        container_id: 'chart',
+        container_id: containerId,
         show_popup_button: true,
         popup_width: '1000',
         popup_height: '650',
@@ -53,9 +55,9 @@ const TradingViewWidget = () => {
       script.onload = loadWidget;
       document.head.appendChild(script);
     }
-  }, [widgetToken, currency, interval]);
+  }, [widgetToken, currency, interval, containerId]);
 
-  return <div id="chart"></div>;
+  return <div id={containerId}></div>;
 };
 
 export default TradingViewWidget;

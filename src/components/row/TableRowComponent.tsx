@@ -48,7 +48,8 @@ const CoinDetailView = React.memo(
         </div>
 
         <div style={{ marginBottom: '10px' }}>
-          <strong>순위:</strong> #{coinDetail.rank.toLocaleString()}
+          <strong>순위:</strong> #
+          {coinDetail.rank ? coinDetail.rank.toLocaleString() : '정보 없음'}
         </div>
 
         <div style={{ marginBottom: '10px' }}>
@@ -62,19 +63,19 @@ const CoinDetailView = React.memo(
           <strong>총 공급량:</strong>{' '}
           {coinDetail.totalSupply
             ? Number(coinDetail.totalSupply).toLocaleString()
-            : 'N/A'}
+            : '정보 없음'}
         </div>
         <div style={{ marginBottom: '10px' }}>
           <strong>유통량:</strong>{' '}
           {coinDetail.circulatingSupply
             ? Number(coinDetail.circulatingSupply).toLocaleString()
-            : 'N/A'}
+            : '정보 없음'}
         </div>
         <div style={{ marginBottom: '10px' }}>
           <strong>시가총액:</strong>{' '}
           {coinDetail.marketCap
             ? numberToKorean(Number(coinDetail.marketCap)) + '원'
-            : 'N/A'}
+            : '정보 없음'}
         </div>
       </div>
 
@@ -190,7 +191,6 @@ const TableRowComponent = React.memo(
         <StyledTableRow
           $isExpanded={expandedRow === token}
           onClick={() => {
-            console.log('👆 Row clicked in TableRowComponent:', token);
             onRowClick(token);
           }}
           className={fadeOutClass || ''}
@@ -202,10 +202,11 @@ const TableRowComponent = React.memo(
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <span>{data.trade_price?.toLocaleString()}</span>
               <span style={{ color: 'gray' }}>
-                {data.secondPrice
+                {data.trade_price && data.secondPrice
                   ? (() => {
                       const decimalPlaces =
                         data.trade_price.toString().split('.')[1]?.length || 1;
+
                       return data.secondPrice.toLocaleString(undefined, {
                         minimumFractionDigits: decimalPlaces,
                         maximumFractionDigits: decimalPlaces,

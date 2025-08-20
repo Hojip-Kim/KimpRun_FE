@@ -6,8 +6,8 @@ import {
   MarketSelectorContainer,
   MarketSelectorGroup,
   MarketSelectorLabel,
-  MarketSelect,
 } from "./style";
+import Dropdown, { DropdownOption } from '@/components/common/Dropdown';
 
 interface MarketOption {
   value: MarketType;
@@ -37,50 +37,55 @@ const MarketSelector: React.FC<MarketSelectorProps> = ({
   disabled = false,
   marketOptions = DEFAULT_MARKET_OPTIONS,
 }) => {
+  const iconMap: Partial<Record<MarketType, string>> = {
+    [MarketType.UPBIT]: '/upbit_logo.png',
+    [MarketType.BINANCE]: '/binance_logo.png',
+    [MarketType.COINONE]: '/coinone_logo.png',
+    [MarketType.BITHUMB]: '/bithumb_logo.png',
+    [MarketType.ALL]: '/logo.png',
+  };
+
+  const dropdownOptions: DropdownOption<MarketType>[] = marketOptions.map((o) => ({
+    value: o.value,
+    label: `${o.label}${o.hasWebsocket ? '' : ' (준비중)'}`,
+    iconSrc: iconMap[o.value],
+    iconAlt: `${o.label} logo`,
+    disabled:
+      !o.hasWebsocket ||
+      o.value === selectedCompareMarket ||
+      o.value === selectedMainMarket,
+  }));
+
   return (
     <MarketSelectorContainer>
       <MarketSelectorGroup>
         <MarketSelectorLabel>메인 거래소</MarketSelectorLabel>
-        <MarketSelect
+        <Dropdown
           value={selectedMainMarket}
-          onChange={(e) => onMarketChange("main", e.target.value as MarketType)}
+          options={dropdownOptions.map((o) => ({
+            ...o,
+            disabled: !marketOptions.find((m) => m.value === o.value)?.hasWebsocket ||
+              o.value === selectedCompareMarket,
+          }))}
+          onChange={(val) => onMarketChange('main', val as MarketType)}
           disabled={disabled}
-        >
-          {marketOptions.map((option) => (
-            <option
-              key={option.value}
-              value={option.value}
-              disabled={
-                !option.hasWebsocket || option.value === selectedCompareMarket
-              }
-            >
-              {option.label} {!option.hasWebsocket && "(준비중)"}
-            </option>
-          ))}
-        </MarketSelect>
+          ariaLabel="메인 거래소 선택"
+        />
       </MarketSelectorGroup>
 
       <MarketSelectorGroup>
         <MarketSelectorLabel>비교 거래소</MarketSelectorLabel>
-        <MarketSelect
+        <Dropdown
           value={selectedCompareMarket}
-          onChange={(e) =>
-            onMarketChange("compare", e.target.value as MarketType)
-          }
+          options={dropdownOptions.map((o) => ({
+            ...o,
+            disabled: !marketOptions.find((m) => m.value === o.value)?.hasWebsocket ||
+              o.value === selectedMainMarket,
+          }))}
+          onChange={(val) => onMarketChange('compare', val as MarketType)}
           disabled={disabled}
-        >
-          {marketOptions.map((option) => (
-            <option
-              key={option.value}
-              value={option.value}
-              disabled={
-                !option.hasWebsocket || option.value === selectedMainMarket
-              }
-            >
-              {option.label} {!option.hasWebsocket && "(준비중)"}
-            </option>
-          ))}
-        </MarketSelect>
+          ariaLabel="비교 거래소 선택"
+        />
       </MarketSelectorGroup>
     </MarketSelectorContainer>
   );

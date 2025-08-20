@@ -18,7 +18,6 @@ import {
   SearchInputContainer,
   SearchInput,
   SearchButton,
-  StyledArrowIcon,
 } from './style';
 function debounce<F extends (...args: any[]) => any>(func: F, wait: number) {
   let timeout: NodeJS.Timeout | null = null;
@@ -52,8 +51,8 @@ const Search: React.FC<SearchProps> = ({ onSearch }) => {
   );
 
   const handleCurrencyChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      dispatch(setCurrency(e.target.value as 'KRW' | 'USDT'));
+    (val: string) => {
+      dispatch(setCurrency(val as 'KRW' | 'USDT'));
     },
     [dispatch]
   );
@@ -75,8 +74,8 @@ const Search: React.FC<SearchProps> = ({ onSearch }) => {
   );
 
   const handleIntervalChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      dispatch(setInterval(e.target.value));
+    (val: string) => {
+      dispatch(setInterval(val));
     },
     [dispatch]
   );
@@ -85,12 +84,10 @@ const Search: React.FC<SearchProps> = ({ onSearch }) => {
     <SearchContainer>
       <SelectContainer>
         <SelectWrapper>
-          <CurrencySelect value={currency} onChange={handleCurrencyChange} />
-          <StyledArrowIcon />
+          <CurrencySelect value={currency} onChangeValue={handleCurrencyChange} />
         </SelectWrapper>
         <SelectWrapper>
-          <IntervalSelect value={interval} onChange={handleIntervalChange} />
-          <StyledArrowIcon />
+          <IntervalSelect value={interval} onChangeValue={handleIntervalChange} />
         </SelectWrapper>
       </SelectContainer>
       <SearchInputContainer>

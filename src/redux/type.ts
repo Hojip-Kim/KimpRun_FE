@@ -10,6 +10,7 @@ export interface User {
 export interface AuthState {
   isAuthenticated: boolean;
   user: User | null;
+  uuid: string;
 }
 
 export interface NoticeState {

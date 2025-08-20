@@ -18,12 +18,14 @@ import Search from '@/components/search/Search';
 import { checkAuth } from '@/components/login/server/checkAuth';
 import { setGuestUser } from '@/redux/reducer/authReducer';
 import { firstDataSet, secondDataSet, TokenNameMapping } from '../types';
-import { RowContainer, LoadingOverlay } from './style';
+import { RowContainer, MobileChartContainer } from './style';
 import { MarketType } from '@/types/marketType';
 import { getClientSingleMarketData, getClientTokenMapping } from './clientApi';
 import { useMarketDataWebSocket } from '@/hooks/useMarketDataWebSocket';
 import { MarketDataMap } from '@/types/marketData';
 import MarketSelector from '@/components/market-selector/MarketSelector';
+import TradingViewWidget from '@/components/tradingview/TradingViewWidget';
+import { MarketSelectorSkeleton, SearchSkeleton, TableSkeleton, ChartSkeleton } from '@/components/skeleton/Skeleton';
 
 const RowPageClient: React.FC = () => {
   // 기본 거래소 설정
@@ -314,40 +316,45 @@ const RowPageClient: React.FC = () => {
   const displayFirstDataset = firstDataset;
   const displaySecondDataset = secondDataset;
 
+  const showSkeleton = initialLoading || loading;
+
   return (
     <RowContainer style={{ position: 'relative' }}>
-      {initialLoading && (
-        <LoadingOverlay>
-          <div>로딩 중</div>
-        </LoadingOverlay>
-      )}
-
-      {!initialLoading && loading && (
-        <LoadingOverlay>
-          <div>거래소 데이터 로딩 중</div>
-        </LoadingOverlay>
-      )}
-
-      <MarketSelector
-        selectedMainMarket={selectedMainMarket}
-        selectedCompareMarket={selectedCompareMarket}
-        onMarketChange={handleMarketChange}
-        disabled={loading || initialLoading}
-        marketOptions={marketOptions}
-      />
-
-      <Search onSearch={handleSearch} />
-
-      {!initialLoading && tokenFirstList && tokenFirstList.length > 0 && (
-        <Row
-          firstTokenNameList={tokenFirstList}
-          firstTokenDataList={displayFirstDataset}
-          secondTokenDataList={displaySecondDataset}
-          firstDataset={displayFirstDataset}
-          secondDataset={displaySecondDataset}
-          filteredTokens={filteredTokens}
-          tokenMapping={tokenMapping}
-        />
+      {showSkeleton ? (
+        <>
+          <MarketSelectorSkeleton />
+          <MobileChartContainer>
+            <ChartSkeleton height={200} />
+          </MobileChartContainer>
+          <SearchSkeleton />
+          <TableSkeleton rows={12} />
+        </>
+      ) : (
+        <>
+          <MarketSelector
+            selectedMainMarket={selectedMainMarket}
+            selectedCompareMarket={selectedCompareMarket}
+            onMarketChange={handleMarketChange}
+            disabled={false}
+            marketOptions={marketOptions}
+          />
+          {/* Mobile chart between selector and search */}
+          <MobileChartContainer>
+            <TradingViewWidget containerId="mobile-chart" />
+          </MobileChartContainer>
+          <Search onSearch={handleSearch} />
+          {tokenFirstList && tokenFirstList.length > 0 && (
+            <Row
+              firstTokenNameList={tokenFirstList}
+              firstTokenDataList={displayFirstDataset}
+              secondTokenDataList={displaySecondDataset}
+              firstDataset={displayFirstDataset}
+              secondDataset={displaySecondDataset}
+              filteredTokens={filteredTokens}
+              tokenMapping={tokenMapping}
+            />
+          )}
+        </>
       )}
     </RowContainer>
   );
