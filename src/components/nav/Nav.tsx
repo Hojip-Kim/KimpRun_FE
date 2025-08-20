@@ -5,8 +5,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import Modal from '@/components/modal/modal';
 import LoginForm from '@/components/login/loginForm';
-import { logout, setUser } from '@/redux/reducer/authReducer';
+import {
+  logout,
+  setGuestUser,
+  setUser,
+  setUuid,
+} from '@/redux/reducer/authReducer';
 import ProfileForm from '../profile/ProfileForm';
+import NicknameModal from '../profile/NicknameModal';
 import NewNoticeModal from '../notice/client/NewNoticeModal';
 import { Notice } from '../notice/type';
 import { NoticeModalContainer } from '../notice/client/style';
@@ -54,6 +60,7 @@ import {
   setIsNewNoticeGenerated,
   setNotice,
 } from '@/redux/reducer/noticeReducer';
+import { Member, UserInfo } from '../market-selector/type';
 
 interface ResponseUrl {
   response: string;
@@ -62,6 +69,7 @@ interface ResponseUrl {
 const Nav = () => {
   const [isModalActive, setIsModalActive] = useState<boolean>(false);
   const [modalSize, setModalSize] = useState({ width: 400, height: 300 });
+  const [isNicknameModalOpen, setIsNicknameModalOpen] = useState<boolean>(false);
 
   // 여러 모달을 관리하기 위한 상태
   const [noticeModals, setNoticeModals] = useState<
@@ -102,14 +110,23 @@ const Nav = () => {
   };
 
   const setReduxUserAuth = async () => {
-    const response = await checkUserAuth(isAuthenticated);
-    dispatch(
-      setUser({
-        name: response?.nickname,
-        email: response?.email,
-        role: response?.role,
-      })
-    );
+    const response: UserInfo | null = await checkUserAuth();
+    if (response !== null && response.member !== undefined) {
+      const member: Member = response.member;
+      dispatch(
+        setUser({
+          name: member.name,
+          email: member.email,
+          role: member.role,
+        })
+      );
+      dispatch(setUuid(response.uuid));
+    } else if (response !== null && response.member === undefined) {
+      dispatch(setGuestUser());
+      dispatch(setUuid(response.uuid));
+    } else {
+      dispatch(logout());
+    }
   };
 
   useEffect(() => {
@@ -192,8 +209,7 @@ const Nav = () => {
   };
 
   const handleLoginClick = () => {
-    setModalSize({ width: 400, height: 300 });
-    setIsModalActive(true);
+    router.push('/login');
   };
 
   const handleLogout = async () => {
@@ -247,13 +263,7 @@ const Nav = () => {
   };
 
   const handleNickname = () => {
-    const guestName = localStorage.getItem('guestName');
-
-    const nickname = prompt(guestName, guestName);
-    if (nickname) {
-      localStorage.setItem('guestName', nickname);
-    }
-    router.refresh();
+    setIsNicknameModalOpen(true);
   };
 
   return (
@@ -393,6 +403,24 @@ const Nav = () => {
             />
           ))}
         </NoticeModalContainer>
+      )}
+
+      {isNicknameModalOpen && (
+        <Modal
+          width={420}
+          height={260}
+          element={
+            <NicknameModal
+              initialName={user?.name ?? ''}
+              onCancel={() => setIsNicknameModalOpen(false)}
+              onSave={async (newName) => {
+                await dispatch(setUser({ ...user, name: newName }));
+                setIsNicknameModalOpen(false);
+              }}
+            />
+          }
+          setModal={setIsNicknameModalOpen}
+        />
       )}
     </NavbarWrapper>
   );
