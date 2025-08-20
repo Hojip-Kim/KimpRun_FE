@@ -1,21 +1,22 @@
 import { MarketType } from '@/types/marketType';
 import styled from 'styled-components';
+import { palette } from '@/styles/palette';
 
 export const NoticeContainer = styled.div`
   height: 100%;
   width: 100%;
   display: flex;
   flex-direction: column;
-  background-color: #1e1e1e;
-  border-radius: 8px;
-  border: 1px solid #333333;
-  overflow: hidden;
+  background: ${palette.card};
+  border-radius: 12px;
+  border: 1px solid ${palette.border};
+  overflow: visible;
 `;
 
 export const NoticeHeader = styled.div`
   padding: 15px 20px;
-  background-color: #2c2c2c;
-  border-bottom: 1px solid #333333;
+  background: ${palette.input};
+  border-bottom: 1px solid ${palette.border};
   position: sticky;
   top: 0;
   z-index: 1;
@@ -25,17 +26,18 @@ export const NoticeHeader = styled.div`
 `;
 
 export const NoticeTitle = styled.h3`
-  color: #ffd700;
+  color: ${palette.accent};
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   margin: 0;
   display: flex;
   align-items: center;
   gap: 8px;
 
   &::before {
-    content: '📢';
+    content: '🔔';
     font-size: 1.1rem;
+    filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.35));
   }
 `;
 
@@ -59,10 +61,11 @@ export const NoticeList = styled.div`
   }
 `;
 
+// background-color: #131722;
 export const NoticeItem = styled.div`
-  background-color: #131722;
-  border: 1px solid #333333;
-  border-radius: 6px;
+  background: ${palette.card};
+  border: 1px solid ${palette.border};
+  border-radius: 10px;
   margin-bottom: 8px;
   padding: 12px 15px;
   transition: all 0.2s ease;
@@ -70,9 +73,9 @@ export const NoticeItem = styled.div`
 
   &:hover {
     background-color: #1a1a2e;
-    border-color: #ffd700;
+    border-color: ${palette.accent};
     transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.1);
+    box-shadow: 0 2px 8px ${palette.accentRing};
   }
 
   &:last-child {
@@ -90,12 +93,16 @@ export const NoticeItemHeader = styled.div`
 export const ExchangeBadge = styled.span.withConfig({
   shouldForwardProp: (prop) => prop !== 'exchangeType',
 })<{ exchangeType: string }>`
-  background: #333;
+  background: rgba(255, 255, 255, 0.06);
   color: #fff;
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 12px;
-  font-weight: bold;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid ${palette.border};
 `;
 
 export const NoticeDate = styled.span`
@@ -105,7 +112,7 @@ export const NoticeDate = styled.span`
 `;
 
 export const NoticeItemTitle = styled.h4`
-  color: #e0e0e0;
+  color: ${palette.textPrimary};
   font-size: 0.8rem;
   font-weight: 500;
   margin: 0 0 8px 0;
@@ -117,7 +124,7 @@ export const NoticeItemTitle = styled.h4`
   text-overflow: ellipsis;
 
   &:hover {
-    color: #ffd700;
+    color: ${palette.accent};
   }
 `;
 
@@ -246,6 +253,14 @@ export const SelectorWrapper = styled.div`
   gap: 10px;
 `;
 
+export const FixedSelectorWidth = styled.div`
+  width: 120px;
+
+  @media (max-width: 768px) {
+    width: 100px;
+  }
+`;
+
 export const ExchangeSelector = styled.select`
   padding: 8px 12px;
   border: 1px solid #333;
@@ -308,7 +323,7 @@ export const AnimatedNoticeList = styled.div.withConfig({
 export const NewNoticeItem = styled.div.withConfig({
   shouldForwardProp: (prop) => !['isAnimating'].includes(prop),
 })<{ isAnimating?: boolean }>`
-  background: #1a1a1a;
+  background: ${palette.card};
   border: 1px solid #333333;
   border-radius: 12px;
   padding: 16px;

@@ -37,3 +37,24 @@ body {
 * {
   box-sizing: border-box;
 }
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: #e9eef9 !important;
+  caret-color: #e9eef9;
+  -webkit-box-shadow: 0 0 0px 1000px rgba(8, 12, 20, 0.9) inset !important;
+  box-shadow: 0 0 0px 1000px rgba(8, 12, 20, 0.9) inset !important;
+  transition: background-color 9999s ease-out 0s !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+input:autofill,
+textarea:autofill,
+select:autofill {
+  filter: none;
+  background: rgba(8, 12, 20, 0.9) !important;
+  color: #e9eef9 !important;
+}

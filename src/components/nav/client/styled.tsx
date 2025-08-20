@@ -1,6 +1,7 @@
 'use client';
 
 import styled from 'styled-components';
+import { palette } from '@/styles/palette';
 
 export const NavbarWrapper = styled.nav`
   position: fixed;
@@ -9,8 +10,13 @@ export const NavbarWrapper = styled.nav`
   right: 0;
   height: 100px;
   z-index: 1000;
-  background-color: #1e1e1e;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  background: ${palette.card};
+  border-bottom: 1px solid ${palette.border};
+  box-shadow: ${palette.shadow};
+
+  @media (max-width: 768px) {
+    height: 72px;
+  }
 `;
 
 export const TopSection = styled.div`
@@ -20,6 +26,13 @@ export const TopSection = styled.div`
   padding-top: 10px;
   padding-left: 20px;
   padding-right: 20px;
+
+  @media (max-width: 768px) {
+    height: 72px;
+    padding-top: 8px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
 `;
 
 export const InfoContainer = styled.div`
@@ -101,7 +114,9 @@ export const UserContainer = styled.div`
 
 export const UserRole = styled.span<{ role?: string }>`
   color: ${(props) =>
-    props.role === 'OPERATOR' || props.role === 'MANAGER' ? 'red' : 'black'};
+    props.role === 'OPERATOR' || props.role === 'MANAGER'
+      ? palette.accent
+      : palette.textMuted};
   font-weight: ${(props) =>
     props.role === 'OPERATOR' || props.role === 'MANAGER' ? 'bold' : 'normal'};
   margin-bottom: 5px;
@@ -113,24 +128,37 @@ export const UserName = styled.span`
   margin-bottom: 5px;
   font-size: 0.9rem;
   color: #e0e0e0;
+  @media (max-width: 768px) {
+    font-size: 0.75rem;
+  }
 `;
 
 export const ActionButtons = styled.div`
   display: flex;
+  gap: 6px;
+  @media (max-width: 768px) {
+    gap: 4px;
+  }
 `;
 
 export const ActionButton = styled.button`
-  background-color: #2c2c2c;
-  border: none;
+  background: ${palette.input};
+  border: 1px solid ${palette.border};
   padding: 5px 10px;
   margin-left: 10px;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 0.8rem;
-  color: #e0e0e0;
+  color: ${palette.textPrimary};
 
   &:hover {
-    background-color: #3a3a3a;
+    color: ${palette.accent};
+    background-color: #131722;
+  }
+  @media (max-width: 768px) {
+    padding: 4px 8px;
+    margin-left: 6px;
+    font-size: 0.7rem;
   }
 `;
 
@@ -140,6 +168,9 @@ export const BottomSection = styled.div`
   height: 40px;
   padding: 10px 0;
   margin-top: 10px;
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 
 export const Logo = styled.div`
@@ -164,16 +195,18 @@ export const NavMenu = styled.ul`
 `;
 
 export const CloseButton = styled.button`
-  background-color: #f0f0f0;
-  border: none;
+  background: ${palette.input};
+  border: 1px solid ${palette.border};
   padding: 5px 10px;
   margin-top: 10px;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 0.8rem;
+  color: ${palette.textPrimary};
 
   &:hover {
-    background-color: #e0e0e0;
+    color: ${palette.accent};
+    background-color: #131722;
   }
 `;
 
@@ -184,12 +217,13 @@ export const NavMenuLink = styled.span`
 
 export const SubMenu = styled.ul`
   position: absolute;
-  background-color: #2c2c2c;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  background: ${palette.card};
+  box-shadow: ${palette.shadow};
   margin-top: 30px;
   z-index: 1;
   min-width: 150px;
-  border-radius: 4px;
+  border-radius: 8px;
+  border: 1px solid ${palette.border};
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -203,6 +237,9 @@ export const SubMenu = styled.ul`
 export const TradingViewOverviewContainer = styled.div`
   align-items: center;
   width: 700px;
+  @media (max-width: 992px) {
+    display: none;
+  }
 `;
 
 export const SubMenuItem = styled.li`
@@ -210,12 +247,12 @@ export const SubMenuItem = styled.li`
   cursor: pointer;
   white-space: nowrap;
   text-align: left;
-  color: #e0e0e0;
+  color: ${palette.textPrimary};
   transition: background-color 0.3s ease, color 0.3s ease;
 
   &:hover {
-    background-color: #3a3a3a;
-    color: #ffd700;
+    background-color: #131722;
+    color: ${palette.accent};
   }
 `;
 
