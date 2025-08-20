@@ -7,6 +7,8 @@ import Nav from '../../../components/nav/Nav';
 import { persistStore } from 'redux-persist';
 import { PersistGate } from 'redux-persist/integration/react';
 import { LayoutWrapper, MainContent } from './style';
+import MobileTabBar from '@/components/nav/MobileTabBar';
+import MobileChatFab from '@/components/chat/MobileChatFab';
 
 const ClientLayout: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -20,6 +22,8 @@ const ClientLayout: React.FC<{ children: React.ReactNode }> = ({
         <LayoutWrapper>
           <Nav />
           <MainContent>{children}</MainContent>
+          <MobileTabBar />
+          <MobileChatFab />
         </LayoutWrapper>
       </PersistGate>
     </Provider>

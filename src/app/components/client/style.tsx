@@ -8,6 +8,12 @@ export const LayoutWrapper = styled.div`
 
 export const MainContent = styled.main`
   flex: 1;
-  padding-top: 100px; // Nav의 높이와 동일하게 설정
-  min-height: calc(100vh - 150px); // 전체 높이에서 Nav 높이를 뺀 만큼
+  padding-top: 100px; // Nav 높이
+  min-height: calc(100vh - 150px);
+
+  @media (max-width: 768px) {
+    padding-top: 72px; // 모바일에서 Nav를 더 얇게 사용 시
+    min-height: calc(100vh - 120px);
+    padding-bottom: 72px; // bottom tabbar spacing
+  }
 `;
