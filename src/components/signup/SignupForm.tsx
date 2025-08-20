@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { FormContainer, LoginButton } from '@/components/login/style';
 import { signupDataFetch } from './server/signupDataFetch';
 import { clientEnv } from '@/utils/env';
 import {
@@ -13,33 +14,45 @@ import {
 
 interface SignupFormProps {
   setIsLoginForm: React.Dispatch<React.SetStateAction<boolean>>;
+  hideInlineTitle?: boolean;
+  hideBackToLogin?: boolean;
 }
 
-const StyledButton = styled.button<{ $isDisabled: boolean }>`
-  background-color: ${(props) => (props.$isDisabled ? '#cccccc' : '#007bff')};
-  color: ${(props) => (props.$isDisabled ? '#666666' : '#ffffff')};
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
+const InlineActionButton = styled.button<{ $isDisabled?: boolean }>`
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, #1e1e1e, #171b24);
+  color: ${(props) => (props.$isDisabled ? '#8b93a7' : '#e6e8ee')};
   cursor: ${(props) => (props.$isDisabled ? 'not-allowed' : 'pointer')};
-  transition: background-color 0.3s;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  white-space: nowrap;
 
   &:hover {
-    background-color: ${(props) => (props.$isDisabled ? '#cccccc' : '#0056b3')};
+    color: ${(props) => (props.$isDisabled ? '#8b93a7' : 'rgba(255, 215, 0)')};
+    background-color: #131722;
   }
 
   &:disabled {
-    background-color: #cccccc;
-    color: #666666;
-    cursor: not-allowed;
+    opacity: 0.7;
   }
+`;
+
+const Row = styled.div`
+  display: flex;
+  gap: 10px;
+  align-items: center;
 `;
 
 interface verifyCodeResponse {
   isVerified: boolean;
 }
 
-const SignupForm: React.FC<SignupFormProps> = ({ setIsLoginForm }) => {
+const SignupForm: React.FC<SignupFormProps> = ({
+  setIsLoginForm,
+  hideInlineTitle = false,
+  hideBackToLogin = false,
+}) => {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
@@ -98,16 +111,13 @@ const SignupForm: React.FC<SignupFormProps> = ({ setIsLoginForm }) => {
       return;
     }
 
-    try {
-      const response = await emailVerification(email);
-      if (response) {
-        setIsEmailVerifying(true);
-        setRemainingTime(300); // 5분
-      } else {
-        alert('이메일 인증 요청 중 오류 발생');
-      }
-    } catch (error) {
-      alert('이메일 인증 요청 중 오류 발생');
+    setIsEmailVerifying(true);
+    setRemainingTime(300); // 5분
+    const response = emailVerification(email);
+    if (!response) {
+      setIsEmailVerifying(false);
+      setRemainingTime(0);
+      return;
     }
   };
 
@@ -162,8 +172,8 @@ const SignupForm: React.FC<SignupFormProps> = ({ setIsLoginForm }) => {
   };
 
   return (
-    <>
-      <h1>회원가입</h1>
+    <FormContainer>
+      {!hideInlineTitle && <h1>회원가입</h1>}
       <form onSubmit={handleSignup}>
         <div>
           <label>사용자 이름</label>
@@ -173,19 +183,21 @@ const SignupForm: React.FC<SignupFormProps> = ({ setIsLoginForm }) => {
             value={username}
             onChange={handleInputChange}
             required
+            placeholder="닉네임을 입력하세요"
           />
         </div>
         <div>
           <label>이메일</label>
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <Row>
             <input
               type="email"
               name="email"
               value={email}
               onChange={handleInputChange}
               required
+              placeholder="example@email.com"
             />
-            <StyledButton
+            <InlineActionButton
               type="button"
               onClick={handleEmailVerification}
               $isDisabled={isEmailVerifying}
@@ -196,10 +208,10 @@ const SignupForm: React.FC<SignupFormProps> = ({ setIsLoginForm }) => {
                     .toString()
                     .padStart(2, '0')}`
                 : '인증하기'}
-            </StyledButton>
-          </div>
+            </InlineActionButton>
+          </Row>
           {isEmailVerifying && (
-            <div style={{ marginTop: '10px', display: 'flex', gap: '10px' }}>
+            <Row style={{ marginTop: '10px' }}>
               <input
                 type="text"
                 placeholder="인증번호 6자리 입력"
@@ -207,15 +219,15 @@ const SignupForm: React.FC<SignupFormProps> = ({ setIsLoginForm }) => {
                 onChange={(e) => setVerifyCode(e.target.value)}
                 maxLength={6}
               />
-              <StyledButton
+              <InlineActionButton
                 type="button"
                 onClick={handleVerifyCode}
                 $isDisabled={!verifyCode}
                 disabled={!verifyCode}
               >
                 확인
-              </StyledButton>
-            </div>
+              </InlineActionButton>
+            </Row>
           )}
         </div>
         <div>
@@ -226,6 +238,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ setIsLoginForm }) => {
             value={password}
             onChange={handleInputChange}
             required
+            placeholder="비밀번호를 입력하세요"
           />
         </div>
         <div>
@@ -236,22 +249,23 @@ const SignupForm: React.FC<SignupFormProps> = ({ setIsLoginForm }) => {
             value={confirmPassword}
             onChange={handleInputChange}
             required
+            placeholder="비밀번호를 다시 입력하세요"
           />
           {password !== confirmPassword && (
             <span style={{ color: 'red' }}>비밀번호가 일치하지 않습니다.</span>
           )}
         </div>
-        <StyledButton
-          type="submit"
-          $isDisabled={!isFormValid}
-          disabled={!isFormValid}
-        >
+        <LoginButton type="submit" disabled={!isFormValid}>
           가입하기
-        </StyledButton>
+        </LoginButton>
       </form>
-      <p>이미 계정이 있으신가요?</p>
-      <button onClick={() => setIsLoginForm(true)}>로그인으로 돌아가기</button>
-    </>
+      {!hideBackToLogin && (
+        <>
+          <p>이미 계정이 있으신가요?</p>
+          <button onClick={() => setIsLoginForm(true)}>로그인으로 돌아가기</button>
+        </>
+      )}
+    </FormContainer>
   );
 };
 
