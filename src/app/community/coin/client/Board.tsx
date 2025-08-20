@@ -11,7 +11,22 @@ import CommunityLayout from './CommunityLayout';
 import ErrorMessage from '@/components/error/ErrorMessage';
 import { Category } from '@/app/admin/type';
 import { AllPostData } from '../../types';
-import { BoardContainer, BoardHeader, CategorySelect, WriteButton, PostList, BoardListHeader, TitleSection, NumberHeader, CategoryHeader, TitleHeader, AuthorHeader, DateHeader, StatsSection, StatHeader } from './style';
+import {
+  BoardContainer,
+  BoardHeader,
+  CategorySelect,
+  WriteButton,
+  PostList,
+  BoardListHeader,
+  TitleSection,
+  NumberHeader,
+  CategoryHeader,
+  TitleHeader,
+  AuthorHeader,
+  DateHeader,
+  StatsSection,
+  StatHeader,
+} from './style';
 
 interface BoardProps {
   initialCategoryId?: number;
@@ -75,10 +90,9 @@ const Board: React.FC<BoardProps> = ({
             value={currentCategoryId}
             onChange={handleCategoryChange}
           >
-            <option value={-1}>전체</option>
             {categories.map((category, index) => (
               <option key={index} value={category.id}>
-                {category.name}
+                {category.categoryName}
               </option>
             ))}
           </CategorySelect>
