@@ -1,18 +1,25 @@
 import React from 'react';
-import { StyledSelect } from './style';
+import Dropdown, { DropdownOption } from '@/components/common/Dropdown';
 
 interface CurrencySelectProps {
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  onChangeValue: (value: string) => void;
 }
 
-const CurrencySelect: React.FC<CurrencySelectProps> = ({ value, onChange }) => {
+const options: DropdownOption<string>[] = [
+  { value: 'USDT', label: 'USDT' },
+  { value: 'KRW', label: 'KRW' },
+  { value: 'BTC', label: 'BTC' },
+];
+
+const CurrencySelect: React.FC<CurrencySelectProps> = ({ value, onChangeValue }) => {
   return (
-    <StyledSelect value={value} onChange={onChange}>
-      <option value="USDT">USDT</option>
-      <option value="KRW">KRW</option>
-      <option value="BTC">BTC</option>
-    </StyledSelect>
+    <Dropdown
+      value={value}
+      options={options}
+      onChange={(v) => onChangeValue(String(v))}
+      ariaLabel="통화 선택"
+    />
   );
 };
 
