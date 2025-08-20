@@ -16,7 +16,6 @@ import {
   NoticeUrl,
   EmptyNotice,
   LoadingSpinner,
-  ExchangeSelector,
   SelectorWrapper,
   LoadingIndicator,
   NoticeLoadingSpinner,
@@ -27,10 +26,13 @@ import {
   NewBadge,
   NoticeItemHeaderLeft,
   NoticeCompleteBanner,
+  FixedSelectorWidth,
 } from './style';
+import Dropdown, { DropdownOption } from '@/components/common/Dropdown';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { formatNoticeDate, isNewNotice } from '@/method/common_method';
+import { NoticeSkeleton } from '@/components/skeleton/Skeleton';
 
 interface NoticeClientProps {
   initialNoticeData: NoticeResponse;
@@ -180,27 +182,48 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
     await loadInitialData(marketType);
   };
 
+  const iconMap: Partial<Record<MarketType, string>> = {
+    [MarketType.UPBIT]: '/upbit_logo.png',
+    [MarketType.BINANCE]: '/binance_logo.png',
+    [MarketType.COINONE]: '/coinone_logo.png',
+    [MarketType.BITHUMB]: '/bithumb_logo.png',
+    [MarketType.ALL]: '/logo.png',
+  };
+  const marketOptions: DropdownOption<MarketType>[] = [
+    {
+      value: MarketType.ALL,
+      label: '전체',
+      iconSrc: iconMap[MarketType.ALL],
+      iconAlt: 'ALL',
+    },
+    {
+      value: MarketType.UPBIT,
+      label: 'UPBIT',
+      iconSrc: iconMap[MarketType.UPBIT],
+      iconAlt: 'UPBIT',
+    },
+    {
+      value: MarketType.BINANCE,
+      label: 'BINANCE',
+      iconSrc: iconMap[MarketType.BINANCE],
+      iconAlt: 'BINANCE',
+    },
+    {
+      value: MarketType.COINONE,
+      label: 'COINONE',
+      iconSrc: iconMap[MarketType.COINONE],
+      iconAlt: 'COINONE',
+    },
+    {
+      value: MarketType.BITHUMB,
+      label: 'BITHUMB',
+      iconSrc: iconMap[MarketType.BITHUMB],
+      iconAlt: 'BITHUMB',
+    },
+  ];
+
   if (isLoading) {
-    return (
-      <NoticeContainer>
-        <NoticeHeader>
-          <NoticeTitle>공지사항</NoticeTitle>
-          <SelectorWrapper>
-            <ExchangeSelector
-              value={selectedMarket}
-              onChange={(e) => handleMarketChange(e.target.value as MarketType)}
-            >
-              <option value={MarketType.ALL}>전체</option>
-              <option value={MarketType.UPBIT}>UPBIT</option>
-              <option value={MarketType.BINANCE}>BINANCE</option>
-              <option value={MarketType.COINONE}>COINONE</option>
-              <option value={MarketType.BITHUMB}>BITHUMB</option>
-            </ExchangeSelector>
-          </SelectorWrapper>
-        </NoticeHeader>
-        <LoadingSpinner>로딩 중...</LoadingSpinner>
-      </NoticeContainer>
-    );
+    return <NoticeSkeleton items={8} />;
   }
 
   return (
@@ -208,16 +231,16 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
       <NoticeHeader>
         <NoticeTitle>공지사항</NoticeTitle>
         <SelectorWrapper>
-          <ExchangeSelector
-            value={selectedMarket}
-            onChange={(e) => handleMarketChange(e.target.value as MarketType)}
-          >
-            <option value={MarketType.ALL}>전체</option>
-            <option value={MarketType.UPBIT}>UPBIT</option>
-            <option value={MarketType.BINANCE}>BINANCE</option>
-            <option value={MarketType.COINONE}>COINONE</option>
-            <option value={MarketType.BITHUMB}>BITHUMB</option>
-          </ExchangeSelector>
+          <FixedSelectorWidth>
+            <Dropdown
+              key={selectedMarket}
+              value={selectedMarket}
+              options={marketOptions}
+              onChange={(val) => handleMarketChange(val as MarketType)}
+              ariaLabel="공지사항 거래소 선택"
+              usePortal
+            />
+          </FixedSelectorWidth>
         </SelectorWrapper>
       </NoticeHeader>
 
@@ -249,6 +272,15 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
                           <ExchangeBadge
                             exchangeType={notice.exchangeType.toString()}
                           >
+                            <img
+                              src={
+                                iconMap[
+                                  notice.exchangeType as unknown as MarketType
+                                ] || '/logo.png'
+                              }
+                              alt={`${notice.exchangeType} logo`}
+                              style={{ width: 14, height: 14, borderRadius: 3 }}
+                            />
                             {notice.exchangeType}
                           </ExchangeBadge>
                           {isNewNotice(notice.createdAt) && (
