@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.2.5",
+    "@stomp/stompjs": "^7.1.1",
     "@xeger/quill-image-actions": "^0.7.2",
     "dotenv": "^16.4.5",
     "express": "^5.1.0",
