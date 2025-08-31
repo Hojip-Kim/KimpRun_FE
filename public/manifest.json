@@ -1,0 +1,56 @@
+{
+  "name": "KIMPRUN - 암호화폐 가격 비교",
+  "short_name": "KIMPRUN",
+  "description": "한국 최대 암호화폐 가격 비교 사이트. 업비트, 바이낸스 등 주요 거래소 가격을 실시간으로 비교하고 프리미엄 정보를 확인하세요.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1a1a",
+  "theme_color": "#ffd700",
+  "orientation": "portrait-primary",
+  "lang": "ko",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": [
+    "finance",
+    "business",
+    "cryptocurrency"
+  ],
+  "shortcuts": [
+    {
+      "name": "가격 비교",
+      "short_name": "가격비교",
+      "description": "암호화폐 가격 비교 보기",
+      "url": "/",
+      "icons": [
+        {
+          "src": "/logo.png",
+          "sizes": "256x256"
+        }
+      ]
+    },
+    {
+      "name": "커뮤니티",
+      "short_name": "커뮤니티",
+      "description": "커뮤니티 게시판",
+      "url": "/community",
+      "icons": [
+        {
+          "src": "/logo.png",
+          "sizes": "256x256"
+        }
+      ]
+    }
+  ]
+}
