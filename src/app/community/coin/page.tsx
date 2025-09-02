@@ -1,13 +1,26 @@
 import React from 'react';
 import Board from './client/Board';
 import ErrorMessage from '@/components/error/ErrorMessage';
-import { getCategories, getPosts } from './server/server';
+import { getCategories } from './server/server';
+import { getAllPosts } from '../actions';
 
 // 동적 렌더링 강제 설정 - 빌드 시점에 데이터 가져오기 방지
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export default async function CoinCommunityPage() {
+interface CoinCommunityPageProps {
+  searchParams: {
+    page?: string;
+    size?: string;
+  };
+}
+
+export default async function CoinCommunityPage({
+  searchParams,
+}: CoinCommunityPageProps) {
+  const page = parseInt(searchParams.page || '1', 10);
+  const size = parseInt(searchParams.size || '15', 10);
+
   try {
     const categories = await getCategories();
 
@@ -26,7 +39,6 @@ export default async function CoinCommunityPage() {
       !categories.data ||
       categories.data.length === 0
     ) {
-      console.error('카테고리 데이터 없음:', categories);
       return (
         <ErrorMessage
           title="카테고리 데이터를 불러올 수 없습니다."
@@ -36,9 +48,11 @@ export default async function CoinCommunityPage() {
     }
 
     const firstCategoryId = categories.data[0].id;
-    const postOfCategory = await getPosts(firstCategoryId, 1);
 
-    if (!postOfCategory) {
+    // 기존 API로 데이터 가져오기 (1-based 페이지)
+    const postsResponse = await getAllPosts(page);
+
+    if (!postsResponse.success) {
       return (
         <ErrorMessage
           title="게시글 데이터를 불러올 수 없습니다."
@@ -47,12 +61,32 @@ export default async function CoinCommunityPage() {
       );
     }
 
+    let initialData = { boardResponseDtos: [], count: 0 };
+    if (postsResponse.data && 'content' in postsResponse.data) {
+      const responseData = postsResponse.data as any;
+      initialData = {
+        boardResponseDtos: responseData.content,
+        count: responseData.totalElements,
+      };
+    } else if (
+      postsResponse.data &&
+      'boardResponseDtos' in postsResponse.data
+    ) {
+      initialData = postsResponse.data;
+    }
+
+    // categories.data가 배열인지 확인
+    const validCategories = Array.isArray(categories.data)
+      ? categories.data
+      : [];
+
     return (
       <Board
         initialCategoryId={firstCategoryId}
-        initialPage={1}
-        categories={categories.data}
-        initialPosts={postOfCategory.data}
+        initialPage={page}
+        initialSize={size}
+        categories={validCategories}
+        initialPosts={initialData}
         isError={false}
       />
     );

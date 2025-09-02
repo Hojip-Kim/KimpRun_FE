@@ -26,6 +26,11 @@ const ReactQuillComponent = dynamic(
 
 import 'react-quill/dist/quill.snow.css';
 import { clientRequest } from '@/server/fetch';
+import { palette } from '@/styles/palette';
+import Modal from '@/components/modal/modal';
+import Dropdown, { DropdownOption } from '@/components/common/Dropdown';
+import { getCategories } from '@/app/community/actions';
+import { CommunityWriteSkeleton } from '@/components/skeleton/Skeleton';
 
 const WritePost: React.FC = () => {
   const [title, setTitle] = useState('');
@@ -33,6 +38,11 @@ const WritePost: React.FC = () => {
   const [isPreview, setIsPreview] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [categories, setCategories] = useState<DropdownOption<number>[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<number>(1);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const quillRef = useRef<ReactQuill>(null);
 
@@ -51,6 +61,42 @@ const WritePost: React.FC = () => {
     }
   }, [isAuthenticated, router]);
 
+  // 카테고리 목록 불러오기
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setIsLoading(true);
+        const response = await getCategories();
+        if (response.success && response.data) {
+          const categoryData = Array.isArray(response.data)
+            ? response.data
+            : (response.data as any)?.categories || [];
+
+          const categoryOptions: DropdownOption<number>[] = categoryData.map(
+            (cat: any) => ({
+              label: cat.categoryName,
+              value: cat.id,
+            })
+          );
+
+          setCategories(categoryOptions);
+
+          // 현재 경로의 카테고리 ID로 초기값 설정
+          const currentCategoryId = parseInt(categoryIdFromPath, 10);
+          if (!isNaN(currentCategoryId)) {
+            setSelectedCategory(currentCategoryId);
+          }
+        }
+      } catch (error) {
+        console.error('카테고리 불러오기 실패:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, [categoryIdFromPath]);
+
   useEffect(() => {
     const extractedImages = extractImagesFromContent(content);
     setImages(extractedImages);
@@ -67,8 +113,9 @@ const WritePost: React.FC = () => {
 
   const createPost = async () => {
     try {
+      setIsSubmitting(true);
       const response = await clientRequest.post(
-        `${boardUrl}/${categoryIdFromPath}/create`,
+        `${boardUrl}/${selectedCategory}/create`,
         {
           title,
           content,
@@ -77,15 +124,77 @@ const WritePost: React.FC = () => {
       );
 
       if (response.status === 200) {
-        alert('게시글 작성 성공');
-        window.location.href = `/community/coin/${categoryIdFromPath}/1`;
+        setShowSuccessModal(true);
       } else {
-        alert('게시글 작성실패');
+        alert('게시글 작성에 실패했습니다.');
       }
     } catch (error) {
       console.error(error);
+      alert('게시글 작성 중 오류가 발생했습니다.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
+  const handleSuccessConfirm = () => {
+    setShowSuccessModal(false);
+    // 새로고침과 함께 게시판으로 이동
+    window.location.href = `/community/coin/${selectedCategory}?page=1&size=15`;
+  };
+
+  // 성공 모달 컴포넌트
+  const SuccessModalContent = () => (
+    <SuccessModalContainer>
+      <SuccessIconWrapper>
+        <SuccessCheckIcon>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M20 6L9 17L4 12"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </SuccessCheckIcon>
+      </SuccessIconWrapper>
+      <SuccessTitle>게시글 작성 완료!</SuccessTitle>
+      <SuccessMessage>
+        게시글이 성공적으로 작성되었습니다.
+        <br />
+        <SuccessSubMessage>작성하신 글을 지금 확인해보세요</SuccessSubMessage>
+      </SuccessMessage>
+      <SuccessButtonContainer>
+        <SuccessButton onClick={handleSuccessConfirm}>
+          <ButtonIcon>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M3 7V17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7Z"
+                stroke="currentColor"
+                strokeWidth="2"
+              />
+              <path
+                d="M8 9L12 13L16 9"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </ButtonIcon>
+          게시판으로 이동
+        </SuccessButton>
+      </SuccessButtonContainer>
+    </SuccessModalContainer>
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,6 +203,26 @@ const WritePost: React.FC = () => {
 
   const togglePreview = () => {
     setIsPreview(!isPreview);
+  };
+
+  // 에디터 컨테이너 클릭 시 에디터에 포커스
+  const handleEditorContainerClick = (e: React.MouseEvent) => {
+    const quill = quillRef.current?.getEditor();
+    if (quill) {
+      // 클릭한 위치가 에디터 영역이 아닌 경우에만 포커스 설정
+      const editorElement = quill.root;
+      const rect = editorElement.getBoundingClientRect();
+      const clickY = e.clientY;
+
+      if (clickY > rect.bottom) {
+        // 에디터 하단 빈 공간을 클릭한 경우, 마지막 위치에 커서 설정
+        const length = quill.getLength();
+        quill.setSelection(length - 1, 0);
+      }
+
+      // 에디터에 포커스
+      quill.focus();
+    }
   };
 
   const imageHandler = () => {
@@ -122,15 +251,22 @@ const WritePost: React.FC = () => {
     () => ({
       toolbar: {
         container: [
-          [{ header: [1, 2, false] }],
-          ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+          [{ header: [1, 2, 3, false] }],
+          [{ font: [] }],
+          [{ size: ['small', false, 'large', 'huge'] }],
+          ['bold', 'italic', 'underline', 'strike'],
+          [{ color: [] }, { background: [] }],
+          [{ script: 'sub' }, { script: 'super' }],
+          ['blockquote', 'code-block'],
           [
             { list: 'ordered' },
             { list: 'bullet' },
             { indent: '-1' },
             { indent: '+1' },
           ],
-          ['link', 'image'],
+          [{ direction: 'rtl' }],
+          [{ align: [] }],
+          ['link', 'image', 'video'],
           ['clean'],
         ],
         handlers: {
@@ -147,253 +283,905 @@ const WritePost: React.FC = () => {
 
   const formats = [
     'header',
+    'font',
+    'size',
     'bold',
     'italic',
     'underline',
     'strike',
+    'color',
+    'background',
+    'script',
     'blockquote',
+    'code-block',
     'list',
     'bullet',
     'indent',
+    'direction',
+    'align',
     'link',
     'image',
+    'video',
   ];
+
+  // 로딩 상태일 때 스켈레톤 표시
+  if (isLoading) {
+    return <CommunityWriteSkeleton />;
+  }
 
   return (
     <WritePostContainer>
-      <Title>글 작성</Title>
-      <form onSubmit={handleSubmit}>
-        <TitleInput
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="제목을 입력하세요"
-          required
-        />
-        {isPreview ? (
-          <PreviewContainer>
-            <h3>{title}</h3>
-            <div dangerouslySetInnerHTML={{ __html: content }} />
-          </PreviewContainer>
-        ) : (
-          <EditorContainer>
-            <ReactQuillComponent
-              forwardedRef={quillRef}
-              value={content}
-              onChange={setContent}
-              modules={modules}
-              formats={formats}
-              theme="snow"
-            />
-          </EditorContainer>
-        )}
+      <WriteCard>
+        <WriteHeader>
+          <Title>글 작성</Title>
+          <Subtitle>새로운 게시글을 작성해보세요</Subtitle>
+        </WriteHeader>
+        <WriteContent>
+          <form onSubmit={handleSubmit}>
+            <FormGroup>
+              <Label htmlFor="title">제목</Label>
+              <TitleInput
+                id="title"
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="어떤 이야기를 나누고 싶으신가요?"
+                required
+              />
+            </FormGroup>
 
-        {images.length > 0 && (
-          <ImagePreviewContainer>
-            <ImagePreviewTitle>
-              <FaImage /> 대표 이미지 선택
-            </ImagePreviewTitle>
-            <ImageList>
-              {images.map((img, index) => (
-                <ImageItem
-                  key={index}
-                  selected={img === selectedImage}
-                  onClick={() => setSelectedImage(img)}
-                >
-                  <img src={img} alt={`미리보기 ${index + 1}`} />
-                </ImageItem>
-              ))}
-            </ImageList>
-          </ImagePreviewContainer>
-        )}
-        <ButtonContainer>
-          <PreviewButton type="button" onClick={togglePreview}>
-            {isPreview ? <FaPencilAlt /> : <FaEye />}
-            {isPreview ? '편집' : '미리보기'}
-          </PreviewButton>
-          <SubmitButton type="submit">
-            <FaCheck />
-            작성 완료
-          </SubmitButton>
-        </ButtonContainer>
-      </form>
+            <FormGroup>
+              <Label htmlFor="content">내용</Label>
+              {isPreview ? (
+                <PreviewContainer>
+                  <h3>{title}</h3>
+                  <div dangerouslySetInnerHTML={{ __html: content }} />
+                </PreviewContainer>
+              ) : (
+                <EditorContainer onClick={handleEditorContainerClick}>
+                  <ReactQuillComponent
+                    forwardedRef={quillRef}
+                    value={content}
+                    onChange={setContent}
+                    modules={modules}
+                    formats={formats}
+                    theme="snow"
+                  />
+                </EditorContainer>
+              )}
+            </FormGroup>
+
+            {images.length > 0 && (
+              <ImagePreviewContainer>
+                <ImagePreviewTitle>
+                  <FaImage /> 대표 이미지 선택
+                </ImagePreviewTitle>
+                <ImageList>
+                  {images.map((img, index) => (
+                    <ImageItem
+                      key={index}
+                      selected={img === selectedImage}
+                      onClick={() => setSelectedImage(img)}
+                    >
+                      <img src={img} alt={`미리보기 ${index + 1}`} />
+                    </ImageItem>
+                  ))}
+                </ImageList>
+              </ImagePreviewContainer>
+            )}
+            <ButtonContainer>
+              <PreviewButton type="button" onClick={togglePreview}>
+                {isPreview ? <FaPencilAlt /> : <FaEye />}
+                {isPreview ? '편집' : '미리보기'}
+              </PreviewButton>
+              <SubmitButton type="submit" disabled={isSubmitting}>
+                <FaCheck />
+                {isSubmitting ? '작성 중...' : '작성 완료'}
+              </SubmitButton>
+            </ButtonContainer>
+          </form>
+        </WriteContent>
+      </WriteCard>
+
+      {/* 성공 모달 */}
+      {showSuccessModal && (
+        <Modal
+          width={420}
+          height={320}
+          element={<SuccessModalContent />}
+          setModal={setShowSuccessModal}
+        />
+      )}
     </WritePostContainer>
   );
 };
 
 export default WritePost;
 
-const WritePostContainer = styled.div`
-  width: 100%;
-  max-width: 1000px;
-  margin: 20px auto;
-  padding: 20px;
-  background-color: #2c2c2c;
-  color: #e0e0e0;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  max-height: 90vh;
-  overflow-y: auto; // 스크롤
+// 카테고리 선택 스타일
+const CategoryContainer = styled.div`
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 
-  &::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: #1e1e1e;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 4px;
+  @media (max-width: 768px) {
+    margin-bottom: 1rem;
   }
 `;
 
-const Title = styled.h2`
-  color: #ffd700;
-  margin-bottom: 20px;
+const CategoryLabel = styled.label`
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: ${palette.textSecondary};
+`;
+
+// 성공 모달 스타일 - 모던 디자인
+const SuccessModalContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  background: ${palette.card};
+  border-radius: 20px;
+  box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(20px);
+  border: 1px solid ${palette.border};
+  min-width: 320px;
+  max-width: 400px;
+`;
+
+const SuccessIconWrapper = styled.div`
+  position: relative;
+  margin-bottom: 1.5rem;
+`;
+
+const SuccessCheckIcon = styled.div`
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  animation: successPulse 0.8s ease-out;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+
+  svg {
+    width: 36px;
+    height: 36px;
+    stroke-width: 3;
+  }
+
+  @keyframes successPulse {
+    0% {
+      transform: scale(0.8);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    border-radius: 50%;
+    background: linear-gradient(
+      135deg,
+      rgba(16, 185, 129, 0.2),
+      rgba(5, 150, 105, 0.1)
+    );
+    animation: ripple 2s infinite;
+  }
+
+  @keyframes ripple {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1.3);
+      opacity: 0;
+    }
+  }
+`;
+
+const SuccessTitle = styled.h2`
+  color: ${palette.textPrimary};
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  background: linear-gradient(135deg, ${palette.accent}, #10b981);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+`;
+
+const SuccessMessage = styled.div`
+  color: ${palette.textSecondary};
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+`;
+
+const SuccessSubMessage = styled.span`
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: ${palette.textMuted};
+  font-style: italic;
+`;
+
+const SuccessButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  width: 100%;
+`;
+
+const SuccessButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, ${palette.accent}, #10b981);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 0.875rem 1.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+    transition: left 0.5s;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+
+    &::before {
+      left: 100%;
+    }
+  }
+
+  &:active {
+    transform: translateY(-1px);
+  }
+`;
+
+const ButtonIcon = styled.div`
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+`;
+
+const WritePostContainer = styled.div`
+  width: 100%;
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0;
+  color: ${palette.textPrimary};
+
+  @media (max-width: 768px) {
+    margin: 1rem auto;
+    padding: 0 1rem;
+    margin-bottom: 100px; /* 모바일 탭바 공간 */
+  }
+`;
+
+const WriteCard = styled.div`
+  background: ${palette.card};
+  border-radius: 20px;
+  border: 1px solid ${palette.border};
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(20px);
+  overflow: hidden;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 768px) {
+    border-radius: 16px;
+  }
+`;
+
+const WriteHeader = styled.div`
+  padding: 2rem 2rem 1rem 2rem;
+  border-bottom: 1px solid ${palette.border};
+  background: linear-gradient(135deg, ${palette.card}, ${palette.bgContainer});
+
+  @media (max-width: 768px) {
+    padding: 1.5rem 1.5rem 1rem 1.5rem;
+  }
+`;
+
+const Title = styled.h1`
+  background: linear-gradient(135deg, ${palette.accent}, #10b981);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+
+  @media (max-width: 768px) {
+    font-size: 1.75rem;
+  }
+`;
+
+const Subtitle = styled.p`
+  color: ${palette.textSecondary};
+  font-size: 1rem;
+  margin: 0;
+  font-weight: 500;
+
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+  }
+`;
+
+const WriteContent = styled.div`
+  padding: 2rem;
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
+`;
+
+const FormGroup = styled.div`
+  margin-bottom: 2rem;
+`;
+
+const Label = styled.label`
+  display: block;
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${palette.textPrimary};
+  letter-spacing: 0.025em;
 `;
 
 const TitleInput = styled.input`
   width: 100%;
-  padding: 10px;
-  margin-bottom: 20px;
-  font-size: 16px;
-  background-color: #333;
-  color: #e0e0e0;
-  border: 1px solid #444;
-  border-radius: 4px;
+  padding: 1.25rem 1.5rem;
+  font-size: 1.125rem;
+  background: ${palette.input};
+  color: ${palette.textPrimary};
+  border: 2px solid ${palette.border};
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  transition: all 0.3s ease;
+  font-weight: 500;
 
   &:focus {
     outline: none;
-    border-color: #ffd700;
-    box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+    border-color: ${palette.accent};
+    box-shadow: 0 0 0 4px ${palette.accentRing};
+    transform: translateY(-1px);
+  }
+
+  &::placeholder {
+    color: ${palette.textMuted};
+    font-weight: 400;
+  }
+
+  @media (max-width: 768px) {
+    padding: 1rem 1.25rem;
+    font-size: 1rem;
+    border-radius: 12px;
   }
 `;
 
 const EditorContainer = styled.div`
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid ${palette.border};
+  backdrop-filter: blur(8px);
+  margin-bottom: 1.5rem;
+
   .ql-container {
-    min-height: 300px;
-    font-size: 16px;
-    background-color: #333;
-    color: #e0e0e0;
-    border-color: #444;
+    min-height: 400px;
+    font-size: 1rem;
+    background: ${palette.input};
+    color: ${palette.textPrimary};
+    border: none;
+    border-top: 1px solid ${palette.border};
+    cursor: text; /* 전체 영역에서 텍스트 커서 표시 */
+
+    /* 클릭 영역 확장을 위한 스타일 */
+    .ql-editor {
+      min-height: 400px;
+      padding: 1.5rem;
+      line-height: 1.6;
+      cursor: text;
+
+      /* 빈 에디터일 때도 클릭 가능하게 만들기 */
+      &:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+      }
+
+      &.ql-blank::before {
+        color: ${palette.textMuted};
+        font-style: normal;
+        pointer-events: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      min-height: 300px;
+      font-size: 0.9rem;
+
+      .ql-editor {
+        min-height: 300px;
+        padding: 1rem;
+      }
+    }
   }
 
   .ql-toolbar {
-    background-color: #444;
-    border-color: #555;
+    background: ${palette.card};
+    border: none;
+    border-bottom: 1px solid ${palette.border};
+    padding: 0.75rem;
 
     .ql-stroke {
-      stroke: #e0e0e0;
+      stroke: ${palette.textSecondary};
     }
 
     .ql-fill {
-      fill: #e0e0e0;
+      fill: ${palette.textSecondary};
     }
 
     .ql-picker {
-      color: #e0e0e0;
+      color: ${palette.textSecondary};
     }
+
+    .ql-picker-options {
+      background: ${palette.card};
+      border: 1px solid ${palette.border};
+      border-radius: 4px;
+      box-shadow: ${palette.shadow};
+      z-index: 1000;
+    }
+
+    .ql-picker-item {
+      color: ${palette.textPrimary};
+
+      &:hover {
+        background: ${palette.accentRing};
+      }
+    }
+
+    /* 색상 선택기 스타일 */
+    .ql-color-picker,
+    .ql-background-picker {
+      .ql-picker-options {
+        padding: 0.5rem;
+        width: auto;
+      }
+    }
+
+    /* 폰트 크기 선택기 */
+    .ql-size .ql-picker-options {
+      .ql-picker-item[data-value='small']::before {
+        content: '작게';
+        font-size: 0.8rem;
+      }
+
+      .ql-picker-item[data-value='false']::before {
+        content: '보통';
+        font-size: 1rem;
+      }
+
+      .ql-picker-item[data-value='large']::before {
+        content: '크게';
+        font-size: 1.2rem;
+      }
+
+      .ql-picker-item[data-value='huge']::before {
+        content: '매우 크게';
+        font-size: 1.5rem;
+      }
+    }
+
+    /* 헤더 선택기 */
+    .ql-header .ql-picker-options {
+      .ql-picker-item[data-value='1']::before {
+        content: '제목 1';
+        font-size: 2rem;
+        font-weight: bold;
+      }
+
+      .ql-picker-item[data-value='2']::before {
+        content: '제목 2';
+        font-size: 1.5rem;
+        font-weight: bold;
+      }
+
+      .ql-picker-item[data-value='3']::before {
+        content: '제목 3';
+        font-size: 1.25rem;
+        font-weight: bold;
+      }
+
+      .ql-picker-item[data-value='false']::before {
+        content: '본문';
+        font-size: 1rem;
+      }
+    }
+
+    button {
+      color: ${palette.textSecondary};
+
+      &:hover {
+        color: ${palette.accent};
+        background: ${palette.accentRing};
+        border-radius: 4px;
+      }
+
+      &.ql-active {
+        color: ${palette.accent};
+        background: ${palette.accentRing};
+      }
+    }
+  }
+
+  /* 에디터 전체 영역 클릭 가능하게 만들기 */
+  &:focus-within {
+    border-color: ${palette.accent};
+    box-shadow: 0 0 0 3px ${palette.accentRing};
   }
 `;
 
 const PreviewContainer = styled.div`
-  border: 1px solid #444;
-  border-radius: 4px;
-  padding: 20px;
-  margin-bottom: 20px;
-  background-color: #333;
-  color: #e0e0e0;
+  border: 1px solid ${palette.border};
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  background: ${palette.input};
+  color: ${palette.textPrimary};
+  backdrop-filter: blur(8px);
 
   h3 {
-    color: #ffd700;
-    margin-bottom: 10px;
+    color: ${palette.accent};
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  /* Quill 콘텐츠 스타일링 */
+  .ql-editor {
+    padding: 0;
+    border: none;
+    font-size: inherit;
+    line-height: 1.6;
+  }
+
+  /* 헤더 스타일 */
+  h1,
+  .ql-size-huge {
+    font-size: 2rem;
+    font-weight: 700;
+    color: ${palette.accent};
+    margin: 1rem 0;
+  }
+
+  h2,
+  .ql-size-large {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: ${palette.textPrimary};
+    margin: 0.8rem 0;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: ${palette.textSecondary};
+    margin: 0.6rem 0;
+  }
+
+  /* 텍스트 스타일 */
+  p {
+    margin: 0.5rem 0;
+    line-height: 1.6;
+  }
+
+  /* 강조 스타일 */
+  strong {
+    font-weight: 700;
+    color: ${palette.accent};
+  }
+
+  em {
+    font-style: italic;
+    color: ${palette.textSecondary};
+  }
+
+  u {
+    text-decoration: underline;
+  }
+
+  s {
+    text-decoration: line-through;
+    opacity: 0.7;
+  }
+
+  /* 리스트 스타일 */
+  ul,
+  ol {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+  }
+
+  li {
+    margin: 0.25rem 0;
+  }
+
+  /* 인용문 스타일 */
+  blockquote {
+    border-left: 4px solid ${palette.accent};
+    margin: 1rem 0;
+    padding: 0.5rem 1rem;
+    background: ${palette.accentRing};
+    font-style: italic;
+    color: ${palette.textSecondary};
+  }
+
+  /* 코드 블록 스타일 */
+  pre {
+    background: ${palette.bgContainer};
+    border: 1px solid ${palette.border};
+    border-radius: 4px;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    overflow-x: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+  }
+
+  code {
+    background: ${palette.bgContainer};
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+  }
+
+  /* 링크 스타일 */
+  a {
+    color: ${palette.accent};
+    text-decoration: underline;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+
+  /* 이미지 스타일 */
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    margin: 0.5rem 0;
+  }
+
+  /* 정렬 스타일 */
+  .ql-align-center {
+    text-align: center;
+  }
+
+  .ql-align-right {
+    text-align: right;
+  }
+
+  .ql-align-justify {
+    text-align: justify;
+  }
+
+  /* 폰트 크기 스타일 */
+  .ql-size-small {
+    font-size: 0.8rem;
+  }
+
+  .ql-size-large {
+    font-size: 1.2rem;
+  }
+
+  .ql-size-huge {
+    font-size: 1.5rem;
+  }
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+
+    h3 {
+      font-size: 1.25rem;
+    }
+
+    h1,
+    .ql-size-huge {
+      font-size: 1.5rem;
+    }
+
+    h2,
+    .ql-size-large {
+      font-size: 1.25rem;
+    }
   }
 `;
 
 const ButtonContainer = styled.div`
   display: flex;
   justify-content: flex-end;
-  margin-top: 20px;
+  gap: 0.75rem;
+  margin-top: 2rem;
+
+  @media (max-width: 768px) {
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+  }
 `;
 
 const Button = styled.button`
   display: flex;
   align-items: center;
-  padding: 10px 20px;
-  margin-left: 10px;
+  padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
-  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
 
   svg {
-    margin-right: 5px;
+    margin-right: 0.5rem;
+    font-size: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.85rem;
   }
 `;
 
 const PreviewButton = styled(Button)`
-  background-color: #4a4a4a;
-  color: #e0e0e0;
+  background: ${palette.card};
+  color: ${palette.textPrimary};
+  border: 1px solid ${palette.border};
 
   &:hover {
-    background-color: #5a5a5a;
-    transform: translateY(-2px);
+    background: ${palette.accentRing};
+    color: ${palette.accent};
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px ${palette.accentRing};
   }
 `;
 
 const SubmitButton = styled(Button)`
-  background-color: #ffd700;
-  color: #1e1e1e;
+  background: ${palette.accent};
+  color: ${palette.bgPage};
 
   &:hover {
-    background-color: #ffed4d;
-    transform: translateY(-2px);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px ${palette.accentRing};
+    opacity: 0.9;
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 `;
 
 const ImagePreviewContainer = styled.div`
-  margin-top: 20px;
-  background-color: #333;
-  border-radius: 4px;
-  padding: 15px;
+  margin-top: 1.5rem;
+  background: ${palette.card};
+  border: 1px solid ${palette.border};
+  border-radius: 8px;
+  padding: 1.5rem;
+  backdrop-filter: blur(8px);
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
 `;
 
 const ImagePreviewTitle = styled.h3`
-  color: #ffd700;
-  margin-bottom: 10px;
+  color: ${palette.accent};
+  margin-bottom: 1rem;
   display: flex;
   align-items: center;
+  font-size: 1.1rem;
+  font-weight: 600;
 
   svg {
-    margin-right: 5px;
+    margin-right: 0.5rem;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
   }
 `;
 
 const ImageList = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 0.75rem;
+
+  @media (max-width: 768px) {
+    gap: 0.5rem;
+  }
 `;
 
 const ImageItem = styled.div<{ selected: boolean }>`
   width: 100px;
   height: 100px;
-  border: 2px solid ${(props) => (props.selected ? '#ffd700' : 'transparent')};
-  border-radius: 4px;
+  border: 2px solid
+    ${(props) => (props.selected ? palette.accent : palette.border)};
+  border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  background: ${palette.input};
 
   &:hover {
     transform: scale(1.05);
+    box-shadow: 0 4px 12px ${palette.accentRing};
   }
 
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  @media (max-width: 768px) {
+    width: 80px;
+    height: 80px;
   }
 `;
