@@ -286,10 +286,21 @@ const Row = ({
     };
   }, []);
 
-  // 거래소 변경 시 정렬 상태 초기화
+  // 거래소 변경 시 모든 상태 완전 초기화
   useEffect(() => {
     if (isMountedRef.current) {
+      // 정렬 상태 초기화
       setSortConfig({ key: '', direction: '' });
+      
+      // 모든 데이터 상태 완전 초기화 (이전 SSR 데이터 제거)
+      setNameList([]);
+      setDataList([]);
+      setPrevRowData({});
+      setRowData({});
+      setFadeOutClass({});
+      setExpandedRow(null);
+      setCoinDetails({});
+      setLoadingCoinDetail(null);
     }
   }, [selectedMainMarket, selectedCompareMarket]);
 

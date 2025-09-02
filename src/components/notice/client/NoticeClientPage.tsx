@@ -33,12 +33,18 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { formatNoticeDate, isNewNotice } from '@/method/common_method';
 import { NoticeSkeleton } from '@/components/skeleton/Skeleton';
+import { useStompClientSingleton } from '@/hooks/useStompClientSingleton';
+import { IMessage } from '@stomp/stompjs';
 
 interface NoticeClientProps {
   initialNoticeData: NoticeResponse;
+  isModal?: boolean;
 }
 
-const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
+const NoticeClientPage = ({
+  initialNoticeData,
+  isModal = false,
+}: NoticeClientProps) => {
   const initialContent = initialNoticeData?.data?.content || [];
   const initialLast = initialNoticeData?.data?.last ?? true;
 
@@ -64,11 +70,47 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const newNoticeData = useSelector((state: RootState) => state.notice.notice);
 
+  // 싱글톤 STOMP 클라이언트 사용
+  const { isConnected, isConnecting, connectionError, subscribe, unsubscribe } =
+    useStompClientSingleton({
+      autoConnect: true,
+    });
+
   useEffect(() => {
     if (isNewNoticeGenerated) {
       handleNewNoticeAnimation();
     }
   }, [isNewNoticeGenerated, newNoticeData]);
+
+  // 웹소켓 공지사항 메시지 처리
+  const handleNoticeWebSocketMessage = useCallback((message: IMessage) => {
+    try {
+      const data = JSON.parse(message.body);
+
+      if (data && Array.isArray(data)) {
+        // 새로운 공지사항을 기존 목록 맨 앞에 추가
+        setNoticeData((prev) => [data[0], ...prev]);
+        setIsAnimating(true);
+
+        setTimeout(() => {
+          setIsAnimating(false);
+        }, 600);
+      }
+    } catch (error) {
+      console.error('❌ 공지사항 웹소켓 메시지 파싱 오류:', error);
+    }
+  }, []);
+
+  // STOMP 구독 설정 (공지사항)
+  useEffect(() => {
+    if (isConnected) {
+      subscribe('/topic/notice', handleNoticeWebSocketMessage);
+
+      return () => {
+        unsubscribe('/topic/notice');
+      };
+    }
+  }, [isConnected, subscribe, unsubscribe, handleNoticeWebSocketMessage]);
 
   const handleNewNoticeAnimation = async () => {
     if (!Array.isArray(newNoticeData) || newNoticeData.length === 0) {
@@ -169,12 +211,23 @@ const NoticeClientPage = ({ initialNoticeData }: NoticeClientProps) => {
 
   // 스크롤 이벤트 리스너 등록
   useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (container) {
-      container.addEventListener('scroll', handleScroll);
-      return () => container.removeEventListener('scroll', handleScroll);
+    if (isModal) {
+      // 모달에서는 상위 컨테이너(ModalContent)에서 스크롤 이벤트를 처리
+      const modalContent = document.querySelector(
+        '[data-modal-content="notice"]'
+      );
+      if (modalContent) {
+        modalContent.addEventListener('scroll', handleScroll);
+        return () => modalContent.removeEventListener('scroll', handleScroll);
+      }
+    } else {
+      const container = scrollContainerRef.current;
+      if (container) {
+        container.addEventListener('scroll', handleScroll);
+        return () => container.removeEventListener('scroll', handleScroll);
+      }
     }
-  }, [handleScroll]);
+  }, [handleScroll, isModal]);
 
   // 거래소 변경 핸들러 등록
   const handleMarketChange = async (marketType: MarketType) => {

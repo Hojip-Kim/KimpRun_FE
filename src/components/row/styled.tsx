@@ -104,7 +104,7 @@ export const SortButton = styled.button`
   border: none;
   cursor: pointer;
   padding: 0;
-  color: #888;
+  color: ${palette.textMuted};
   transition: all 0.2s ease;
   position: absolute;
   right: 5px;
@@ -123,11 +123,11 @@ export const SortButton = styled.button`
   }
 
   &:hover {
-    color: #ffd700;
+    color: ${palette.accent};
   }
 
   &.active {
-    color: #ffd700;
+    color: ${palette.accent};
 
     svg {
       transform: scale(1.2);
@@ -147,8 +147,10 @@ export const HeaderContent = styled.div`
 export const TableRow = styled.tr<{ $isExpanded?: boolean }>`
   text-align: right;
   font-size: 0.6rem;
-  border-bottom: solid ${palette.border};
-  transition: background-color 0.4s ease-in-out;
+  border-bottom: 1px solid ${palette.border};
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+
   @media (max-width: 768px) {
     td:nth-child(5),
     td:nth-child(6) {
@@ -157,11 +159,10 @@ export const TableRow = styled.tr<{ $isExpanded?: boolean }>`
   }
 
   &:hover {
+    background-color: ${palette.bgContainer};
     td {
       color: ${palette.accent};
-      background-color: rgba(255, 215, 0, 0.06);
     }
-    cursor: pointer;
   }
 
   &.fade-out {
@@ -171,7 +172,10 @@ export const TableRow = styled.tr<{ $isExpanded?: boolean }>`
   ${({ $isExpanded }) =>
     $isExpanded &&
     `
-    background-color: #202635;
+    background-color: ${palette.bgContainer};
+    td {
+      background-color: ${palette.bgContainer};
+    }
   `}
 `;
 
@@ -189,11 +193,181 @@ export const TableCell = styled.td`
 `;
 
 export const ExpandableContent = styled.div<{ $isExpanded: boolean }>`
-  padding: 10px;
-  border: 1px solid #555;
-  border-radius: 4px;
-  height: ${({ $isExpanded }) => ($isExpanded ? 'auto' : '0')};
-  overflow: hidden;
-  background-color: #131722;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  padding: ${({ $isExpanded }) => ($isExpanded ? '1.5rem' : '0')};
+  border: none;
+  background: ${palette.bgPage};
+  animation: fadeIn 0.3s ease-out;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .coin-detail-responsive {
+    @media (max-width: 768px) {
+      display: grid !important;
+      grid-template-columns: auto 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      font-size: 0.7rem;
+
+      /* 로고와 기본 정보 섹션 - 컴팩트한 세로 배치 */
+      & > div:first-child {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+        min-width: 60px;
+        order: 1;
+
+        img {
+          width: 32px !important;
+          height: 32px !important;
+          margin-bottom: 0.25rem !important;
+          border-radius: 50%;
+        }
+
+        & > div {
+          text-align: center !important;
+
+          h3 {
+            font-size: 0.75rem !important;
+            margin-bottom: 0.1rem !important;
+            color: var(--accent) !important;
+            font-weight: 600;
+          }
+
+          p:first-of-type {
+            font-size: 0.65rem !important;
+            font-weight: 500 !important;
+            margin-bottom: 0.2rem !important;
+            color: var(--text-muted);
+          }
+
+          p:last-of-type {
+            font-size: 0.6rem !important;
+            padding: 0.1rem 0.3rem;
+            background: var(--accent);
+            color: white;
+            border-radius: 6px;
+            display: inline-block;
+          }
+        }
+      }
+
+      /* 공급량 정보 - 헤더/바디 구조 */
+      & > div:nth-child(2) {
+        order: 2;
+
+        h4 {
+          font-size: 0.7rem !important;
+          margin-bottom: 0.4rem !important;
+          color: var(--accent) !important;
+          font-weight: 600;
+        }
+
+        & > div {
+          & > div {
+            margin-bottom: 0.2rem;
+
+            span:first-child {
+              font-size: 0.6rem !important;
+            }
+
+            span:last-child {
+              font-size: 0.6rem !important;
+            }
+          }
+        }
+      }
+
+      /* 시장 정보 - 헤더/바디 구조 */
+      & > div:nth-child(3) {
+        order: 3;
+
+        h4 {
+          font-size: 0.7rem !important;
+          margin-bottom: 0.4rem !important;
+          color: var(--accent) !important;
+          font-weight: 600;
+        }
+
+        & > div {
+          & > div {
+            margin-bottom: 0.2rem;
+
+            span:first-child {
+              font-size: 0.6rem !important;
+            }
+
+            span:last-child {
+              font-size: 0.6rem !important;
+            }
+          }
+        }
+
+        /* 플랫폼 태그 컴팩트하게 */
+        & > div:last-child {
+          margin-top: 0.5rem !important;
+
+          & > div:first-child span {
+            font-size: 0.55rem !important;
+          }
+
+          & > div:last-child {
+            span {
+              font-size: 0.55rem !important;
+              padding: 0.1rem 0.3rem !important;
+            }
+          }
+        }
+      }
+
+      /* 탐색기 링크 - 전체 너비, 컴팩트 */
+      & > div:last-child {
+        grid-column: 1 / -1 !important;
+        order: 4;
+        margin-top: 0.25rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid var(--border);
+
+        & > div:first-child {
+          margin-bottom: 0.4rem !important;
+
+          span {
+            font-size: 0.65rem !important;
+            font-weight: 600 !important;
+            color: var(--accent) !important;
+          }
+        }
+
+        & > div:last-child {
+          display: grid !important;
+          grid-template-columns: 1fr 1fr;
+          gap: 0.4rem;
+
+          a {
+            font-size: 0.6rem !important;
+            padding: 0.3rem 0.5rem !important;
+            border-radius: 4px !important;
+            background: var(--accent-ring) !important;
+            border: 1px solid var(--accent) !important;
+            text-align: center;
+            font-weight: 500;
+            transition: all 0.2s ease !important;
+
+            &:hover {
+              background: var(--accent) !important;
+              color: white !important;
+            }
+          }
+        }
+      }
+    }
+  }
 `;

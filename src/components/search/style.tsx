@@ -35,7 +35,7 @@ export const StyledSelect = styled.select`
   }
 
   &:hover {
-    background-color: #131722;
+    background-color: ${palette.input};
   }
 
   option {
@@ -46,7 +46,7 @@ export const StyledSelect = styled.select`
     animation: ${popIn} 0.2s ease-out;
 
     &:hover {
-      background-color: #131722;
+      background-color: ${palette.input};
     }
   }
 `;
@@ -102,7 +102,7 @@ export const SearchInput = styled.input`
 
   &:focus {
     outline: none;
-    border-color: rgba(255, 215, 0, 0.45);
+    border-color: ${palette.accent};
     box-shadow: 0 0 0 3px ${palette.accentRing};
   }
   @media (max-width: 768px) {
@@ -115,7 +115,7 @@ export const StyledArrowIcon = styled(MdOutlineKeyboardArrowDown)`
   position: absolute;
   right: 8px;
   pointer-events: none;
-  color: #888;
+  color: ${palette.textMuted};
   width: 20px;
   height: 20px;
 `;
@@ -141,7 +141,7 @@ export const SearchButton = styled.button`
 
   &:hover {
     color: ${palette.accent};
-    background-color: #131722;
+    background-color: ${palette.input};
   }
 
   &:active {
