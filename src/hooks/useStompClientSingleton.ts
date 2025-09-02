@@ -66,7 +66,7 @@ class StompClientSingleton {
 
   validateStompUrl(): string {
     // 개발 환경에서는 하드코딩된 URL 사용
-    const stompUrl = clientEnv.STOMP_URL || 'ws://localhost:8080/api/ws';
+    const stompUrl = clientEnv.STOMP_URL;
 
     if (!stompUrl) {
       throw new Error(

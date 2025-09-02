@@ -33,7 +33,7 @@ export async function getChatLogs(page: number = 0, size: number = 20) {
 export async function deleteAnonChatByInherenceId(inherenceId: string) {
   try {
     const response = await clientRequest.delete(
-      `http://localhost:8080/api/chat/anon`,
+      `${clientEnv.API_BASE_URL}/api/chat/anon`,
       {
         credentials: 'include',
         headers: { 'Content-type': 'application/json' },
@@ -56,7 +56,7 @@ export async function deleteAnonChatByInherenceId(inherenceId: string) {
 export async function deleteAuthChatByInherenceId(inherenceId: string) {
   try {
     const response = await clientRequest.delete(
-      `http://localhost:8080/api/chat/auth`,
+      `${clientEnv.API_BASE_URL}/api/chat/auth`,
       {
         credentials: 'include',
         headers: { 'Content-type': 'application/json' },
@@ -84,7 +84,7 @@ export async function reportUser(
 ) {
   try {
     const response = await clientRequest.post(
-      'http://localhost:8080/api/declaration',
+      `${clientEnv.API_BASE_URL}/api/declaration`,
       {
         fromMember,
         toMember,

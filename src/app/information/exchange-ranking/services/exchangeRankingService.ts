@@ -5,6 +5,7 @@ import {
 } from '@/types/exchangeRanking';
 import { serverGet } from '@/server/fetch/server';
 import { clientRequest } from '@/server/fetch/client';
+import { clientEnv } from '@/utils/env';
 
 // 서버 컴포넌트용 fetch (SSR) - 1-based 페이지
 export async function fetchExchangeRankingServer(
@@ -17,8 +18,7 @@ export async function fetchExchangeRankingServer(
     size: size.toString(),
   });
 
-  const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+  const API_BASE_URL = clientEnv.API_BASE_URL;
   const url = `${API_BASE_URL}/api/cmc/exchange/all?${searchParams.toString()}`;
 
   try {
@@ -57,8 +57,7 @@ export async function fetchExchangeRankingClient(
     size: size.toString(),
   });
 
-  const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+  const API_BASE_URL = clientEnv.API_BASE_URL;
   const url = `${API_BASE_URL}/api/cmc/exchange/all?${searchParams.toString()}`;
 
   try {
