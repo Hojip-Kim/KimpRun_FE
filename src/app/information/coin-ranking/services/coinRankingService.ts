@@ -60,7 +60,7 @@ export class CoinRankingService {
   ): Promise<CoinRankingResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/cmc/coin/all?page=${page}&size=${size}`,
+        `${clientEnv.API_BASE_URL}/api/cmc/coin/all?page=${page}&size=${size}`,
         {
           method: 'GET',
           headers: {
