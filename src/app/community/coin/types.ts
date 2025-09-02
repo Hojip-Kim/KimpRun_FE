@@ -6,13 +6,15 @@ export interface Post {
   categoryId: number;
   categoryName: string;
   memberNickName: string;
+  profileImageUrl?: string;
   title: string;
   content: string;
   boardViewsCount: number;
   boardLikesCount: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
   commentsCount: number;
+  isPin: boolean;
 }
 
 export interface ErrorResponse {
@@ -20,4 +22,4 @@ export interface ErrorResponse {
   error: string;
   message: string;
   trace?: string;
-};
+}
