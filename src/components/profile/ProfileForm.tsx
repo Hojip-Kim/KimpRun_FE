@@ -22,7 +22,9 @@ interface UserInfo {
 
 interface ProfileFormProps {
   closeModal: () => void;
-  setModalSize: React.Dispatch<React.SetStateAction<{ width: number; height: number }>>;
+  setModalSize: React.Dispatch<
+    React.SetStateAction<{ width: number; height: number }>
+  >;
 }
 
 const Card = styled.div`
@@ -66,16 +68,26 @@ const Action = styled.button`
   }
 `;
 
-const ProfileForm: React.FC<ProfileFormProps> = ({ closeModal, setModalSize }) => {
+const ProfileForm: React.FC<ProfileFormProps> = ({
+  closeModal,
+  setModalSize,
+}) => {
   const user = useSelector((state: RootState) => state.auth.user);
   const dispatch = useDispatch();
 
-  const [userInfo, setUserInfo] = useState<UserInfo>({ email: '', nickname: '', role: '' });
+  const [userInfo, setUserInfo] = useState<UserInfo>({
+    email: '',
+    nickname: '',
+    role: '',
+  });
   const [isNicknameOpen, setIsNicknameOpen] = useState(false);
 
   const fetchUserInfo = async (): Promise<void> => {
     try {
-      const response = await clientRequest.get<UserInfo>(userInfoUrl, { credentials: 'include' });
+      const response = await clientRequest.get<UserInfo>(userInfoUrl, {
+        credentials: 'include',
+        cache: 'no-store',
+      });
       if (response.success && response.data) {
         setUserInfo(response.data);
       } else {
@@ -88,9 +100,16 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ closeModal, setModalSize }) =
 
   const handleSaveNickname = async (newNickname: string) => {
     try {
-      const updatedUserInfo = await updateNickname(updateNicknameUrl, newNickname);
+      const updatedUserInfo = await updateNickname(
+        updateNicknameUrl,
+        newNickname
+      );
       if (updatedUserInfo && updatedUserInfo.result === 'success') {
-        const newUserInfo: UserInfo = { email: userInfo.email, nickname: newNickname, role: userInfo.role };
+        const newUserInfo: UserInfo = {
+          email: userInfo.email,
+          nickname: newNickname,
+          role: userInfo.role,
+        };
         setUserInfo(newUserInfo);
         if (user) dispatch(setUser({ ...user, name: newNickname }));
         setIsNicknameOpen(false);
@@ -99,7 +118,13 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ closeModal, setModalSize }) =
       }
     } catch (error) {
       console.error('닉네임 변경 오류:', error);
-      alert('닉네임 변경 중 오류 발생');
+      if (error instanceof Error && error.message.includes('400')) {
+        alert(
+          '이미 다른 사용자가 사용 중인 닉네임입니다.\n다른 닉네임을 선택해주세요.'
+        );
+      } else {
+        alert('닉네임 변경 중 오류 발생');
+      }
     }
   };
 
@@ -112,20 +137,26 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ closeModal, setModalSize }) =
       <Row>
         <div>
           <Label>닉네임</Label>
-          <div><Value>{userInfo.nickname}</Value></div>
+          <div>
+            <Value>{userInfo.nickname}</Value>
+          </div>
         </div>
         <Action onClick={() => setIsNicknameOpen(true)}>닉네임 변경</Action>
       </Row>
       <Row>
         <div>
           <Label>이메일</Label>
-          <div><Value>{userInfo.email}</Value></div>
+          <div>
+            <Value>{userInfo.email}</Value>
+          </div>
         </div>
       </Row>
       <Row>
         <div>
           <Label>권한</Label>
-          <div><Value>{userInfo.role}</Value></div>
+          <div>
+            <Value>{userInfo.role}</Value>
+          </div>
         </div>
       </Row>
 

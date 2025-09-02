@@ -78,7 +78,7 @@ const NewNoticeModal: React.FC<NewNoticeModalProps> = ({
 
   const handleViewNotice = () => {
     if (notice?.exchangeUrl && notice?.url) {
-      window.open(notice.exchangeUrl + notice.url, '_blank');
+      window.open(notice.url, '_blank');
     } else if (notice?.url) {
       window.open(notice.url, '_blank');
     }

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
+import { palette } from '@/styles/palette';
 
 interface AuthLayoutProps {
   title: string;
@@ -18,13 +19,8 @@ const Page = styled.div`
   align-items: center;
   justify-content: center;
   padding: 32px 16px;
-  background: radial-gradient(
-      1200px 800px at 20% -10%,
-      #1b2230 0%,
-      transparent 60%
-    ),
-    radial-gradient(1000px 600px at 110% 10%, #121826 0%, transparent 60%),
-    linear-gradient(180deg, #0b0f17 0%, #0a0e14 100%);
+  background: ${palette.bgPage};
+  transition: background-color 0.3s ease;
 
   @media (max-width: 768px) {
     min-height: calc(100vh - 72px - 72px);
@@ -35,32 +31,36 @@ const Page = styled.div`
 const Card = styled.div`
   width: 100%;
   max-width: 480px;
-  background: rgba(20, 24, 34, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: ${palette.card};
+  border: 1px solid ${palette.border};
   border-radius: 16px;
   padding: 28px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  box-shadow: ${palette.shadow};
   backdrop-filter: blur(6px);
   display: flex;
   flex-direction: column;
+  transition: background-color 0.3s ease, border-color 0.3s ease,
+    box-shadow 0.3s ease;
 
   & > * {
     width: 100%;
   }
 
   h1 {
-    color: #e6e8ee;
+    color: ${palette.textPrimary};
     font-size: 22px;
     font-weight: 600;
     letter-spacing: 0.2px;
     margin: 0 0 8px;
     text-align: center;
+    transition: color 0.3s ease;
   }
   p.subtitle {
-    color: #a6b0c3;
+    color: ${palette.textMuted};
     font-size: 13px;
     text-align: center;
     margin: 0 0 18px;
+    transition: color 0.3s ease;
   }
 
   form {
@@ -69,10 +69,11 @@ const Card = styled.div`
     width: 100%;
   }
   label {
-    color: #cfd6e4;
+    color: ${palette.textSecondary};
     font-size: 12px;
     margin-bottom: 6px;
     display: block;
+    transition: color 0.3s ease;
   }
   input[type='text'],
   input[type='email'],
@@ -80,27 +81,27 @@ const Card = styled.div`
     width: 100%;
     padding: 12px 14px;
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(8, 12, 20, 0.9);
-    color: #e9eef9;
+    border: 1px solid ${palette.border};
+    background: ${palette.input};
+    color: ${palette.textPrimary};
     outline: none;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus {
-    -webkit-text-fill-color: #e9eef9 !important;
-    -webkit-box-shadow: 0 0 0px 1000px rgba(8, 12, 20, 0.9) inset !important;
-    box-shadow: 0 0 0px 1000px rgba(8, 12, 20, 0.9) inset !important;
-    caret-color: #e9eef9;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    -webkit-text-fill-color: ${palette.textPrimary} !important;
+    -webkit-box-shadow: 0 0 0px 1000px ${palette.input} inset !important;
+    box-shadow: 0 0 0px 1000px ${palette.input} inset !important;
+    caret-color: ${palette.textPrimary};
+    border: 1px solid ${palette.borderSoft};
   }
   input::placeholder {
-    color: #7b87a3;
+    color: ${palette.textMuted};
   }
   input:focus {
-    border-color: rgba(255, 215, 0, 0.45);
-    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
+    border-color: ${palette.accent};
+    box-shadow: 0 0 0 3px ${palette.accentRing};
   }
 `;
 
@@ -109,7 +110,7 @@ const Footer = styled.div`
   display: flex;
   justify-content: center;
   gap: 8px;
-  color: #9aa6bf;
+  color: ${palette.textMuted};
   font-size: 13px;
 `;
 

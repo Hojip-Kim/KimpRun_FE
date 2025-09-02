@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React from 'react';
 import { useRouter, usePathname } from 'next/navigation';
@@ -21,6 +21,10 @@ const Bar = styled.nav`
   box-shadow: ${palette.shadow};
   display: none;
   z-index: 1100;
+  transform: scale(0.95);
+  transform-origin: bottom center;
+  width: 105.26%; // scale(0.95)의 역보정
+  margin-left: -2.63%; // 중앙 정렬
 
   @media (max-width: 768px) {
     display: flex;
@@ -67,10 +71,26 @@ const MobileTabBar: React.FC = () => {
   const pathname = usePathname() || '';
 
   const tabs = [
-    { label: '메인', path: clientEnv.MAIN_PAGE ?? '/', icon: <FiHome size={18} /> },
-    { label: '커뮤니티', path: clientEnv.COMMUNITY_PAGE ?? '/community', icon: <MdOutlineForum size={19} /> },
-    { label: '통계', path: clientEnv.STATISTICS_PAGE ?? '/statistics', icon: <LuBarChart3 size={18} /> },
-    { label: '뉴스', path: clientEnv.NEWS_PAGE ?? '/news', icon: <IoNewspaperOutline size={18} /> },
+    {
+      label: '메인',
+      path: clientEnv.MAIN_PAGE ?? '/',
+      icon: <FiHome size={18} />,
+    },
+    {
+      label: '커뮤니티',
+      path: clientEnv.COMMUNITY_PAGE ?? '/community',
+      icon: <MdOutlineForum size={19} />,
+    },
+    {
+      label: '정보',
+      path: clientEnv.INFORMATION_PAGE ?? '/information',
+      icon: <LuBarChart3 size={18} />,
+    },
+    {
+      label: '뉴스',
+      path: clientEnv.NEWS_PAGE ?? '/news',
+      icon: <IoNewspaperOutline size={18} />,
+    },
   ];
 
   const isActive = (path: string) => {

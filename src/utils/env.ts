@@ -1,16 +1,16 @@
 // 클라이언트 환경 변수 - 빌드 시점에 번들에 포함됨
 export const clientEnv = {
+  API_BASE_URL:
+    process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api',
   LOGIN_URL: process.env.NEXT_PUBLIC_LOGIN_URL,
 
-  // Websocket
-  MARKET_DATA_WEBSOCKET_URL: process.env.NEXT_PUBLIC_MARKET_DATA_WEBSOCKET_URL,
-  CHAT_WEBSOCKET_URL: process.env.NEXT_PUBLIC_CHAT_WEBSOCKET_URL,
-  INFO_WEBSOCKET_URL: process.env.NEXT_PUBLIC_INFO_WEBSOCKET_URL,
+  // STOMP WebSocket
+  STOMP_URL: process.env.NEXT_PUBLIC_STOMP_URL,
 
   // Page
   MAIN_PAGE: process.env.NEXT_PUBLIC_MAIN_PAGE,
   COMMUNITY_PAGE: process.env.NEXT_PUBLIC_COMMUNITY_PAGE,
-  STATISTICS_PAGE: process.env.NEXT_PUBLIC_STATISTICS_PAGE,
+  INFORMATION_PAGE: process.env.NEXT_PUBLIC_INFORMATION_PAGE,
   NEWS_PAGE: process.env.NEXT_PUBLIC_NEWS_PAGE,
   PROFILE_PAGE: process.env.NEXT_PUBLIC_PROFILE_PAGE,
 
@@ -44,6 +44,7 @@ export const clientEnv = {
 };
 
 export const serverEnv = {
+  API_BASE_URL: process.env.API_BASE_URL,
   MARKET_FIRST_NAME: process.env.MARKET_FIRST_NAME,
   MARKET_COMBINE_DATA: process.env.MARKET_COMBINE_DATA,
   NOTICE_URL: process.env.NOTICE_URL,

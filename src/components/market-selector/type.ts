@@ -5,7 +5,7 @@ interface UserInfo {
 }
 
 interface Member {
-  id?: number;
+  memberId: number;
   email: string;
   name: string;
   role: string;

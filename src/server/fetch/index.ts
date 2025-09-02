@@ -6,7 +6,7 @@ export type {
   ProcessedApiResponse,
 } from '../type';
 
-export { createRequest } from './request';
+export { createRequest, createApiClient } from './request';
 
 export { clientFetch, clientRequest } from './client';
 
