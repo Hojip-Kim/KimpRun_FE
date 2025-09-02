@@ -8,6 +8,7 @@ import { fetchUserInfo } from '../auth/fetchUserInfo';
 import { clientEnv } from '@/utils/env';
 import { FormContainer, LoginButton, GoogleLoginButton } from './style';
 import { UserInfo } from '../market-selector/type';
+import { useGlobalAlert } from '@/providers/AlertProvider';
 interface LoginFormProps {
   closeModal: () => void;
   setModalSize: React.Dispatch<
@@ -23,11 +24,6 @@ interface LoginFormProps {
 
 const googleLoginUrl = clientEnv.GOOGLE_LOGIN_URL;
 
-interface loginResponse {
-  result: 'check' | 'success';
-  message: string;
-}
-
 const LoginForm: React.FC<LoginFormProps> = ({
   closeModal,
   setModalSize,
@@ -41,7 +37,9 @@ const LoginForm: React.FC<LoginFormProps> = ({
   const [isLoginForm, setIsLoginForm] = useState<boolean>(true);
   const [rememberMe, setRememberMe] = useState<boolean>(false);
 
-  const statusUrl = clientEnv.STATUS_URL;
+  // 전역 알림 훅
+  const { showSuccess, showError } = useGlobalAlert();
+
   const loginUrl = clientEnv.LOGIN_URL;
 
   useEffect(() => {
@@ -67,7 +65,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
       localStorage.removeItem('email');
     }
 
-    // Spring Boot의 /login 엔드포인트로 POST 요청
     const loginResponse: responseData = await loginDataFetch(
       loginUrl,
       email,
@@ -82,12 +79,13 @@ const LoginForm: React.FC<LoginFormProps> = ({
           name: userInfo?.member.name,
           email: userInfo?.member.email,
           role: userInfo?.member.role,
+          memberId: userInfo?.member.memberId,
         };
 
         if (userInfo?.isAuthenticated) {
           await dispatch(setUser(parseUserInfo));
         }
-        alert('로그인 성공');
+        showSuccess('로그인 성공');
         closeModal();
       } else if (loginResponse.result === 'check') {
         const userConfirmed = window.confirm(
@@ -102,19 +100,20 @@ const LoginForm: React.FC<LoginFormProps> = ({
             name: userInfo?.member.name,
             email: userInfo?.member.email,
             role: userInfo?.member.role,
+            memberId: userInfo?.member.memberId,
           };
 
           if (userInfo) {
             await dispatch(setUser(parseUserInfo));
           }
-          alert('로그인 성공');
+          showSuccess('로그인 성공');
           closeModal();
         } else {
           window.location.href = '/change-password'; // 비밀번호 변경 페이지 URL로 수정 필요
         }
       }
     } else {
-      alert('로그인 실패');
+      showError('로그인 실패');
     }
   };
 
@@ -158,6 +157,17 @@ const LoginForm: React.FC<LoginFormProps> = ({
               onChange={(e) => setRememberMe(e.target.checked)}
             />
             <label htmlFor="rememberMe">아이디 기억하기</label>
+          </div>
+
+          <div className="password-reset-section">
+            <p>비밀번호를 잊어버리셨나요?</p>
+            <button
+              type="button"
+              className="reset-password-btn"
+              onClick={() => (window.location.href = '/reset-password')}
+            >
+              비밀번호 재설정
+            </button>
           </div>
 
           {!hideInlineFooter && (

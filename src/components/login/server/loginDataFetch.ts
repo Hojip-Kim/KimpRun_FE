@@ -4,6 +4,7 @@ export interface responseData {
   result: 'success' | 'check';
   message: string;
   data?: string;
+  memberId: number;
 }
 
 export const loginDataFetch = async (

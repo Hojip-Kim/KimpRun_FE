@@ -24,7 +24,7 @@ export const DropdownButton = styled.button<{ $disabled?: boolean }>`
 
   &:hover {
     color: ${(p) => (p.$disabled ? palette.textPrimary : palette.accent)};
-    background-color: ${(p) => (p.$disabled ? palette.input : '#131722')};
+    background-color: ${(p) => (p.$disabled ? palette.input : palette.input)};
   }
 `;
 
@@ -70,9 +70,9 @@ export const DropdownItem = styled.li<{
 }>`
   padding: 8px 10px;
   border-radius: 8px;
-  color: ${(p) => (p.$disabled ? '#67748b' : palette.textPrimary)};
+  color: ${(p) => (p.$disabled ? palette.textMuted : palette.textPrimary)};
   cursor: ${(p) => (p.$disabled ? 'not-allowed' : 'pointer')};
-  background: ${(p) => (p.$active ? '#131722' : 'transparent')};
+  background: ${(p) => (p.$active ? palette.input : 'transparent')};
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -87,8 +87,8 @@ export const DropdownItem = styled.li<{
   }
 
   &:hover {
-    color: ${(p) => (p.$disabled ? '#67748b' : palette.accent)};
-    background: ${(p) => (p.$disabled ? 'transparent' : '#131722')};
+    color: ${(p) => (p.$disabled ? palette.textMuted : palette.accent)};
+    background: ${(p) => (p.$disabled ? 'transparent' : palette.input)};
   }
 `;
 

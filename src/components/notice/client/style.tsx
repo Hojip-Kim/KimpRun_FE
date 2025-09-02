@@ -52,12 +52,12 @@ export const NoticeList = styled.div`
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.3);
+    background-color: var(--border);
     border-radius: 3px;
   }
 
   &::-webkit-scrollbar-track {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: var(--bg-container);
   }
 `;
 
@@ -72,7 +72,7 @@ export const NoticeItem = styled.div`
   cursor: pointer;
 
   &:hover {
-    background-color: #1a1a2e;
+    background-color: ${palette.input};
     border-color: ${palette.accent};
     transform: translateY(-1px);
     box-shadow: 0 2px 8px ${palette.accentRing};
@@ -93,8 +93,8 @@ export const NoticeItemHeader = styled.div`
 export const ExchangeBadge = styled.span.withConfig({
   shouldForwardProp: (prop) => prop !== 'exchangeType',
 })<{ exchangeType: string }>`
-  background: rgba(255, 255, 255, 0.06);
-  color: #fff;
+  background: var(--bg-container);
+  color: var(--text-primary);
   padding: 4px 8px;
   border-radius: 8px;
   font-size: 12px;
@@ -102,13 +102,16 @@ export const ExchangeBadge = styled.span.withConfig({
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  border: 1px solid ${palette.border};
+  border: 1px solid var(--border);
+  transition: background-color 0.3s ease, color 0.3s ease,
+    border-color 0.3s ease;
 `;
 
 export const NoticeDate = styled.span`
-  color: #888888;
+  color: var(--text-muted);
   font-size: 0.7rem;
   font-weight: 400;
+  transition: color 0.3s ease;
 `;
 
 export const NoticeItemTitle = styled.h4`
@@ -129,19 +132,20 @@ export const NoticeItemTitle = styled.h4`
 `;
 
 export const NoticeUrl = styled.a`
-  color: #4a9eff;
+  color: var(--accent);
   font-size: 0.7rem;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
   gap: 4px;
   opacity: 0.8;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
 
   &:hover {
     opacity: 1;
-    color: #66b3ff;
+    color: var(--accent);
     text-decoration: underline;
+    transform: translateX(2px);
   }
 
   &::after {
@@ -172,7 +176,7 @@ export const LoadingSpinner = styled.div`
   align-items: center;
   justify-content: center;
   height: 100px;
-  color: #ffd700;
+  color: ${palette.accent};
   font-size: 0.9rem;
 
   &::before {
@@ -221,7 +225,7 @@ export const ErrorTitle = styled.h3`
 `;
 
 export const ErrorMessage = styled.p`
-  color: #e0e0e0;
+  color: ${palette.textSecondary};
   font-size: 0.8rem;
   margin: 5px 0;
   opacity: 0.8;
@@ -295,7 +299,7 @@ export const LoadingIndicator = styled.div`
   display: flex;
   justify-content: center;
   padding: 20px;
-  color: #ffd700;
+  color: ${palette.accent};
   font-size: 14px;
 `;
 
@@ -303,7 +307,7 @@ export const LoadingText = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #ffd700;
+  color: ${palette.accent};
   font-size: 14px;
 `;
 
@@ -324,14 +328,14 @@ export const NewNoticeItem = styled.div.withConfig({
   shouldForwardProp: (prop) => !['isAnimating'].includes(prop),
 })<{ isAnimating?: boolean }>`
   background: ${palette.card};
-  border: 1px solid #333333;
+  border: 1px solid ${palette.border};
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  color: #ffffff;
+  box-shadow: ${palette.shadow};
+  color: ${palette.textPrimary};
 
   ${(props) =>
     props.isAnimating &&
@@ -341,8 +345,8 @@ export const NewNoticeItem = styled.div.withConfig({
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-    background: #2a2a2a;
+    box-shadow: ${palette.shadow};
+    background: ${palette.input};
   }
 
   @keyframes slideInFromTop {
@@ -462,7 +466,7 @@ export const ModalHeader = styled.div`
 `;
 
 export const ModalTitle = styled.h3`
-  color: #ffd700;
+  color: ${palette.accent};
   font-size: 16px;
   font-weight: bold;
   margin: 0;
@@ -498,7 +502,7 @@ export const ModalCloseButton = styled.button`
 `;
 
 export const ModalContent = styled.div`
-  color: #e0e0e0;
+  color: ${palette.textSecondary};
 `;
 
 export const ModalExchangeBadge = styled.div<{ exchangeType: MarketType }>`
@@ -523,13 +527,15 @@ export const ModalExchangeBadge = styled.div<{ exchangeType: MarketType }>`
     }
   }};
   color: white;
+  transition: opacity 0.3s ease;
 `;
 
 export const ModalNoticeTitle = styled.h4`
-  color: #fff;
+  color: var(--text-primary);
   font-size: 14px;
   margin: 10px 0;
   line-height: 1.4;
+  transition: color 0.3s ease;
 `;
 
 export const ModalActions = styled.div`
@@ -563,7 +569,7 @@ export const ModalButton = styled.button<{ variant?: 'primary' | 'secondary' }>`
   `
       : `
     background: rgba(255, 255, 255, 0.1);
-    color: #e0e0e0;
+    color: ${palette.textSecondary};
     border: 1px solid #333;
     
     &:hover {

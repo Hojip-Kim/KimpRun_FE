@@ -16,13 +16,13 @@
   #desktop-chart,
   #mobile-chart {
     justify-content: center;
-    background-color: #131722;
+    background-color: var(--input);
     align-items: left;
     height: 100%;
     width: 100%;
-    border: 1px solid #333333;
+    border: 1px solid var(--border);
     border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow);
   }
 }
 
@@ -38,9 +38,9 @@
 .main-page-container {
   width: 100%;
   display: flex;
-  background-color: #0b0f17;
-  color: #e6e8ee;
-  height: calc(100vh - 130px);
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  height: calc(114vh - 130px);
   overflow: hidden;
   gap: 20px;
   justify-content: center;
@@ -51,10 +51,10 @@
   flex: 4.5;
   min-width: 600px;
   max-width: 900px;
-  background: rgba(20, 24, 34, 0.9);
+  background: var(--card);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -86,10 +86,10 @@
   flex: 2.5;
   min-width: 300px;
   max-width: 400px;
-  background: rgba(20, 24, 34, 0.9);
+  background: var(--card);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
   padding: 20px;
   height: 100%;
   display: flex;

@@ -8,7 +8,9 @@ export const signupValidation = (
   email: string,
   password: string,
   confirmPassword: string,
-  isVerified: boolean
+  isVerified: boolean,
+  termsServiceAgreed: boolean,
+  privacyPolicyAgreed: boolean
 ) => {
   if (
     username.trim() === '' ||
@@ -22,6 +24,12 @@ export const signupValidation = (
     return false;
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return false;
+  }
+  if (!isVerified) {
+    return false;
+  }
+  if (!termsServiceAgreed || !privacyPolicyAgreed) {
     return false;
   }
   return true;

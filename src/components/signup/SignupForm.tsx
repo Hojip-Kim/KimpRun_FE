@@ -21,16 +21,19 @@ interface SignupFormProps {
 const InlineActionButton = styled.button<{ $isDisabled?: boolean }>`
   padding: 10px 14px;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(180deg, #1e1e1e, #171b24);
-  color: ${(props) => (props.$isDisabled ? '#8b93a7' : '#e6e8ee')};
+  border: 1px solid var(--border);
+  background: var(--input);
+  color: ${(props) =>
+    props.$isDisabled ? 'var(--text-muted)' : 'var(--text-primary)'};
   cursor: ${(props) => (props.$isDisabled ? 'not-allowed' : 'pointer')};
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: all 0.2s ease;
   white-space: nowrap;
 
   &:hover {
-    color: ${(props) => (props.$isDisabled ? '#8b93a7' : 'rgba(255, 215, 0)')};
-    background-color: #131722;
+    color: ${(props) =>
+      props.$isDisabled ? 'var(--text-muted)' : 'var(--accent)'};
+    background-color: var(--bg-container);
+    border-color: var(--accent);
   }
 
   &:disabled {
@@ -64,6 +67,9 @@ const SignupForm: React.FC<SignupFormProps> = ({
   const [verifyCode, setVerifyCode] = useState<string>('');
   const [isVerified, setIsVerified] = useState<boolean>(false);
 
+  const [termsServiceAgreed, setTermsServiceAgreed] = useState<boolean>(false);
+  const [privacyPolicyAgreed, setPrivacyPolicyAgreed] =
+    useState<boolean>(false);
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
 
   const verifyEmailUrl = clientEnv.VERIFY_EMAIL_URL;
@@ -78,6 +84,11 @@ const SignupForm: React.FC<SignupFormProps> = ({
       return;
     }
 
+    if (!termsServiceAgreed || !privacyPolicyAgreed) {
+      alert('서비스 이용약관에 동의해주세요.');
+      return;
+    }
+
     const responseJson = await signupDataFetch(username, email, password);
     if (responseJson) {
       alert(
@@ -89,7 +100,15 @@ const SignupForm: React.FC<SignupFormProps> = ({
 
   useEffect(() => {
     validateForm();
-  }, [username, email, password, confirmPassword, isVerified]);
+  }, [
+    username,
+    email,
+    password,
+    confirmPassword,
+    isVerified,
+    termsServiceAgreed,
+    privacyPolicyAgreed,
+  ]);
 
   const validateForm = () => {
     const isValid = signupValidation(
@@ -97,7 +116,9 @@ const SignupForm: React.FC<SignupFormProps> = ({
       email,
       password,
       confirmPassword,
-      isVerified
+      isVerified,
+      termsServiceAgreed,
+      privacyPolicyAgreed
     );
 
     isValid ? setIsFormValid(true) : setIsFormValid(false);
@@ -255,6 +276,51 @@ const SignupForm: React.FC<SignupFormProps> = ({
             <span style={{ color: 'red' }}>비밀번호가 일치하지 않습니다.</span>
           )}
         </div>
+
+        <div>
+          <label>서비스 이용약관 동의</label>
+
+          <div className="remember-row">
+            <input
+              type="checkbox"
+              id="terms-service"
+              checked={termsServiceAgreed}
+              onChange={(e) => setTermsServiceAgreed(e.target.checked)}
+            />
+            <label htmlFor="terms-service">
+              (필수){' '}
+              <a
+                href="/terms-of-service"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                서비스 이용약관
+              </a>
+              에 동의합니다.
+            </label>
+          </div>
+
+          <div className="remember-row">
+            <input
+              type="checkbox"
+              id="privacy-policy"
+              checked={privacyPolicyAgreed}
+              onChange={(e) => setPrivacyPolicyAgreed(e.target.checked)}
+            />
+            <label htmlFor="privacy-policy">
+              (필수){' '}
+              <a
+                href="/privacy-policy"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                개인정보 수집 및 이용
+              </a>
+              에 동의합니다.
+            </label>
+          </div>
+        </div>
+
         <LoginButton type="submit" disabled={!isFormValid}>
           가입하기
         </LoginButton>
@@ -262,7 +328,9 @@ const SignupForm: React.FC<SignupFormProps> = ({
       {!hideBackToLogin && (
         <>
           <p>이미 계정이 있으신가요?</p>
-          <button onClick={() => setIsLoginForm(true)}>로그인으로 돌아가기</button>
+          <button onClick={() => setIsLoginForm(true)}>
+            로그인으로 돌아가기
+          </button>
         </>
       )}
     </FormContainer>

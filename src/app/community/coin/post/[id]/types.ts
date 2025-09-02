@@ -5,20 +5,27 @@ export interface Comment {
   depth: number;
   email: string;
   nickName: string;
-  createdAt: Date;
-  updatedAt: Date;
+  memberId?: number;
+  profileImageUrl?: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
   children?: Comment[];
 }
 
 export interface BoardData {
   boardId: number;
-  userId: number;
-  userNickName: string;
+  memberId: number;
+  categoryId: number;
+  categoryName: string;
+  memberNickName: string;
+  profileImageUrl?: string;
   title: string;
   content: string;
   boardViewsCount: number;
   boardLikesCount: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string | Date;
+  updatedAt: string | Date;
+  commentsCount: number;
+  isPin: boolean;
   comments: Comment[];
 }

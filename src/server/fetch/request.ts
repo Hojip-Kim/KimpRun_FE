@@ -1,4 +1,5 @@
 import { FetchConfig, ApiResponse, ProcessedApiResponse } from '../type';
+import { addCsrfToHeaders } from '@/utils/csrf';
 
 const DEFAULT_CONFIG: FetchConfig = {
   method: 'GET',
@@ -47,6 +48,23 @@ export const createRequest = (baseConfig: Partial<FetchConfig> = {}) => {
     options: Partial<FetchConfig> = {}
   ): Promise<ProcessedApiResponse<T>> => {
     const finalConfig = { ...config, ...options };
+
+    // POST, PUT, PATCH, DELETE 요청에 CSRF 토큰 자동 추가
+    if (
+      finalConfig.method &&
+      ['POST', 'PUT', 'PATCH', 'DELETE'].includes(
+        finalConfig.method.toUpperCase()
+      )
+    ) {
+      try {
+        finalConfig.headers = await addCsrfToHeaders(
+          finalConfig.headers as Record<string, string>
+        );
+      } catch (error) {
+        console.warn('⚠️ CSRF 토큰 추가 실패, 요청 계속 진행:', error);
+      }
+    }
+
     const { timeout, retries, retryDelay, ...fetchOptions } = finalConfig;
 
     try {

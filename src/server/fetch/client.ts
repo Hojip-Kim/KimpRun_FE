@@ -5,12 +5,20 @@ import {
 } from '../type';
 import { createApiClient } from './request';
 
-const clientApi = createApiClient('', {
-  credentials: 'include',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+// 지연 초기화를 위한 함수
+let clientApi: ReturnType<typeof createApiClient> | null = null;
+
+const getClientApi = () => {
+  if (!clientApi) {
+    clientApi = createApiClient('', {
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+  }
+  return clientApi;
+};
 
 export const clientFetch = async (
   route: string,
@@ -45,7 +53,7 @@ export const clientRequest = {
     url: string,
     config?: Partial<FetchConfig>
   ): Promise<ProcessedApiResponse<T>> => {
-    return clientApi.get<T>(url, config);
+    return getClientApi().get<T>(url, config);
   },
 
   // 클라이언트 전용 POST 요청
@@ -54,7 +62,7 @@ export const clientRequest = {
     data?: any,
     config?: Partial<FetchConfig>
   ): Promise<ProcessedApiResponse<T>> => {
-    return clientApi.post<T>(url, data, config);
+    return getClientApi().post<T>(url, data, config);
   },
 
   // 클라이언트 전용 PUT 요청
@@ -63,7 +71,7 @@ export const clientRequest = {
     data?: any,
     config?: Partial<FetchConfig>
   ): Promise<ProcessedApiResponse<T>> => {
-    return clientApi.put<T>(url, data, config);
+    return getClientApi().put<T>(url, data, config);
   },
 
   // 클라이언트 전용 PATCH 요청
@@ -72,7 +80,7 @@ export const clientRequest = {
     data?: any,
     config?: Partial<FetchConfig>
   ): Promise<ProcessedApiResponse<T>> => {
-    return clientApi.patch<T>(url, data, config);
+    return getClientApi().patch<T>(url, data, config);
   },
 
   // 클라이언트 전용 DELETE 요청
@@ -80,6 +88,6 @@ export const clientRequest = {
     url: string,
     config?: Partial<FetchConfig>
   ): Promise<ProcessedApiResponse<T>> => {
-    return clientApi.delete<T>(url, config);
+    return getClientApi().delete<T>(url, config);
   },
 };

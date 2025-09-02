@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
@@ -38,9 +38,9 @@ const TitleIcon = styled.span`
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.18), rgba(255, 215, 0, 0.06));
+  background: ${palette.accentRing};
   border: 1px solid ${palette.border};
-  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+  box-shadow: ${palette.shadow};
   &::before {
     content: '✍️';
   }
@@ -63,12 +63,13 @@ const InputWrap = styled.div<{ $invalid?: boolean }>`
   position: relative;
   display: flex;
   align-items: center;
-  border: 1px solid ${(p) => (p.$invalid ? 'rgba(244, 67, 54, 0.45)' : palette.border)};
+  border: 1px solid
+    ${(p) => (p.$invalid ? 'rgba(244, 67, 54, 0.45)' : palette.border)};
   border-radius: 12px;
   background: ${palette.input};
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   &:focus-within {
-    border-color: rgba(255, 215, 0, 0.45);
+    border-color: ${palette.accent};
     box-shadow: 0 0 0 3px ${palette.accentRing};
   }
 `;
@@ -94,16 +95,15 @@ const Button = styled.button<{ $variant?: 'primary' | 'ghost' }>`
   border-radius: 10px;
   border: 1px solid ${palette.border};
   background: ${(p) =>
-    p.$variant === 'primary'
-      ? 'linear-gradient(180deg, #1e1e1e, #171b24)'
-      : 'transparent'};
-  color: ${(p) => (p.$variant === 'primary' ? palette.textPrimary : palette.textSecondary)};
+    p.$variant === 'primary' ? palette.input : 'transparent'};
+  color: ${(p) =>
+    p.$variant === 'primary' ? palette.textPrimary : palette.textSecondary};
   cursor: pointer;
   font-weight: 600;
   transition: all 0.2s ease;
   &:hover {
     color: ${palette.accent};
-    background-color: #131722;
+    background-color: ${palette.input};
     transform: translateY(-1px);
   }
   &:disabled {
@@ -124,7 +124,11 @@ const ErrorText = styled.p`
   color: #ff8a80;
 `;
 
-const NicknameModal: React.FC<NicknameModalProps> = ({ initialName = '', onCancel, onSave }) => {
+const NicknameModal: React.FC<NicknameModalProps> = ({
+  initialName = '',
+  onCancel,
+  onSave,
+}) => {
   const [name, setName] = useState(initialName);
   const [saving, setSaving] = useState(false);
 
@@ -145,7 +149,9 @@ const NicknameModal: React.FC<NicknameModalProps> = ({ initialName = '', onCance
         <TitleIcon />
         <div>
           <Title>닉네임 변경</Title>
-          <Subtext>공개 표시되는 이름이에요. 언제든 다시 바꿀 수 있어요.</Subtext>
+          <Subtext>
+            공개 표시되는 이름이에요. 언제든 다시 바꿀 수 있어요.
+          </Subtext>
         </div>
       </Header>
       <div>
@@ -170,7 +176,11 @@ const NicknameModal: React.FC<NicknameModalProps> = ({ initialName = '', onCance
       </div>
       <Actions>
         <Button onClick={onCancel}>취소</Button>
-        <Button $variant="primary" onClick={handleSave} disabled={!valid || saving}>
+        <Button
+          $variant="primary"
+          onClick={handleSave}
+          disabled={!valid || saving}
+        >
           {saving ? '저장 중...' : '저장'}
         </Button>
       </Actions>

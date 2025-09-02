@@ -1,6 +1,7 @@
 import { BoardData, Comment } from '../types';
 import { serverEnv } from '@/utils/env';
 import { ApiResponse } from '@/server/type';
+import { serverRequest } from '@/server/fetch';
 
 const boardUrl = serverEnv.BOARD_URL;
 const commentUrl = serverEnv.COMMENT_URL;
@@ -8,28 +9,16 @@ const commentUrl = serverEnv.COMMENT_URL;
 export async function getBoardData(id: string): Promise<BoardData | null> {
   const boardRequestUrl = `${boardUrl}?boardId=${id}&commentPage=0`;
   try {
-    const response = await fetch(boardRequestUrl, {
-      method: 'GET',
-      credentials: 'include',
+    const response = await serverRequest.get<BoardData>(boardRequestUrl, {
+      cache: 'no-store', // 캐시 비허용 - 항상 최신 데이터 가져오기
     });
 
-    if (!response.ok) {
-      throw new Error('게시글 데이터를 불러오는 중 오류 발생');
-    }
-
-    const apiResponse: ApiResponse<BoardData> = await response.json();
-
-    // 새로운 API 응답 형식 처리: {status, message, data, detail, success}
-    if (
-      apiResponse.status >= 200 &&
-      apiResponse.status < 300 &&
-      apiResponse.success === true
-    ) {
-      return apiResponse.data;
+    if (response.success && response.data) {
+      return response.data;
     } else {
       console.error(
         '게시글 데이터 로드 실패:',
-        apiResponse.message || apiResponse.detail
+        response.error || 'Unknown error'
       );
       return null;
     }
@@ -45,39 +34,25 @@ export async function createComment(
   depth: number,
   parentCommentId: number
 ): Promise<Comment | null> {
-  const commentRequestUrl = `${commentUrl}/${boardId}/create`;
+  // URL 끝점만 사용하여 잘못된 URL 합성 방지
+  const endpoint = `/${boardId}/create`;
   try {
-    const response = await fetch(commentRequestUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify({
+    const response = await serverRequest.post<Comment>(
+      commentUrl + endpoint,
+      {
         content,
         depth,
         parentCommentId,
-      }),
-    });
+      },
+      {
+        cache: 'no-store', // 캐시 비허용 - 실시간 댓글 생성
+      }
+    );
 
-    if (!response.ok) {
-      throw new Error('댓글 작성 실패');
-    }
-
-    const apiResponse: ApiResponse<Comment> = await response.json();
-
-    // 새로운 API 응답 형식 처리: {status, message, data, detail, success}
-    if (
-      apiResponse.status >= 200 &&
-      apiResponse.status < 300 &&
-      apiResponse.success === true
-    ) {
-      return apiResponse.data;
+    if (response.success && response.data) {
+      return response.data;
     } else {
-      console.error(
-        '댓글 작성 실패:',
-        apiResponse.message || apiResponse.detail
-      );
+      console.error('댓글 작성 실패:', response.error || 'Unknown error');
       return null;
     }
   } catch (error) {
@@ -86,8 +61,8 @@ export async function createComment(
   }
 }
 
-export const formatDate = (dateString: Date) => {
-  const date = new Date(dateString);
+export const formatDate = (dateInput: string | Date) => {
+  const date = new Date(dateInput);
   if (isNaN(date.getTime())) {
     return '날짜 없음';
   }

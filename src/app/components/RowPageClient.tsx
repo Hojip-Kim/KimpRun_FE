@@ -21,11 +21,17 @@ import { firstDataSet, secondDataSet, TokenNameMapping } from '../types';
 import { RowContainer, MobileChartContainer } from './style';
 import { MarketType } from '@/types/marketType';
 import { getClientSingleMarketData, getClientTokenMapping } from './clientApi';
-import { useMarketDataWebSocket } from '@/hooks/useMarketDataWebSocket';
+import { useStompClientSingleton } from '@/hooks/useStompClientSingleton';
+import { IMessage } from '@stomp/stompjs';
 import { MarketDataMap } from '@/types/marketData';
 import MarketSelector from '@/components/market-selector/MarketSelector';
 import TradingViewWidget from '@/components/tradingview/TradingViewWidget';
-import { MarketSelectorSkeleton, SearchSkeleton, TableSkeleton, ChartSkeleton } from '@/components/skeleton/Skeleton';
+import {
+  MarketSelectorSkeleton,
+  SearchSkeleton,
+  TableSkeleton,
+  ChartSkeleton,
+} from '@/components/skeleton/Skeleton';
 
 const RowPageClient: React.FC = () => {
   // 기본 거래소 설정
@@ -75,6 +81,12 @@ const RowPageClient: React.FC = () => {
     (state: RootState) => state.token.tokenList.first
   );
 
+  // 싱글톤 STOMP 클라이언트 사용
+  const { isConnected, isConnecting, connectionError, subscribe, unsubscribe } =
+    useStompClientSingleton({
+      autoConnect: true,
+    });
+
   const updateTokenFirstList = (newTokenList: string[]) =>
     dispatch(setTokenFirstList(newTokenList));
   const updateTokenFirstDataSet = (newTokenSet: any) =>
@@ -92,18 +104,35 @@ const RowPageClient: React.FC = () => {
     { value: MarketType.BITHUMB, label: 'BITHUMB', hasWebsocket: true },
   ];
 
-  const mapToFirstDataSet = useCallback((data: any): firstDataSet => {
-    return {
-      acc_trade_price24: data.acc_trade_price24 || 0,
-      change_rate: data.change_rate || 0,
-      highest_price: data.highest_price || 0,
-      lowest_price: data.lowest_price || 0,
-      opening_price: data.opening_price || 0,
-      rate_change: data.rate_change || 'EVEN',
-      token: data.token || '',
-      trade_price: data.trade_price || 0,
-      trade_volume: data.trade_volume || 0,
-    };
+  const mapToFirstDataSet = useCallback((data: any): Partial<firstDataSet> => {
+    const result: Partial<firstDataSet> = {};
+
+    // 기본적으로 항상 있어야 하는 필드들
+    result.token = data.token || '';
+    result.trade_price = data.trade_price || 0;
+    result.change_rate = data.change_rate || 0;
+    result.rate_change = data.rate_change || 'EVEN';
+
+    // 선택적 필드들 - 실제 데이터가 있을 때만 업데이트
+    if (data.acc_trade_price24 !== undefined) {
+      result.acc_trade_price24 = data.acc_trade_price24;
+    }
+    if (data.opening_price !== undefined) {
+      result.opening_price = data.opening_price;
+    }
+    if (data.trade_volume !== undefined) {
+      result.trade_volume = data.trade_volume;
+    }
+
+    // 52주 고가/저가는 실제 데이터가 있고 0이 아닐 때만 업데이트
+    if (data.highest_price !== undefined && data.highest_price !== 0) {
+      result.highest_price = data.highest_price;
+    }
+    if (data.lowest_price !== undefined && data.lowest_price !== 0) {
+      result.lowest_price = data.lowest_price;
+    }
+
+    return result as firstDataSet;
   }, []);
 
   const mapToSecondDataSet = useCallback((data: any): secondDataSet => {
@@ -115,16 +144,39 @@ const RowPageClient: React.FC = () => {
 
   const handleMarketData = useCallback(
     (marketType: MarketType, data: MarketDataMap) => {
-      // 메인 거래소인 경우 - 모든 필드 사용
+      // 메인 거래소인 경우 - 기존 데이터와 병합하여 업데이트
       if (selectedMainMarket === marketType) {
-        const mappedData: { [key: string]: firstDataSet } = {};
-        Object.entries(data).forEach(([token, marketData]) => {
-          mappedData[token] = mapToFirstDataSet(marketData);
+        setFirstDataset((prevData) => {
+          const updatedData = { ...prevData };
+
+          Object.entries(data).forEach(([token, marketData]) => {
+            const newData = mapToFirstDataSet(marketData);
+
+            // 기존 데이터가 있으면 병합, 없으면 새로 생성
+            if (updatedData[token]) {
+              updatedData[token] = {
+                ...updatedData[token], // 기존 데이터 유지
+                ...newData, // 새 데이터로 업데이트 (undefined 필드는 덮어쓰지 않음)
+              };
+            } else {
+              // 새 토큰인 경우 기본값과 함께 생성
+              updatedData[token] = {
+                acc_trade_price24: 0,
+                change_rate: 0,
+                highest_price: 0,
+                lowest_price: 0,
+                opening_price: 0,
+                rate_change: 'EVEN',
+                token: '',
+                trade_price: 0,
+                trade_volume: 0,
+                ...newData, // 웹소켓 데이터로 덮어쓰기
+              };
+            }
+          });
+
+          return updatedData;
         });
-        setFirstDataset((prevData) => ({
-          ...prevData,
-          ...mappedData,
-        }));
       }
 
       // 비교 거래소인 경우 - 가격 정보만 사용
@@ -147,13 +199,61 @@ const RowPageClient: React.FC = () => {
     ]
   );
 
-  // 통합 마켓 데이터 웹소켓 사용
-  const { disconnect } = useMarketDataWebSocket({
-    onMarketData: handleMarketData,
-    enabled: !loading && !initialLoading,
-  });
+  // 배열을 객체로 변환하는 헬퍼 함수
+  const arrayToObject = useCallback((dataArray: any[]): MarketDataMap => {
+    const result: MarketDataMap = {};
+    dataArray.forEach((item) => {
+      if (item.token) {
+        result[item.token] = item;
+      }
+    });
+    return result;
+  }, []);
 
-  // 초기 설정 및 데이터 로드
+  // 웹소켓 메시지 처리 함수
+  const handleMarketDataMessage = useCallback(
+    (message: IMessage) => {
+      try {
+        const data = JSON.parse(message.body);
+
+        // 각 거래소별로 데이터 처리
+        if (data.upbitData) {
+          const upbitMap = arrayToObject(data.upbitData);
+          handleMarketData(MarketType.UPBIT, upbitMap);
+        }
+
+        if (data.binanceData) {
+          const binanceMap = arrayToObject(data.binanceData);
+          handleMarketData(MarketType.BINANCE, binanceMap);
+        }
+
+        if (data.coinoneData) {
+          const coinoneMap = arrayToObject(data.coinoneData);
+          handleMarketData(MarketType.COINONE, coinoneMap);
+        }
+
+        if (data.bithumbData) {
+          const bithumbMap = arrayToObject(data.bithumbData);
+          handleMarketData(MarketType.BITHUMB, bithumbMap);
+        }
+      } catch (error) {
+        console.error('❌ 마켓 데이터 웹소켓 메시지 파싱 오류:', error);
+        console.error('원본 데이터:', message.body);
+      }
+    },
+    [handleMarketData, arrayToObject]
+  );
+
+  // STOMP 구독 설정 (통합 마켓 데이터)
+  useEffect(() => {
+    if (isConnected) {
+      subscribe('/topic/marketData', handleMarketDataMessage);
+
+      return () => {};
+    }
+  }, [isConnected, subscribe, unsubscribe, handleMarketDataMessage]);
+
+  // 초기 설정 및 데이터 로드 - redux-persist 상태 우선 사용
   useEffect(() => {
     const initializeApp = async () => {
       try {
@@ -163,24 +263,34 @@ const RowPageClient: React.FC = () => {
         dispatch(setGuestUser());
       }
 
-      // 리덕스에 저장된 거래소 확인
-      const savedFirstMarket = selectedMainMarket;
-      const savedSecondMarket = selectedCompareMarket;
+      // redux-persist rehydration을 위한 짧은 지연
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
-      if (!(savedFirstMarket && savedSecondMarket)) {
-        setMainMarket(DEFAULT_MAIN_MARKET);
-        setCompareMarket(DEFAULT_COMPARE_MARKET);
+      // redux-persist에서 복원된 상태가 있으면 사용, 없으면 기본값 설정
+      let mainMarket = selectedMainMarket;
+      let compareMarket = selectedCompareMarket;
+
+      // 저장된 상태가 없거나 유효하지 않은 경우 기본값 설정
+      if (!mainMarket || !compareMarket || mainMarket === compareMarket) {
+        mainMarket = DEFAULT_MAIN_MARKET;
+        compareMarket = DEFAULT_COMPARE_MARKET;
+
+        // 리덕스 상태 업데이트 (localStorage에 저장됨)
+        setMainMarket(mainMarket);
+        setCompareMarket(compareMarket);
       }
 
-      // 초기 데이터 로드
-      await loadMarketData(savedFirstMarket, savedSecondMarket);
+      // 최종 결정된 거래소로 초기 데이터 로드
+      await loadMarketData(mainMarket, compareMarket);
       setInitialLoading(false);
     };
 
     initializeApp();
-  }, []);
+  }, []); // 의존성에서 selectedMainMarket, selectedCompareMarket 제거 (초기화 시에만 실행)
 
-  // 거래소 변경 시 데이터 로드
+  // 마켓 데이터 STOMP 기능 임시 비활성화
+
+  // 거래소 변경 시 데이터 로드 - 완전 초기화 방식
   const loadMarketData = async (
     mainMarket: MarketType,
     compareMarket: MarketType
@@ -188,40 +298,41 @@ const RowPageClient: React.FC = () => {
     setLoading(true);
 
     try {
-      // 1. 기존 웹소켓 연결 종료
-      disconnect();
-
-      // 2. 기존 상태 초기화
+      // 1. 모든 상태를 완전히 초기화 (SSR 데이터 포함)
       setFirstDataset({});
       setSecondDateset({});
       setFilteredTokens([]);
+      setTokenMapping(null);
 
-      // 3. 메인 거래소의 모든 데이터와 비교 거래소의 공통 데이터 가져오기
+      // Redux 상태도 완전히 초기화
+      updateTokenFirstList([]);
+      updateTokenSecondList([]);
+      updateTokenFirstDataSet({});
+      updateTokenSecondDataSet({});
+
+      // 2. 새로운 데이터 로드
       const [mainMarketData, compareMarketData] = await Promise.all([
-        getClientSingleMarketData(mainMarket), // 메인 거래소의 모든 데이터
-        getClientSingleMarketData(compareMarket), // 비교 거래소의 모든 데이터
+        getClientSingleMarketData(mainMarket),
+        getClientSingleMarketData(compareMarket),
       ]);
 
-      // 4. 메인 거래소의 코인 리스트 생성
+      // 3. 메인 거래소의 코인 리스트 생성
       const mainTokenList = mainMarketData ? Object.keys(mainMarketData) : [];
 
-      // 5. 메인 거래소의 모든 토큰에 대해 비교 거래소 데이터 매핑 (있는 것만)
+      // 4. 비교 거래소 데이터 매핑
       const compareDataForMain: { [key: string]: any } = {};
       if (mainMarketData && compareMarketData) {
         Object.keys(mainMarketData).forEach((token) => {
-          // 비교 거래소에 해당 토큰이 있으면 추가, 없으면 제외
           if (compareMarketData[token]) {
             compareDataForMain[token] = compareMarketData[token];
           }
-          // 없는 경우는 compareDataForMain에 포함하지 않음 (undefined로 처리)
         });
       }
 
-      // 6. Redux store에 코인 리스트 저장
-      updateTokenFirstList(mainTokenList); // 메인 거래소의 모든 코인
-      updateTokenSecondList(Object.keys(compareDataForMain)); // 비교 데이터가 있는 코인만
+      // 5. 새 데이터로 상태 업데이트
+      updateTokenFirstList(mainTokenList);
+      updateTokenSecondList(Object.keys(compareDataForMain));
 
-      // 7. 정적 데이터를 웹소켓 데이터의 초기값으로 설정
       if (mainMarketData) {
         setFirstDataset(mainMarketData);
         updateTokenFirstDataSet(mainMarketData);
@@ -232,7 +343,7 @@ const RowPageClient: React.FC = () => {
         updateTokenSecondDataSet(compareDataForMain);
       }
 
-      // 토큰 매핑 정보 로드
+      // 6. 토큰 매핑 정보 로드
       const mapping = await getClientTokenMapping(mainMarket, compareMarket);
       setTokenMapping(mapping);
     } catch (error) {
@@ -266,7 +377,8 @@ const RowPageClient: React.FC = () => {
       return;
     }
 
-    // Redux state 먼저 업데이트
+    // Redux state 먼저 업데이트 (자동으로 localStorage에 저장됨)
+
     setMainMarket(newMainMarket);
     setCompareMarket(newCompareMarket);
 

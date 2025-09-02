@@ -1,18 +1,26 @@
+'use client';
+
 import styled from 'styled-components';
 
 export const LoginButton = styled.button`
   margin-top: 10px;
-  color: white;
+  color: var(--text-primary);
   padding: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border);
   border-radius: 10px;
   cursor: pointer;
-  background: linear-gradient(180deg, #1e1e1e, #171b24);
+  background: var(--input);
+  transition: all 0.3s ease;
 
   &:hover {
-    color: rgba(255, 215, 0);
-    background-color: #131722;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    color: var(--accent);
+    background-color: var(--bg-container);
+    border-color: var(--accent);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 `;
 
@@ -20,11 +28,13 @@ export const FormContainer = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
+  transition: color 0.3s ease;
 
   h1 {
     text-align: center;
     margin-bottom: 16px;
-    color: #e6e8ee;
+    color: var(--text-primary);
+    transition: color 0.3s ease;
   }
 
   form {
@@ -43,88 +53,140 @@ export const FormContainer = styled.div`
       width: 100%;
       padding: 12px 14px;
       box-sizing: border-box;
-      color: #e9eef9;
-      background-color: rgba(8, 12, 20, 0.9);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-primary);
+      background-color: var(--input);
+      border: 1px solid var(--border);
       border-radius: 10px;
       outline: none;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      transition: all 0.2s ease;
+
+      &::placeholder {
+        color: var(--text-muted);
+      }
+
+      &:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-ring);
+      }
     }
+
     /* Autofill overrides (Chrome/Safari) */
     input:-webkit-autofill,
     input:-webkit-autofill:hover,
     input:-webkit-autofill:focus {
-      -webkit-text-fill-color: #e9eef9 !important;
-      -webkit-box-shadow: 0 0 0px 1000px rgba(8, 12, 20, 0.9) inset !important;
-      box-shadow: 0 0 0px 1000px rgba(8, 12, 20, 0.9) inset !important;
-      caret-color: #e9eef9;
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      -webkit-text-fill-color: var(--text-primary) !important;
+      -webkit-box-shadow: 0 0 0px 1000px var(--input) inset !important;
+      box-shadow: 0 0 0px 1000px var(--input) inset !important;
+      caret-color: var(--text-primary);
+      border: 1px solid var(--border-soft);
     }
-    input::placeholder {
-      color: #7b87a3;
-    }
-    input:focus {
-      border-color: rgba(255, 215, 0, 0.45);
-      box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
-    }
+
     label {
       display: block;
       margin-bottom: 0;
-      color: #cfd6e4;
+      color: var(--text-secondary);
       font-size: 12px;
+      transition: color 0.3s ease;
     }
 
     .error {
-      color: red;
+      color: #ef4444;
       margin-bottom: 12px;
       text-align: center;
     }
   }
+
   /* Remember me row */
   .remember-row {
     display: flex;
     align-items: center;
     gap: 8px;
     margin-top: 6px;
-    color: #cfd6e4;
+    color: var(--text-secondary);
     font-size: 13px;
+    transition: color 0.3s ease;
 
     input[type='checkbox'] {
       appearance: none;
       width: 16px;
       height: 16px;
       border-radius: 6px;
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      background: rgba(8, 12, 20, 0.9);
+      border: 1px solid var(--border);
+      background: var(--input);
       display: inline-flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       transition: all 0.15s ease-in-out;
       outline: none;
+
+      &:checked {
+        border-color: var(--accent);
+        background: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-ring);
+      }
+
+      /* checkmark */
+      &::after {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-radius: 2px;
+        background: transparent;
+        transform: scale(0.6);
+        transition: background 0.15s ease-in-out;
+      }
+
+      &:checked::after {
+        background: var(--text-primary);
+      }
     }
-    input[type='checkbox']:checked {
-      border-color: rgba(255, 215, 0, 0.55);
-      background: linear-gradient(180deg, #2a2a2a, #1b1f2a);
-      box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
-    }
-    /* checkmark */
-    input[type='checkbox']::after {
-      content: '';
-      width: 8px;
-      height: 8px;
-      border-radius: 2px;
-      background: transparent;
-      transform: scale(0.6);
-      transition: background 0.15s ease-in-out;
-    }
-    input[type='checkbox']:checked::after {
-      background: rgba(255, 215, 0, 0.95);
-    }
+
     label {
       margin: 0;
       user-select: none;
       cursor: pointer;
+
+      a {
+        color: var(--accent);
+        text-decoration: underline;
+
+        &:hover {
+          opacity: 0.8;
+        }
+      }
+    }
+  }
+
+  /* Password reset section */
+  .password-reset-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+
+    p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .reset-password-btn {
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: underline;
+      transition: opacity 0.2s ease;
+
+      &:hover {
+        opacity: 0.8;
+      }
     }
   }
 `;
@@ -136,10 +198,12 @@ export const GoogleLoginButton = styled.button`
   width: 100%;
   padding: 10px;
   margin: 10px 0;
-  background: rgba(8, 12, 20, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--input);
+  border: 1px solid var(--border);
   border-radius: 10px;
   cursor: pointer;
+  color: var(--text-primary);
+  transition: all 0.3s ease;
 
   img {
     width: 20px;
@@ -148,8 +212,8 @@ export const GoogleLoginButton = styled.button`
   }
 
   &:hover {
-    color: rgba(255, 215, 0);
-    background-color: #131722;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    color: var(--accent);
+    background-color: var(--bg-container);
+    border-color: var(--accent);
   }
 `;

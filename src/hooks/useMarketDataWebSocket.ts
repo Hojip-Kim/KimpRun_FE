@@ -1,7 +1,8 @@
-import { useEffect, useRef, useCallback } from "react";
-import { MarketType } from "@/types/marketType";
-import { clientEnv } from "@/utils/env";
-import { MultipleMarketDataResponse, MarketDataMap } from "@/types/marketData";
+import { useEffect, useRef, useCallback } from 'react';
+import { MarketType } from '@/types/marketType';
+import { clientEnv } from '@/utils/env';
+import { MultipleMarketDataResponse, MarketDataMap } from '@/types/marketData';
+import { Client, IMessage } from '@stomp/stompjs';
 
 interface UseMarketDataWebSocketProps {
   onMarketData?: (marketType: MarketType, data: MarketDataMap) => void;
@@ -12,7 +13,7 @@ export const useMarketDataWebSocket = ({
   onMarketData,
   enabled = true,
 }: UseMarketDataWebSocketProps) => {
-  const wsRef = useRef<WebSocket | null>(null);
+  const clientRef = useRef<Client | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 5;
@@ -28,11 +29,11 @@ export const useMarketDataWebSocket = ({
     return result;
   }, []);
 
-  // 웹소켓 메시지 처리
+  // STOMP 메시지 처리
   const handleMessage = useCallback(
-    (event: MessageEvent) => {
+    (message: IMessage) => {
       try {
-        const data: MultipleMarketDataResponse = JSON.parse(event.data);
+        const data: MultipleMarketDataResponse = JSON.parse(message.body);
 
         if (!onMarketData) {
           return;
@@ -58,57 +59,69 @@ export const useMarketDataWebSocket = ({
           onMarketData(MarketType.BITHUMB, bithumbMap);
         }
       } catch (error) {
-        console.error("마켓 데이터 웹소켓 메시지 파싱 오류:", error);
-        console.error("원본 데이터:", event.data);
+        console.error('마켓 데이터 STOMP 메시지 파싱 오류:', error);
+        console.error('원본 데이터:', message.body);
       }
     },
     [onMarketData, arrayToObject]
   );
 
-  // 웹소켓 연결
+  // STOMP 연결
   const connect = useCallback(() => {
-    if (!enabled || !clientEnv.MARKET_DATA_WEBSOCKET_URL) {
-      console.warn(
-        "마켓 데이터 웹소켓이 비활성화되었거나 URL이 설정되지 않음."
-      );
+    if (!enabled) {
+      console.warn('마켓 데이터 STOMP가 비활성화됨.');
       return;
     }
 
-    if (wsRef.current) {
-      wsRef.current.close();
+    if (clientRef.current) {
+      clientRef.current.deactivate();
     }
 
     try {
-      wsRef.current = new WebSocket(clientEnv.MARKET_DATA_WEBSOCKET_URL);
+      const client = new Client({
+        brokerURL: clientEnv.STOMP_URL,
+        onConnect: () => {
+          reconnectAttempts.current = 0;
 
-      wsRef.current.onopen = () => {
-        reconnectAttempts.current = 0;
-      };
+          // 마켓 데이터 구독 (에러 핸들링 추가)
+          try {
+            const subscription = client.subscribe(
+              '/topic/marketData',
+              handleMessage
+            );
+          } catch (error) {
+            console.error('❌ 마켓 데이터 구독 실패:', error);
+          }
+        },
+        onStompError: (frame) => {
+          console.error('❌ 마켓 데이터 STOMP 오류:', frame.headers['message']);
+          console.error('상세:', frame.body);
+        },
+        onWebSocketClose: (event) => {
+          if (
+            enabled &&
+            event.code !== 1000 &&
+            reconnectAttempts.current < maxReconnectAttempts
+          ) {
+            const delay = Math.min(
+              1000 * Math.pow(2, reconnectAttempts.current),
+              30000
+            );
+            reconnectTimeoutRef.current = setTimeout(() => {
+              reconnectAttempts.current++;
+              connect();
+            }, delay);
+          }
+        },
+        onWebSocketError: (error) => {
+          console.error('❌ 마켓 데이터 STOMP WebSocket 오류:', error);
+        },
+      });
 
-      wsRef.current.onmessage = handleMessage;
-
-      wsRef.current.onclose = (event) => {
-        // 정상적인 종료가 아니고 재연결 시도 횟수가 남아있다면 재연결 시도
-        if (
-          enabled &&
-          event.code !== 1000 &&
-          reconnectAttempts.current < maxReconnectAttempts
-        ) {
-          const delay = Math.min(
-            1000 * Math.pow(2, reconnectAttempts.current),
-            30000
-          );
-          reconnectTimeoutRef.current = setTimeout(() => {
-            reconnectAttempts.current++;
-            connect();
-          }, delay);
-        }
-      };
-      wsRef.current.onerror = (error) => {
-        console.error("❌ 마켓 데이터 웹소켓 오류:", error);
-      };
+      clientRef.current = client;
+      client.activate();
     } catch (error) {
-      console.error("❌ 마켓 데이터 웹소켓 연결 실패:", error);
+      console.error('❌ 마켓 데이터 STOMP 연결 실패:', error);
     }
   }, [enabled, handleMessage]);
 
@@ -118,14 +131,14 @@ export const useMarketDataWebSocket = ({
       reconnectTimeoutRef.current = null;
     }
 
-    if (wsRef.current) {
-      wsRef.current.close(1000, "정상 종료");
-      wsRef.current = null;
+    if (clientRef.current) {
+      clientRef.current.deactivate();
+      clientRef.current = null;
     }
   }, []);
 
   const isConnected = useCallback(() => {
-    return wsRef.current?.readyState === WebSocket.OPEN;
+    return clientRef.current?.connected === true;
   }, []);
 
   // 컴포넌트 마운트/언마운트 시 연결 관리
