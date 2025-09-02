@@ -1,6 +1,5 @@
 import { CoinRankingResponse } from '@/types/coinRanking';
-
-const API_BASE_URL = 'http://localhost:8080';
+import { clientEnv } from '@/utils/env';
 
 export class CoinRankingService {
   /**
@@ -15,7 +14,7 @@ export class CoinRankingService {
   ): Promise<CoinRankingResponse> {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/cmc/coin/all?page=${page}&size=${size}`,
+        `${clientEnv.API_BASE_URL}/api/cmc/coin/all?page=${page}&size=${size}`,
         {
           method: 'GET',
           headers: {
