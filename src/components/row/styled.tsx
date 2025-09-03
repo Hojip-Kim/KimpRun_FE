@@ -197,6 +197,7 @@ export const ExpandableContent = styled.div<{ $isExpanded: boolean }>`
   border: none;
   background: ${palette.bgPage};
   animation: fadeIn 0.3s ease-out;
+  width: 100%;
 
   @keyframes fadeIn {
     from {
@@ -209,14 +210,14 @@ export const ExpandableContent = styled.div<{ $isExpanded: boolean }>`
 
   .coin-detail-responsive {
     @media (max-width: 768px) {
-      display: grid !important;
-      grid-template-columns: auto 1fr 1fr;
-      grid-template-rows: auto auto;
-      gap: 0.75rem;
-      padding: 0.75rem;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 1rem !important;
+      padding: 0.75rem !important;
       font-size: 0.7rem;
+      align-items: center !important;
+      text-align: center !important;
 
-      /* 로고와 기본 정보 섹션 - 컴팩트한 세로 배치 */
       & > div:first-child {
         display: flex !important;
         flex-direction: column !important;
@@ -271,16 +272,36 @@ export const ExpandableContent = styled.div<{ $isExpanded: boolean }>`
           font-weight: 600;
         }
 
-        & > div {
+        .supply-info-container {
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 0.3rem !important;
+
           & > div {
-            margin-bottom: 0.2rem;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            padding: 0.25rem 0 !important;
+            margin-bottom: 0.1rem !important;
 
             span:first-child {
               font-size: 0.6rem !important;
+              color: var(--text-secondary) !important;
+              flex-shrink: 0 !important;
+              padding-right: 0.5rem !important;
             }
 
             span:last-child {
               font-size: 0.6rem !important;
+              font-weight: 600 !important;
+              color: var(--text-primary) !important;
+              text-align: right !important;
+              word-break: break-all !important;
+              white-space: normal !important;
+              overflow: visible !important;
+              text-overflow: unset !important;
+              max-width: none !important;
+              padding-left: 0.5rem !important;
             }
           }
         }
@@ -299,19 +320,29 @@ export const ExpandableContent = styled.div<{ $isExpanded: boolean }>`
 
         & > div {
           & > div {
-            margin-bottom: 0.2rem;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            padding: 0.25rem 0 !important;
+            margin-bottom: 0.1rem !important;
 
             span:first-child {
               font-size: 0.6rem !important;
+              color: var(--text-secondary) !important;
+              flex-shrink: 0 !important;
+              padding-right: 0.5rem !important;
             }
 
             span:last-child {
               font-size: 0.6rem !important;
+              font-weight: 600 !important;
+              color: var(--text-primary) !important;
+              text-align: right !important;
+              padding-left: 0.5rem !important;
             }
           }
         }
 
-        /* 플랫폼 태그 컴팩트하게 */
         & > div:last-child {
           margin-top: 0.5rem !important;
 
@@ -328,9 +359,7 @@ export const ExpandableContent = styled.div<{ $isExpanded: boolean }>`
         }
       }
 
-      /* 탐색기 링크 - 전체 너비, 컴팩트 */
       & > div:last-child {
-        grid-column: 1 / -1 !important;
         order: 4;
         margin-top: 0.25rem;
         padding-top: 0.5rem;

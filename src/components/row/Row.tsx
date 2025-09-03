@@ -291,7 +291,7 @@ const Row = ({
     if (isMountedRef.current) {
       // 정렬 상태 초기화
       setSortConfig({ key: '', direction: '' });
-      
+
       // 모든 데이터 상태 완전 초기화 (이전 SSR 데이터 제거)
       setNameList([]);
       setDataList([]);

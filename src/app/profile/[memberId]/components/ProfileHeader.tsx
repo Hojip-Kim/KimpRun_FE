@@ -75,7 +75,6 @@ export default function ProfileHeader({
             role: result.role,
             memberId: result.memberId,
           };
-          console.log('🔄 Redux 사용자 정보 업데이트:', updatedUser);
           dispatch(setUser(updatedUser));
         }
 
@@ -101,17 +100,27 @@ export default function ProfileHeader({
     }
   };
 
-  const handleImageUpdate = async (imageFile: File): Promise<boolean> => {
+  const handleImageUpdate = async (_imageFile: File): Promise<boolean> => {
     // API가 준비되면 구현
-    console.log('이미지 업데이트:', imageFile);
     return false;
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-    });
+    const joinDate = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - joinDate.getTime());
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    const formattedDate = joinDate
+      .toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      })
+      .replace(/\./g, '.')
+      .replace(/ /g, '');
+
+    return { date: formattedDate, daysAgo: diffDays };
   };
 
   const getRoleBadge = (role: string) => {
@@ -219,7 +228,17 @@ export default function ProfileHeader({
           <ProfileDetail>
             <ProfileDetailLabel>가입일</ProfileDetailLabel>
             <ProfileDetailValue>
-              {formatDate(profileInfo.joinedAt)}
+              {formatDate(profileInfo.joinedAt).date}
+              <span
+                style={{
+                  fontSize: '0.85em',
+                  opacity: 0.6,
+                  marginLeft: '8px',
+                  color: 'inherit',
+                }}
+              >
+                {formatDate(profileInfo.joinedAt).daysAgo}일전
+              </span>
             </ProfileDetailValue>
           </ProfileDetail>
 

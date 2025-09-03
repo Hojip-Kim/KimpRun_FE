@@ -1,4 +1,5 @@
 import React, { Dispatch, SetStateAction } from 'react';
+import { createPortal } from 'react-dom';
 import styled from 'styled-components';
 import { Canvas, Container, Wrapper } from './style';
 
@@ -15,17 +16,31 @@ const Modal: React.FC<ModalProps> = ({ width, height, element, setModal }) => {
     setModal(false);
   };
 
-  return (
+  const modalContent = (
     <>
-      <Container width={width} height={height}>
+      <Canvas onClick={disableModal} />
+      <Container 
+        width={width} 
+        height={height}
+        style={{
+          position: 'fixed',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 9999,
+        }}
+      >
         <div className="exit-wrapper" onClick={disableModal}>
           닫기
         </div>
         <Wrapper>{element}</Wrapper>
       </Container>
-      <Canvas onClick={disableModal} />
     </>
   );
+
+  return typeof document !== 'undefined' 
+    ? createPortal(modalContent, document.body)
+    : modalContent;
 };
 
 export default Modal;

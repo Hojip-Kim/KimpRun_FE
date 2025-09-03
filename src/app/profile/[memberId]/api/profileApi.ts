@@ -30,7 +30,6 @@ export async function updateNickname(
     );
 
     if (response.success && 200 <= response.status && response.status < 300) {
-      console.log('✅ 닉네임 변경 성공:', response.data);
       return response.data;
     } else if (response.status === 400) {
       // 400 Bad Request: 중복 닉네임
@@ -60,7 +59,6 @@ export async function updateNickname(
 export async function updateProfileImage(imageFile: File): Promise<boolean> {
   try {
     // TODO: 프로필 이미지 변경 엔드포인트가 준비되면 구현
-    console.log('프로필 이미지 변경 API는 아직 준비되지 않았습니다.');
     return false;
   } catch (error) {
     console.error('❌ 프로필 이미지 변경 API 호출 오류:', error);
@@ -76,7 +74,6 @@ export async function deleteMember(password: string): Promise<boolean> {
     );
 
     if (response.success && 200 <= response.status && response.status < 300) {
-      console.log('✅ 회원탈퇴 성공:', response.data);
       return response.data;
     } else {
       console.error('❌ 회원탈퇴 실패:', response.error);

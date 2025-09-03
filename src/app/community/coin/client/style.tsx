@@ -25,8 +25,8 @@ export const CategoryTag = styled.span<{ isNotice?: boolean }>`
   backdrop-filter: blur(8px);
 
   @media (max-width: 768px) {
-    font-size: 0.7rem;
-    padding: 2px 8px;
+    font-size: 0.55rem;
+    padding: 2px 6px;
   }
 `;
 
@@ -37,6 +37,8 @@ export const StyledRow = styled.div<{ isNotice?: boolean }>`
   transition: all 0.2s ease;
   cursor: pointer;
   position: relative;
+  min-height: 60px;
+  align-items: center;
 
   ${(props) =>
     props.isNotice &&
@@ -59,9 +61,11 @@ export const StyledRow = styled.div<{ isNotice?: boolean }>`
   }
 
   @media (max-width: 768px) {
-    padding: 0.5rem 0.5rem;
+    padding: 0.75rem 0.5rem;
     flex-direction: column;
     gap: 0.5rem;
+    align-items: stretch;
+    min-height: auto;
 
     &:hover {
       transform: none;
@@ -86,7 +90,7 @@ export const Title = styled.h3<{ isNotice?: boolean }>`
   }
 
   @media (max-width: 768px) {
-    font-size: ${(props) => (props.isNotice ? '0.95rem' : '0.9rem')};
+    font-size: ${(props) => (props.isNotice ? '0.75rem' : '0.7rem')};
     line-height: 1.3;
   }
 `;
@@ -100,7 +104,7 @@ export const StatValue = styled.div`
 
   @media (max-width: 768px) {
     width: auto;
-    font-size: 0.8rem;
+    font-size: 0.65rem;
   }
 `;
 
@@ -144,7 +148,7 @@ export const AuthorCell = styled.div`
   @media (max-width: 768px) {
     width: auto;
     text-align: left;
-    font-size: 0.8rem;
+    font-size: 0.65rem;
   }
 `;
 
@@ -164,6 +168,11 @@ export const AuthorLink = styled.span`
   &:active {
     transform: translateY(0);
   }
+
+  @media (max-width: 768px) {
+    font-size: 0.65rem;
+    padding: 1px 4px;
+  }
 `;
 
 export const DateCell = styled.div`
@@ -180,7 +189,7 @@ export const DateCell = styled.div`
   @media (max-width: 768px) {
     width: auto;
     text-align: left;
-    font-size: 0.75rem;
+    font-size: 0.6rem;
   }
 `;
 
@@ -228,7 +237,7 @@ export const CommunityTitle = styled.h1`
   text-align: center;
 
   @media (max-width: 768px) {
-    font-size: 1.25rem;
+    font-size: 1rem;
     margin-bottom: 1rem;
   }
 `;
@@ -279,8 +288,8 @@ export const WriteButton = styled.button`
   }
 
   @media (max-width: 768px) {
-    font-size: 0.85rem;
-    padding: 0.625rem 1.25rem;
+    font-size: 0.7rem;
+    padding: 0.5rem 1rem;
   }
 `;
 
@@ -475,7 +484,7 @@ export const MobileRowHeader = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.3rem;
   }
 `;
 
@@ -484,10 +493,8 @@ export const MobileRowContent = styled.div`
 
   @media (max-width: 768px) {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    font-size: 0.8rem;
-    color: ${palette.textMuted};
+    flex-direction: column;
+    gap: 0.5rem;
     width: 100%;
   }
 `;
@@ -498,7 +505,9 @@ export const MobileStats = styled.div`
   @media (max-width: 768px) {
     display: flex;
     gap: 0.75rem;
-    font-size: 0.8rem;
+    font-size: 0.65rem;
+    align-self: flex-end;
+    margin-top: 0.3rem;
   }
 `;
 

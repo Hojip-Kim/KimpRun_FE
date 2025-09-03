@@ -237,7 +237,7 @@ export const ProfileName = styled.h1`
   margin: 0;
 
   @media (max-width: 768px) {
-    font-size: 1.25rem;
+    font-size: 0.9rem;
   }
 `;
 
@@ -287,6 +287,11 @@ export const ProfileBadge = styled.span<{
   border-radius: 12px;
   font-size: 0.7rem;
   font-weight: 600;
+  
+  @media (max-width: 768px) {
+    font-size: 0.55rem;
+    padding: 0.15rem 0.45rem;
+  }
   background: ${(props) => {
     switch (props.$variant) {
       case 'admin':
@@ -416,6 +421,10 @@ export const ProfileStatNumber = styled.span`
   font-weight: 800;
   color: ${palette.textPrimary};
   line-height: 1;
+  
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+  }
 `;
 
 export const ProfileStatLabel = styled.span`
@@ -424,6 +433,10 @@ export const ProfileStatLabel = styled.span`
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.3px;
+  
+  @media (max-width: 768px) {
+    font-size: 0.6rem;
+  }
 `;
 
 export const ProfileDetails = styled.div`
@@ -464,12 +477,20 @@ export const ProfileDetailLabel = styled.span`
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.3px;
+  
+  @media (max-width: 768px) {
+    font-size: 0.6rem;
+  }
 `;
 
 export const ProfileDetailValue = styled.span`
   color: ${palette.textPrimary};
   font-weight: 700;
   font-size: 0.85rem;
+  
+  @media (max-width: 768px) {
+    font-size: 0.65rem;
+  }
 `;
 
 // 탭 스타일
@@ -630,6 +651,10 @@ export const ContentHeader = styled.div`
 export const HeaderTitle = styled.span`
   color: ${palette.textPrimary};
   font-weight: 700;
+  
+  @media (max-width: 768px) {
+    font-size: 0.7rem;
+  }
 `;
 
 export const HeaderMeta = styled.span`
@@ -638,7 +663,7 @@ export const HeaderMeta = styled.span`
   font-weight: 500;
 
   @media (max-width: 768px) {
-    font-size: 0.7rem;
+    font-size: 0.6rem;
   }
 `;
 
@@ -741,6 +766,11 @@ export const PostCategory = styled.span`
     transform: translateY(-0.5px);
     box-shadow: 0 2px 6px -1px ${palette.accentRing};
   }
+  
+  @media (max-width: 768px) {
+    font-size: 0.55rem;
+    padding: 0.2rem 0.5rem;
+  }
 `;
 
 export const PostMeta = styled.div`
@@ -750,6 +780,11 @@ export const PostMeta = styled.div`
   color: ${palette.textMuted};
   align-items: center;
   flex-wrap: wrap;
+  
+  @media (max-width: 768px) {
+    font-size: 0.65rem;
+    gap: 0.5rem;
+  }
 `;
 
 export const PostTitle = styled.h3`
@@ -769,6 +804,11 @@ export const PostTitle = styled.h3`
     color: ${palette.accent};
     transform: translateX(2px);
   }
+  
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+    margin: 0 0 0.5rem 0;
+  }
 `;
 
 export const CommentTargetPost = styled.div`
@@ -784,6 +824,10 @@ export const CommentTargetTitle = styled.div`
   font-weight: 600;
   color: ${palette.textSecondary};
   margin-bottom: 0.25rem;
+  
+  @media (max-width: 768px) {
+    font-size: 0.65rem;
+  }
 `;
 
 export const CommentTargetLink = styled(Link)`
@@ -801,6 +845,10 @@ export const CommentTargetLink = styled(Link)`
   &:hover {
     color: ${palette.accent};
   }
+  
+  @media (max-width: 768px) {
+    font-size: 0.7rem;
+  }
 `;
 
 export const PostContent = styled.p`
@@ -812,6 +860,11 @@ export const PostContent = styled.p`
   -webkit-box-orient: vertical;
   overflow: hidden;
   font-size: 0.875rem;
+  
+  @media (max-width: 768px) {
+    font-size: 0.7rem;
+    margin: 0 0 0.5rem 0;
+  }
 `;
 
 export const PostStats = styled.div`
@@ -833,6 +886,15 @@ export const PostStats = styled.div`
     &:hover {
       background: ${palette.accentRing};
       color: ${palette.textPrimary};
+    }
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 0.65rem;
+    gap: 0.5rem;
+    
+    span {
+      padding: 0.15rem 0.3rem;
     }
   }
 `;
@@ -956,12 +1018,20 @@ export const FollowName = styled.span`
     color: ${palette.accent};
     transform: translateX(2px);
   }
+  
+  @media (max-width: 768px) {
+    font-size: 0.75rem;
+  }
 `;
 
 export const FollowDate = styled.span`
   font-size: 0.8rem;
   color: ${palette.textMuted};
   font-weight: 500;
+  
+  @media (max-width: 768px) {
+    font-size: 0.65rem;
+  }
 `;
 
 // 회원탈퇴 섹션 스타일

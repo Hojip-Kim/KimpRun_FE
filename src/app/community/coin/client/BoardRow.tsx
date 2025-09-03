@@ -93,51 +93,52 @@ const BoardRow: React.FC<BoardRowProps> = ({ post }) => {
 
         {/* 모바일 레이아웃 - 데스크톱에서는 숨김 */}
         <MobileRowHeader>
-          <CategoryTag isNotice={post.isPin}>{post.categoryName}</CategoryTag>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <CategoryTag isNotice={post.isPin}>{post.categoryName}</CategoryTag>
+            <div
+              style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+            >
+              <ProfileImage
+                src={post.profileImageUrl}
+                alt={post.memberNickName}
+                size={16}
+                onClick={handleAuthorClick}
+              />
+              <AuthorLink onClick={handleAuthorClick}>
+                {post.memberNickName}
+              </AuthorLink>
+            </div>
+          </div>
           {post.isPin && <NoticeTag>공지</NoticeTag>}
         </MobileRowHeader>
 
         <MobileRowContent>
-          <div>
-            <Title isNotice={post.isPin}>{post.title}</Title>
-            <div
-              style={{
-                display: 'flex',
-                gap: '1rem',
-                fontSize: '0.8rem',
-                color: 'var(--text-muted)',
-                marginTop: '0.5rem',
-                alignItems: 'center',
-              }}
-            >
-              <div
-                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-              >
-                <ProfileImage
-                  src={post.profileImageUrl}
-                  alt={post.memberNickName}
-                  size={20}
-                  onClick={handleAuthorClick}
-                />
-                <AuthorLink onClick={handleAuthorClick}>
-                  {post.memberNickName}
-                </AuthorLink>
-              </div>
-              <span>{formatDate(post.createdAt)}</span>
-            </div>
+          <Title isNotice={post.isPin}>{post.title}</Title>
+          
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginTop: '0.3rem',
+            }}
+          >
+            <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>
+              {formatDate(post.createdAt)}
+            </span>
+            
+            <MobileStats>
+              <MobileStat>
+                👀 <strong>{post.boardViewsCount}</strong>
+              </MobileStat>
+              <MobileStat>
+                👍 <strong>{post.boardLikesCount}</strong>
+              </MobileStat>
+              <MobileStat>
+                💬 <strong>{post.commentsCount}</strong>
+              </MobileStat>
+            </MobileStats>
           </div>
-
-          <MobileStats>
-            <MobileStat>
-              👀 <strong>{post.boardViewsCount}</strong>
-            </MobileStat>
-            <MobileStat>
-              👍 <strong>{post.boardLikesCount}</strong>
-            </MobileStat>
-            <MobileStat>
-              💬 <strong>{post.commentsCount}</strong>
-            </MobileStat>
-          </MobileStats>
         </MobileRowContent>
       </StyledRow>
     </Link>

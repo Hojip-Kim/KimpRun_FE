@@ -21,7 +21,7 @@ const Fab = styled.button`
   display: none;
   align-items: center;
   justify-content: center;
-  z-index: 1250;
+  z-index: 1350;
   transition: all 0.2s ease;
   transform: scale(0.95); /* 레이아웃과 일치하는 크기 */
   transform-origin: center center;
@@ -44,7 +44,7 @@ const Backdrop = styled.div<{ $open: boolean }>`
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.25);
-  z-index: 1249;
+  z-index: 1349;
   display: ${(p) => (p.$open ? 'block' : 'none')};
 `;
 
@@ -60,7 +60,7 @@ const Panel = styled.div<{ $open: boolean }>`
   display: ${(p) => (p.$open ? 'flex' : 'none')};
   flex-direction: column;
   overflow: hidden;
-  z-index: 1201;
+  z-index: 1351;
   transform: scale(0.95); /* 레이아웃과 일치하는 크기 */
   transform-origin: bottom right;
 `;

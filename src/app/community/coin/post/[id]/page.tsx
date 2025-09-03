@@ -97,7 +97,6 @@ const Page = async ({ params }: PageProps) => {
       notFound();
     }
 
-
     const articleStructuredData = createArticleStructuredData(boardData);
 
     return (

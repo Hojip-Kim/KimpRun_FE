@@ -450,7 +450,7 @@ const RowPageClient: React.FC = () => {
             disabled={false}
             marketOptions={marketOptions}
           />
-          {/* Mobile chart between selector and search */}
+
           <MobileChartContainer>
             <TradingViewWidget containerId="mobile-chart" />
           </MobileChartContainer>
