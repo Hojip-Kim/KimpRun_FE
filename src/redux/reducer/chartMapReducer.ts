@@ -106,9 +106,6 @@ const chartMapSlice = createSlice({
     ) => {
       const slot = state.slots.find((slot) => slot.id === action.payload.id);
       if (slot && slot.isActive) {
-        console.log(
-          `Redux: Updating chart ${action.payload.id} interval from ${slot.interval} to ${action.payload.interval}`
-        );
         slot.interval = action.payload.interval;
       } else {
         console.warn(

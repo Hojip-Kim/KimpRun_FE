@@ -307,8 +307,6 @@ export default function DeleteAccountModal({
       alert('회원탈퇴 처리에 실패했습니다.');
     }
 
-    // TODO: API 호출
-    console.log('회원탈퇴 처리:', { selectedReasons });
     alert('회원탈퇴가 처리되었습니다. (API 미구현)');
     onClose();
   };

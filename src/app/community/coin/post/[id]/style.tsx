@@ -11,7 +11,7 @@ export const Title = styled.h1`
   color: ${palette.accent};
 
   @media (max-width: 768px) {
-    font-size: 1.3rem;
+    font-size: 1rem;
   }
 `;
 
@@ -24,17 +24,29 @@ export const MetaInfo = styled.div`
   color: ${palette.textMuted};
   padding-bottom: 0.5rem;
   border-bottom: 1px solid ${palette.border};
+
+  @media (max-width: 768px) {
+    font-size: 0.65rem;
+  }
 `;
 
 export const AuthorInfo = styled.div`
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  position: relative;
 
   & > div {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+  }
+
+  @media (max-width: 768px) {
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 100%;
   }
 `;
 
@@ -61,9 +73,13 @@ export const AuthorAvatar = styled.div`
   }
 
   @media (max-width: 768px) {
-    width: 2rem;
-    height: 2rem;
-    font-size: 0.8rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.65rem;
+
+    &::before {
+      font-size: 0.8rem;
+    }
   }
 `;
 
@@ -88,7 +104,7 @@ export const AuthorName = styled.span`
   }
 
   @media (max-width: 768px) {
-    font-size: 0.85rem;
+    font-size: 0.7rem;
   }
 `;
 
@@ -97,7 +113,7 @@ export const PostDate = styled.span`
   font-size: 0.8rem;
 
   @media (max-width: 768px) {
-    font-size: 0.75rem;
+    font-size: 0.6rem;
   }
 `;
 
@@ -205,16 +221,16 @@ export const Content = styled.div`
   }
 
   @media (max-width: 768px) {
-    font-size: 0.85rem;
+    font-size: 0.7rem;
 
     h1 {
-      font-size: 1.2rem;
+      font-size: 0.9rem;
     }
     h2 {
-      font-size: 1.05rem;
+      font-size: 0.85rem;
     }
     h3 {
-      font-size: 0.95rem;
+      font-size: 0.8rem;
     }
   }
 `;
@@ -262,6 +278,10 @@ export const AuthorActions = styled.div`
   display: flex;
   align-items: center;
   flex-shrink: 0;
+
+  @media (max-width: 768px) {
+    position: static;
+  }
 `;
 
 export const ActionButton = styled.button`
@@ -315,6 +335,16 @@ export const ActionsDropdown = styled.div`
     border-bottom: none;
     border-right: none;
     transform: rotate(45deg);
+  }
+
+  @media (max-width: 768px) {
+    top: calc(100% + 0.25rem);
+    right: -0.5rem;
+    min-width: 120px;
+
+    &::before {
+      right: 8px;
+    }
   }
 `;
 
@@ -713,7 +743,7 @@ export const CommentTitle = styled.h2`
   gap: 0.5rem;
 
   @media (max-width: 768px) {
-    font-size: 1rem;
+    font-size: 0.8rem;
     margin-bottom: 1rem;
   }
 `;
@@ -774,7 +804,7 @@ export const CommentAuthor = styled.span`
   }
 
   @media (max-width: 768px) {
-    font-size: 0.8rem;
+    font-size: 0.65rem;
   }
 `;
 
@@ -783,7 +813,7 @@ export const CommentDate = styled.span`
   color: ${palette.textMuted};
 
   @media (max-width: 768px) {
-    font-size: 0.65rem;
+    font-size: 0.55rem;
   }
 `;
 
@@ -813,7 +843,7 @@ export const CommentContent = styled.p`
   margin-top: 0.4rem;
 
   @media (max-width: 768px) {
-    font-size: 0.8rem;
+    font-size: 0.65rem;
   }
 `;
 
@@ -844,7 +874,7 @@ export const ReplyButton = styled.button`
   }
 
   @media (max-width: 768px) {
-    font-size: 0.7rem;
+    font-size: 0.6rem;
   }
 `;
 
@@ -886,7 +916,7 @@ export const CommentTextarea = styled.textarea`
 
   @media (max-width: 768px) {
     height: 3rem;
-    font-size: 0.8rem;
+    font-size: 0.65rem;
 
     &:focus {
       height: 4rem;
@@ -916,8 +946,8 @@ export const CommentSubmitButton = styled.button`
   }
 
   @media (max-width: 768px) {
-    font-size: 0.75rem;
-    padding: 0.45rem 1rem;
+    font-size: 0.6rem;
+    padding: 0.35rem 0.8rem;
   }
 `;
 
@@ -972,8 +1002,11 @@ export const PostHeader = styled.div`
 
   @media (max-width: 768px) {
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.75rem;
     align-items: stretch;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    position: relative;
   }
 `;
 
@@ -983,8 +1016,11 @@ export const PostStatsBar = styled.div`
   align-items: center;
 
   @media (max-width: 768px) {
-    justify-content: center;
-    gap: 1rem;
+    justify-content: space-around;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: ${palette.input};
+    border-radius: 8px;
   }
 `;
 
@@ -999,7 +1035,7 @@ export const StatItem = styled.div`
   }
 
   @media (max-width: 768px) {
-    font-size: 0.8rem;
+    font-size: 0.65rem;
   }
 `;
 
@@ -1038,8 +1074,13 @@ export const LikeButtonProminent = styled.button`
   }
 
   @media (max-width: 768px) {
-    font-size: 0.85rem;
-    padding: 0.6rem 1.2rem;
-    max-width: 160px;
+    font-size: 0.65rem;
+    padding: 0.4rem 0.8rem;
+    max-width: 120px;
+    margin: 1rem auto 0.5rem;
+
+    svg {
+      font-size: 0.8rem;
+    }
   }
 `;

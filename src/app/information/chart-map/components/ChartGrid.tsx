@@ -363,7 +363,6 @@ const ChartGrid: React.FC = () => {
 
   // 컴포넌트 마운트 후 스켈레톤 표시 시간
   React.useEffect(() => {
-    console.log('Current slots state:', slots);
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 1500); // 1.5초 후 스켈레톤 제거
@@ -372,9 +371,7 @@ const ChartGrid: React.FC = () => {
   }, []);
 
   // slots 상태 변경 시 로그
-  React.useEffect(() => {
-    console.log('Slots updated:', slots);
-  }, [slots]);
+  React.useEffect(() => {}, [slots]);
 
   const handleActivateChart = (slotId: number) => {
     // 기본값으로 차트 활성화 (BTC, USDT, 4시간봉)
@@ -401,7 +398,6 @@ const ChartGrid: React.FC = () => {
   };
 
   const handleIntervalChange = (slotId: number, newInterval: string) => {
-    console.log(`Interval change for slot ${slotId}: ${newInterval}`);
     dispatch(updateChartInterval({ id: slotId, interval: newInterval }));
   };
 

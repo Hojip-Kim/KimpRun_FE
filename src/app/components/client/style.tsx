@@ -4,12 +4,12 @@ export const LayoutWrapper = styled.div`
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow-x: hidden; 
+  overflow-x: hidden;
   transform: scale(0.9);
   transform-origin: top center;
-  width: 111.11%; 
-  margin-left: -5.56%; 
-  min-height: calc(100vh / 0.9); 
+  width: 111.11%;
+  margin-left: -5.56%;
+  min-height: calc(100vh / 0.9);
 
   @media (max-width: 768px) {
     transform: scale(0.95);
@@ -26,7 +26,7 @@ export const MainContent = styled.main`
 
   @media (max-width: 768px) {
     padding-top: 56px; // 모바일에서 Nav 높이만
-    padding-bottom: 88px; 
+    padding-bottom: 88px;
     min-height: 100vh; // 전체 viewport 높이 사용 - 푸터는 스크롤 필요
   }
 `;

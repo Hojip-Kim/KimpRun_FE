@@ -265,9 +265,8 @@ export default function AlertModal({
   const handleConfirm = () => {
     if (onConfirm) {
       onConfirm();
-    } else {
-      onClose();
     }
+    onClose();
   };
 
   const handleCancel = () => {

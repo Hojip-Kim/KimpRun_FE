@@ -40,10 +40,11 @@ const Row = ({
   const [prevRowData, setPrevRowData] = useState<{
     [key: string]: dataListType;
   }>({});
+  const [currentExchange, setCurrentExchange] = useState<string>('');
   const [rowData, setRowData] = useState<{ [key: string]: dataListType }>({});
   const [sortConfig, setSortConfig] = useState({
-    key: '',
-    direction: '',
+    key: 'acc_trade_price24',
+    direction: 'desc',
   });
   const [fadeOutClass, setFadeOutClass] = useState({});
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
@@ -289,9 +290,12 @@ const Row = ({
   // 거래소 변경 시 모든 상태 완전 초기화
   useEffect(() => {
     if (isMountedRef.current) {
-      // 정렬 상태 초기화
-      setSortConfig({ key: '', direction: '' });
+      const newExchangeKey = `${selectedMainMarket}-${selectedCompareMarket}`;
+      setCurrentExchange(newExchangeKey);
       
+      // 정렬 상태를 기본값(누적 거래액 desc)으로 초기화
+      setSortConfig({ key: 'acc_trade_price24', direction: 'desc' });
+
       // 모든 데이터 상태 완전 초기화 (이전 SSR 데이터 제거)
       setNameList([]);
       setDataList([]);
@@ -380,7 +384,13 @@ const Row = ({
     if (!isMountedRef.current) return;
 
     if (rowData && firstDataset && secondTokenDataList) {
-      setPrevRowData(rowData);
+      const exchangeKey = `${selectedMainMarket}-${selectedCompareMarket}`;
+      
+      // 같은 거래소에서만 이전 데이터로 설정 (cross-exchange 비교 방지)
+      if (currentExchange === exchangeKey && Object.keys(rowData).length > 0) {
+        setPrevRowData(rowData);
+      }
+      
       updateRowData(rowData, firstDataset, secondDataset).then(
         (updatedData) => {
           if (!isMountedRef.current) return;
@@ -396,20 +406,23 @@ const Row = ({
             applySorting(updatedData, sortConfig);
           }
 
-          const newFadeOutClass = {};
-          Object.keys(firstDataset).forEach((token) => {
-            const prev = prevRowData[token]?.trade_price;
-            const cur = firstDataset[token].trade_price;
-            if (prev !== undefined && prev !== cur) {
-              newFadeOutClass[token] = 'fade-out';
-            }
-          });
-          setFadeOutClass(newFadeOutClass);
+          // 같은 거래소에서만 애니메이션 효과 적용
+          if (currentExchange === exchangeKey) {
+            const newFadeOutClass = {};
+            Object.keys(firstDataset).forEach((token) => {
+              const prev = prevRowData[token]?.trade_price;
+              const cur = firstDataset[token].trade_price;
+              if (prev !== undefined && prev !== cur) {
+                newFadeOutClass[token] = 'fade-out';
+              }
+            });
+            setFadeOutClass(newFadeOutClass);
 
-          setTimeout(() => {
-            if (!isMountedRef.current) return;
-            setFadeOutClass({});
-          }, 200);
+            setTimeout(() => {
+              if (!isMountedRef.current) return;
+              setFadeOutClass({});
+            }, 200);
+          }
         }
       );
     }
@@ -418,7 +431,7 @@ const Row = ({
       updateTokenPrice(token);
       updateKimp(token);
     }
-  }, [firstDataset, dollar, tether, selectedCompareMarket]);
+  }, [firstDataset, dollar, tether, selectedCompareMarket, currentExchange]);
 
   return (
     <RowContainer>
@@ -538,19 +551,24 @@ const Row = ({
                 const renderTokens = tokenOrderList.filter(
                   (token) => filteredTokens.includes(token) && rowData[token]
                 );
-                return renderTokens.map((token) => (
-                  <TableRowComponent
-                    key={token}
-                    token={token}
-                    data={rowData[token]}
-                    prevData={prevRowData[token]}
-                    expandedRow={expandedRow}
-                    fadeOutClass={fadeOutClass[token]}
-                    onRowClick={rowClick}
-                    coinDetail={coinDetails[token]}
-                    loadingCoinDetail={loadingCoinDetail === token}
-                  />
-                ));
+                return renderTokens.map((token) => {
+                  const exchangeKey = `${selectedMainMarket}-${selectedCompareMarket}`;
+                  const shouldUsePrevData = currentExchange === exchangeKey;
+                  
+                  return (
+                    <TableRowComponent
+                      key={token}
+                      token={token}
+                      data={rowData[token]}
+                      prevData={shouldUsePrevData ? prevRowData[token] : undefined}
+                      expandedRow={expandedRow}
+                      fadeOutClass={fadeOutClass[token]}
+                      onRowClick={rowClick}
+                      coinDetail={coinDetails[token]}
+                      loadingCoinDetail={loadingCoinDetail === token}
+                    />
+                  );
+                });
               })()}
             </tbody>
           </BodyTable>

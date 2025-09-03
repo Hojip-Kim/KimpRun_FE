@@ -213,19 +213,14 @@ const PostContent: React.FC<{
     <>
       <PostTitleContainer>
         {isEditing ? (
-          <EditTitleInput
-            type="text"
-            value={editTitle}
-            onChange={(e) => setEditTitle(e.target.value)}
-            placeholder="제목을 입력하세요"
-          />
-        ) : (
-          <Title>{currentTitle}</Title>
-        )}
-
-        {isAuthor && (
-          <AuthorActions ref={actionsRef}>
-            {isEditing ? (
+          <>
+            <EditTitleInput
+              type="text"
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
+              placeholder="제목을 입력하세요"
+            />
+            {isAuthor && (
               <EditActionButtons>
                 <SaveButton
                   onClick={handleEditSave}
@@ -237,30 +232,10 @@ const PostContent: React.FC<{
                   <FaTimes /> 취소
                 </CancelButton>
               </EditActionButtons>
-            ) : (
-              <>
-                <ActionButton onClick={() => setShowActions(!showActions)}>
-                  <FaEllipsisV />
-                </ActionButton>
-                {showActions && (
-                  <ActionsDropdown>
-                    <ActionItem onClick={handleEditStart}>
-                      <FaEdit /> 수정
-                    </ActionItem>
-                    <ActionItem
-                      className="delete"
-                      onClick={() => {
-                        handleDeleteClick();
-                        setShowActions(false);
-                      }}
-                    >
-                      <FaTrash /> 삭제
-                    </ActionItem>
-                  </ActionsDropdown>
-                )}
-              </>
             )}
-          </AuthorActions>
+          </>
+        ) : (
+          <Title>{currentTitle}</Title>
         )}
       </PostTitleContainer>
 
@@ -278,6 +253,29 @@ const PostContent: React.FC<{
             </AuthorName>
             <PostDate>{formatDate(boardData.createdAt)}</PostDate>
           </div>
+          {isAuthor && !isEditing && (
+            <AuthorActions ref={actionsRef}>
+              <ActionButton onClick={() => setShowActions(!showActions)}>
+                <FaEllipsisV />
+              </ActionButton>
+              {showActions && (
+                <ActionsDropdown>
+                  <ActionItem onClick={handleEditStart}>
+                    <FaEdit /> 수정
+                  </ActionItem>
+                  <ActionItem
+                    className="delete"
+                    onClick={() => {
+                      handleDeleteClick();
+                      setShowActions(false);
+                    }}
+                  >
+                    <FaTrash /> 삭제
+                  </ActionItem>
+                </ActionsDropdown>
+              )}
+            </AuthorActions>
+          )}
         </AuthorInfo>
 
         <PostStatsBar>

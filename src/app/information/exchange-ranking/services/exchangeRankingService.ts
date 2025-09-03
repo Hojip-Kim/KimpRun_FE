@@ -19,7 +19,7 @@ export async function fetchExchangeRankingServer(
   });
 
   const API_BASE_URL = clientEnv.API_BASE_URL;
-  const url = `${API_BASE_URL}/api/cmc/exchange/all?${searchParams.toString()}`;
+  const url = `${API_BASE_URL}/cmc/exchange/all?${searchParams.toString()}`;
 
   try {
     const response = await serverGet<ExchangeRankingResponse>(url, {
@@ -58,7 +58,7 @@ export async function fetchExchangeRankingClient(
   });
 
   const API_BASE_URL = clientEnv.API_BASE_URL;
-  const url = `${API_BASE_URL}/api/cmc/exchange/all?${searchParams.toString()}`;
+  const url = `${API_BASE_URL}/cmc/exchange/all?${searchParams.toString()}`;
 
   try {
     const response = await clientRequest.get<ExchangeRankingResponse>(url);

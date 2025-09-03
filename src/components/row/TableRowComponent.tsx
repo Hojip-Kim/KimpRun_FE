@@ -94,7 +94,12 @@ const CoinDetailView = React.memo(
           공급량 정보
         </h4>
         <div
-          style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.4rem',
+          }}
+          className="supply-info-container"
         >
           <div
             style={{
@@ -343,6 +348,28 @@ interface TableRowProps {
   loadingCoinDetail?: boolean;
 }
 
+// 가격의 정수 자릿수에 따라 소수점을 조절하는 함수
+const formatPrice = (price: number): string => {
+  if (!price) return '0';
+
+  const integerPart = Math.floor(price);
+  const integerDigits = integerPart.toString().length;
+
+  if (integerDigits >= 4) {
+    // 4자리 이상: 정수로 표시
+    return Math.round(price).toLocaleString();
+  } else if (integerDigits >= 2) {
+    // 2-3자리: 소수점 1자리
+    return price.toFixed(1);
+  } else if (integerDigits === 1) {
+    // 1자리: 소수점 2자리
+    return price.toFixed(2);
+  } else {
+    // 1보다 작은 경우: 소수점 4자리
+    return price.toFixed(4);
+  }
+};
+
 const getChangeRateStyle = (rate, change?) => {
   if ((rate > 0 && change === 'RISE') || rate > 0) {
     return { color: '#45E8BC' };
@@ -395,19 +422,11 @@ const TableRowComponent = React.memo(
           {/* 코인 가격 */}
           <TableCell>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span>{data.trade_price?.toLocaleString()}</span>
+              <span>
+                {data.trade_price ? formatPrice(data.trade_price) : ''}
+              </span>
               <span style={{ color: 'var(--text-muted)' }}>
-                {data.trade_price && data.secondPrice
-                  ? (() => {
-                      const decimalPlaces =
-                        data.trade_price.toString().split('.')[1]?.length || 1;
-
-                      return data.secondPrice.toLocaleString(undefined, {
-                        minimumFractionDigits: decimalPlaces,
-                        maximumFractionDigits: decimalPlaces,
-                      });
-                    })()
-                  : ''}
+                {data.secondPrice ? formatPrice(data.secondPrice) : ''}
               </span>
             </div>
           </TableCell>
@@ -445,7 +464,7 @@ const TableRowComponent = React.memo(
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <span>{(data.change_rate * 10).toFixed(2)}%</span>
               <span style={{ color: 'var(--text-muted)' }}>
-                {data.opening_price?.toLocaleString()}
+                {data.opening_price ? formatPrice(data.opening_price) : ''}
               </span>
             </div>
           </TableCell>
@@ -453,7 +472,7 @@ const TableRowComponent = React.memo(
           <TableCell>
             <div>
               {data.highest_price !== 0
-                ? data.highest_price.toLocaleString() + '원'
+                ? formatPrice(data.highest_price) + '원'
                 : '정보 없음'}
             </div>
             <div
@@ -474,7 +493,7 @@ const TableRowComponent = React.memo(
           <TableCell>
             <div>
               {data.lowest_price !== 0
-                ? data.lowest_price.toLocaleString() + '원'
+                ? formatPrice(data.lowest_price) + '원'
                 : '정보 없음'}
             </div>
             <div

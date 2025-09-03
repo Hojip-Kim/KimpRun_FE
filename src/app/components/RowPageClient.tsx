@@ -144,6 +144,7 @@ const RowPageClient: React.FC = () => {
 
   const handleMarketData = useCallback(
     (marketType: MarketType, data: MarketDataMap) => {
+      // 현재 선택된 거래소와 일치하는 경우에만 데이터 업데이트
       // 메인 거래소인 경우 - 기존 데이터와 병합하여 업데이트
       if (selectedMainMarket === marketType) {
         setFirstDataset((prevData) => {
@@ -154,9 +155,21 @@ const RowPageClient: React.FC = () => {
 
             // 기존 데이터가 있으면 병합, 없으면 새로 생성
             if (updatedData[token]) {
+              // 현재 거래소 데이터만 병합 (필드별 선택적 업데이트)
+              const existing = updatedData[token];
               updatedData[token] = {
-                ...updatedData[token], // 기존 데이터 유지
-                ...newData, // 새 데이터로 업데이트 (undefined 필드는 덮어쓰지 않음)
+                ...existing,
+                // 항상 업데이트되는 필드들
+                token: newData.token || existing.token,
+                trade_price: newData.trade_price !== undefined ? newData.trade_price : existing.trade_price,
+                change_rate: newData.change_rate !== undefined ? newData.change_rate : existing.change_rate,
+                rate_change: newData.rate_change || existing.rate_change,
+                // 선택적 업데이트 필드들 (STOMP에 있을 때만)
+                acc_trade_price24: newData.acc_trade_price24 !== undefined ? newData.acc_trade_price24 : existing.acc_trade_price24,
+                opening_price: newData.opening_price !== undefined ? newData.opening_price : existing.opening_price,
+                trade_volume: newData.trade_volume !== undefined ? newData.trade_volume : existing.trade_volume,
+                highest_price: newData.highest_price !== undefined ? newData.highest_price : existing.highest_price,
+                lowest_price: newData.lowest_price !== undefined ? newData.lowest_price : existing.lowest_price,
               };
             } else {
               // 새 토큰인 경우 기본값과 함께 생성
@@ -378,12 +391,11 @@ const RowPageClient: React.FC = () => {
     }
 
     // Redux state 먼저 업데이트 (자동으로 localStorage에 저장됨)
-
     setMainMarket(newMainMarket);
     setCompareMarket(newCompareMarket);
 
-    // 새 데이터 로드 (정적 데이터 먼저, 그 다음 웹소켓 자동 재연결)
-    await loadMarketData(newMainMarket, newCompareMarket);
+    // 페이지 새로고침으로 깔끔하게 초기화
+    window.location.reload();
   };
 
   const handleSearch = useCallback(
@@ -450,12 +462,12 @@ const RowPageClient: React.FC = () => {
             disabled={false}
             marketOptions={marketOptions}
           />
-          {/* Mobile chart between selector and search */}
+
           <MobileChartContainer>
             <TradingViewWidget containerId="mobile-chart" />
           </MobileChartContainer>
           <Search onSearch={handleSearch} />
-          {tokenFirstList && tokenFirstList.length > 0 && (
+          {tokenFirstList && tokenFirstList.length > 0 && !loading && (
             <Row
               firstTokenNameList={tokenFirstList}
               firstTokenDataList={displayFirstDataset}
@@ -466,6 +478,7 @@ const RowPageClient: React.FC = () => {
               tokenMapping={tokenMapping}
             />
           )}
+          {loading && <TableSkeleton rows={12} />}
         </>
       )}
     </RowContainer>

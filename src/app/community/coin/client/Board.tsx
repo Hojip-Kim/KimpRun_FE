@@ -49,8 +49,6 @@ const Board: React.FC<BoardProps> = ({
   initialPosts,
   isError,
 }) => {
-  console.log('🔍 게시글 데이터:', initialPosts);
-
   const [currentCategoryId, setCurrentCategoryId] = useState(initialCategoryId);
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [pageSize, setPageSize] = useState(initialSize);
@@ -91,7 +89,6 @@ const Board: React.FC<BoardProps> = ({
     setCurrentPage(initialPage);
     setPageSize(initialSize);
   }, [initialCategoryId, initialPage, initialSize]);
-
 
   const categoryOptions: DropdownOption<number>[] =
     categories?.map((category) => ({

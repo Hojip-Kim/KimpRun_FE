@@ -32,14 +32,12 @@ export const checkAuth = async (dispatch: AppDispatch) => {
     // 인증된 사용자인 경우 (member 정보가 있고 isAuthenticated가 true)
     if (response.data.isAuthenticated === true && response.data.member) {
       dispatch(login(response.data.member));
-      console.log('✅ 인증된 사용자 로그인 완료:', response.data.member);
       return;
     }
 
     // 인증되지 않은 사용자 (게스트)
     if (response.data.isAuthenticated === false) {
       dispatch(setGuestUser());
-      console.log('👤 게스트 사용자로 설정');
       return;
     }
 

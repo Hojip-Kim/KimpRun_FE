@@ -41,7 +41,6 @@ import {
   UserDropdown,
   DropdownItem,
   DeleteButton,
-  MessageTime,
   MessageTimeSide,
   MessageContent,
   ChatForm,
@@ -231,10 +230,26 @@ const Chat = () => {
       setDropdownPosition(null);
     } else {
       const rect = event.currentTarget.getBoundingClientRect();
-      setDropdownPosition({
-        top: rect.bottom + window.scrollY,
-        left: rect.left + window.scrollX,
-      });
+      const dropdownHeight = 120;
+      const dropdownWidth = 100;
+
+      let top = rect.bottom + window.scrollY;
+      let left = rect.left + window.scrollX;
+
+      // 뷰포트 경계 체크 및 조정
+      if (top + dropdownHeight > window.innerHeight + window.scrollY) {
+        top = rect.top + window.scrollY - dropdownHeight;
+      }
+
+      if (left + dropdownWidth > window.innerWidth) {
+        left = window.innerWidth - dropdownWidth - 10;
+      }
+
+      if (left < 10) {
+        left = 10;
+      }
+
+      setDropdownPosition({ top, left });
       setOpenDropdown(messageId);
     }
   };
@@ -252,9 +267,7 @@ const Chat = () => {
         setMessages((prev) =>
           prev.filter((message) => message.inherenceId !== inherenceId)
         );
-        console.log('채팅 로그 삭제 성공:', inherenceId);
       } else {
-        console.error('채팅 로그 삭제 실패:', result);
       }
     } else {
       const result = await deleteAnonChatByInherenceId(inherenceId);
@@ -262,13 +275,9 @@ const Chat = () => {
         setMessages((prev) =>
           prev.filter((message) => message.inherenceId !== inherenceId)
         );
-        console.log('채팅 로그 삭제 성공:', inherenceId);
       } else {
-        console.error('채팅 로그 삭제 실패:', result);
       }
     }
-
-    console.log('메시지 삭제:', inherenceId);
   };
 
   const handleProfile = (message: ChatMessage) => {
@@ -276,7 +285,11 @@ const Chat = () => {
     if (message.authenticated && message.memberId) {
       router.push(`/profile/${message.memberId}`);
     } else {
-      alert('게스트 사용자는 프로필이 없습니다.');
+      showConfirm('게스트 사용자는 프로필이 없습니다.', () => {}, {
+        title: '프로필 접근 불가',
+        type: 'info',
+        confirmText: '확인',
+      });
     }
     setOpenDropdown(null);
     setDropdownPosition(null);
@@ -302,13 +315,6 @@ const Chat = () => {
       reportTarget.authenticated && reportTarget.memberId
         ? reportTarget.memberId.toString()
         : reportTarget.uuid;
-
-    console.log('신고 정보:', {
-      fromMember,
-      toMember,
-      reason: reportReason,
-      reportTarget: reportTarget.nickname,
-    });
 
     try {
       const result = await reportUser(
@@ -338,11 +344,6 @@ const Chat = () => {
   };
 
   const handleBlock = (message: ChatMessage) => {
-    console.log(
-      '🔍 차단할 메시지 전체 정보:',
-      JSON.stringify(message, null, 2)
-    );
-
     if (
       message.authenticated &&
       message.memberId !== undefined &&
@@ -351,28 +352,10 @@ const Chat = () => {
       // 로그인한 사용자는 memberId로 차단
       addBlockedMember(message.memberId.toString());
       setBlockedMembers(getBlockedMembers());
-      console.log(
-        '✅ 로그인 사용자 차단:',
-        message.nickname,
-        'memberId:',
-        message.memberId
-      );
     } else {
       // 게스트 사용자는 uuid로 차단
       addBlockedGuest(message.uuid);
       setBlockedGuests(getBlockedGuests());
-      console.log(
-        '❌ 게스트 사용자로 차단:',
-        message.nickname,
-        'uuid:',
-        message.uuid
-      );
-      console.log(
-        '❌ 차단 이유 - authenticated:',
-        message.authenticated,
-        'memberId:',
-        message.memberId
-      );
     }
     setOpenDropdown(null);
   };
@@ -382,8 +365,6 @@ const Chat = () => {
     showConfirm(
       `${message.nickname}님의 차단을 해제하시겠습니까?`,
       () => {
-        console.log('🔓 차단 해제:', message.nickname);
-
         if (
           message.authenticated &&
           message.memberId !== undefined &&
@@ -392,22 +373,10 @@ const Chat = () => {
           // 로그인한 사용자 차단 해제
           removeBlockedMember(message.memberId.toString());
           setBlockedMembers(getBlockedMembers());
-          console.log(
-            '✅ 로그인 사용자 차단 해제:',
-            message.nickname,
-            'memberId:',
-            message.memberId
-          );
         } else {
           // 게스트 사용자 차단 해제
           removeBlockedGuest(message.uuid);
           setBlockedGuests(getBlockedGuests());
-          console.log(
-            '✅ 게스트 사용자 차단 해제:',
-            message.nickname,
-            'uuid:',
-            message.uuid
-          );
         }
       },
       {
@@ -431,7 +400,6 @@ const Chat = () => {
         clearAllBlocked();
         setBlockedMembers([]);
         setBlockedGuests([]);
-        console.log('모든 차단 해제됨');
       },
       {
         title: '전체 차단 해제',
@@ -467,7 +435,6 @@ const Chat = () => {
     try {
       if (scrollRef.current) {
         const scrollContainer = scrollRef.current;
-        const prevScrollHeight = scrollContainer.scrollHeight;
         const prevScrollTop = scrollContainer.scrollTop;
 
         // 중복 로드를 방지하기 위해 먼저 로딩 플래그 설정
@@ -475,7 +442,6 @@ const Chat = () => {
         isAdjustingRef.current = true;
 
         const newMessages = await getChatLogs(page, pageSize);
-        console.log(newMessages);
 
         if (newMessages.length === 0) {
           setHasMore(false);
@@ -742,7 +708,6 @@ const Chat = () => {
   // 차단 목록 상태 변경 감지하여 자동 데이터 새로고침
   useEffect(() => {
     if (initializedRef.current && firstScrollDoneRef.current) {
-      console.log('차단 목록이 변경되어 채팅 데이터를 새로고침합니다.');
       // 약간의 지연을 두어 UI 업데이트 후 데이터 로드
       setTimeout(() => {
         refreshChatData();

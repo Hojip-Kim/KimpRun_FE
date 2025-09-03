@@ -30,20 +30,10 @@ const ChartMapWidget: React.FC<Props> = ({
   useEffect(() => {
     const currentConfig = `${actualSymbol}-${actualInterval}-${currentTheme}`;
 
-    console.log(
-      `Widget ${slotId}: Config changed from '${lastConfigRef.current}' to '${currentConfig}'`
-    );
-    console.log(
-      `Widget ${slotId}: Symbol=${actualSymbol}, Interval=${actualInterval}, Theme=${currentTheme}`
-    );
-
     // 설정이 변경되었을 때만 위젯 재생성
     if (lastConfigRef.current === currentConfig) {
-      console.log(`Widget ${slotId}: Config unchanged, skipping recreation`);
       return;
     }
-
-    console.log(`Widget ${slotId}: Recreating widget with new config`);
 
     // 강제로 위젯을 새로 만들기 위해 참조 초기화
     lastConfigRef.current = '';

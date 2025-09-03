@@ -1,21 +1,22 @@
 import styled from 'styled-components';
 import { palette } from '@/styles/palette';
 export const Container = styled.div<{ width: number; height: number }>`
-  position: fixed;
-  display: flex;
-  flex-direction: column;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: ${(props) => props.width}px;
-  height: ${(props) => props.height}px;
-  padding: 8px;
-  background: ${palette.card};
-  border: 1px solid ${palette.border};
-  border-radius: 12px;
-  z-index: 2000;
-  box-shadow: ${palette.shadow};
-  color: ${palette.textPrimary};
+  position: fixed !important;
+  display: flex !important;
+  flex-direction: column !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: ${(props) => props.width}px !important;
+  height: ${(props) => props.height}px !important;
+  padding: 8px !important;
+  background: ${palette.card} !important;
+  border: 1px solid ${palette.border} !important;
+  border-radius: 12px !important;
+  z-index: 9999 !important;
+  box-shadow: ${palette.shadow} !important;
+  color: ${palette.textPrimary} !important;
+  margin: 0 !important;
 
   .exit-wrapper {
     position: absolute;
@@ -32,13 +33,18 @@ export const Container = styled.div<{ width: number; height: number }>`
 `;
 
 export const Canvas = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.6);
-  z-index: 1000;
+  position: fixed !important;
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  z-index: 9998 !important;
+  margin: 0 !important;
+  padding: 0 !important;
 `;
 
 export const Wrapper = styled.div`
