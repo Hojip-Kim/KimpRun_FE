@@ -316,13 +316,6 @@ const Chat = () => {
         ? reportTarget.memberId.toString()
         : reportTarget.uuid;
 
-    console.log('신고 정보:', {
-      fromMember,
-      toMember,
-      reason: reportReason,
-      reportTarget: reportTarget.nickname,
-    });
-
     try {
       const result = await reportUser(
         fromMember,
@@ -715,7 +708,6 @@ const Chat = () => {
   // 차단 목록 상태 변경 감지하여 자동 데이터 새로고침
   useEffect(() => {
     if (initializedRef.current && firstScrollDoneRef.current) {
-      console.log('차단 목록이 변경되어 채팅 데이터를 새로고침합니다.');
       // 약간의 지연을 두어 UI 업데이트 후 데이터 로드
       setTimeout(() => {
         refreshChatData();

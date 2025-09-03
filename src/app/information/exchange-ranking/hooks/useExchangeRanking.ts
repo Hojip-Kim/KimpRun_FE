@@ -29,8 +29,6 @@ export function useExchangeRanking(initialParams: ExchangeRankingParams = {}) {
           size: params?.size ?? state.pageSize,
         });
 
-        console.log(response);
-
         setState((prev) => ({
           ...prev,
           data: response.content,

@@ -1,6 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { AuthState, User } from '../type';
 
+const updateGuestNameCookie = (name: string) => {
+  if (typeof window !== 'undefined') {
+    document.cookie = `nickname=${encodeURIComponent(name)}; path=/; max-age=31536000`;
+  }
+};
+
 const getOrCreateGuestName = () => {
   if (typeof window !== 'undefined') {
     let guestName = localStorage.getItem('guestName');
@@ -9,6 +15,8 @@ const getOrCreateGuestName = () => {
       guestName = `익명_${randomNumber}`;
       localStorage.setItem('guestName', guestName);
     }
+    // 쿠키에도 닉네임 저장
+    updateGuestNameCookie(guestName);
     return guestName;
   }
   return '익명_0000';
@@ -45,6 +53,16 @@ const authSlices = createSlice({
         memberId: null,
       };
     },
+    updateGuestNickname: (state, action: PayloadAction<string>) => {
+      if (state.user && state.user.role === 'GUEST') {
+        state.user.name = action.payload;
+        // localStorage와 쿠키 모두 업데이트
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('guestName', action.payload);
+          updateGuestNameCookie(action.payload);
+        }
+      }
+    },
     setUuid: (state, action: PayloadAction<string>) => {
       state.uuid = action.payload;
     },
@@ -73,6 +91,7 @@ export const {
   login,
   logout,
   setGuestUser,
+  updateGuestNickname,
   setUuid,
 } = authSlices.actions;
 export default authSlices.reducer;

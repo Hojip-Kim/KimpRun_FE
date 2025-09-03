@@ -11,6 +11,7 @@ import {
   logout,
   setGuestUser,
   setUser,
+  updateGuestNickname as updateGuestNicknameAction,
   setUuid,
 } from '@/redux/reducer/authReducer';
 import ProfileForm from '../profile/ProfileForm';
@@ -111,10 +112,8 @@ const Nav = () => {
   const uuid = useSelector((state: RootState) => state.auth.uuid);
   const { showSuccess, showError } = useGlobalAlert();
 
-  // 사용자 정보 변경 감지 및 로깅
-  useEffect(() => {
-    console.log('🔄 Nav: 사용자 정보 변경 감지:', user);
-  }, [user]);
+  // 사용자 정보 변경 감지
+  useEffect(() => {}, [user]);
 
   const isNewNoticeGenerated = useSelector(
     (state: RootState) => state.notice.isNewNoticeGenerated
@@ -173,7 +172,6 @@ const Nav = () => {
         const wsData: MarketInfoWebsocketDto<InfoResponseDto> = JSON.parse(
           message.body
         );
-        console.log('wsData', wsData);
 
         if (wsData.type === 'market' && wsData.data) {
           const { userData, marketData } = wsData.data;
@@ -212,8 +210,6 @@ const Nav = () => {
           // 기존 공지사항 Redux 액션 사용
           dispatch(setNotice([noticeData]));
           dispatch(setIsNewNoticeGenerated(true));
-
-          console.log('📢 새 공지사항 수신:', noticeData);
         }
       } catch (error) {
         console.error('❌ 공지사항 웹소켓 메시지 파싱 오류:', error);
@@ -544,14 +540,7 @@ const Nav = () => {
                   try {
                     const result = await updateGuestNickname(uuid, newName);
                     if (result) {
-                      await dispatch(
-                        setUser({
-                          name: result.name,
-                          email: null,
-                          role: 'GUEST',
-                          memberId: null,
-                        })
-                      );
+                      dispatch(updateGuestNicknameAction(result.name));
                       showSuccess('닉네임이 변경되었습니다.');
                       setIsNicknameModalOpen(false);
                     } else {

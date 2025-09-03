@@ -25,7 +25,6 @@ export async function updateGuestNickname(
     );
 
     if (response.success && response.data) {
-      console.log('✅ 게스트 닉네임 변경 성공:', response.data);
       return response.data;
     } else {
       console.error('❌ 게스트 닉네임 변경 실패:', response.error);

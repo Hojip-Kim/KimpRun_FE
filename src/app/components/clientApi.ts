@@ -44,7 +44,6 @@ export async function getClientTokenNames(
     const response = await clientRequest.get<tokenNameList>(url.toString(), {
       credentials: 'include',
       headers: { 'Content-type': 'application/json' },
-      cache: 'no-store',
     });
 
     if (response.success) {
@@ -68,7 +67,6 @@ export async function getClientSingleMarketData(market: MarketType) {
     const response = await clientRequest.get(url.toString(), {
       credentials: 'include',
       headers: { 'Content-type': 'application/json' },
-      cache: 'no-store',
     });
 
     if (response.success) {
@@ -113,7 +111,6 @@ export async function getClientCombinedTokenData(
     const response = await clientRequest.get(url.toString(), {
       credentials: 'include',
       headers: { 'Content-type': 'application/json' },
-      cache: 'no-store',
     });
 
     if (response.success) {
