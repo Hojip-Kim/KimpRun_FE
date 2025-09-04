@@ -80,14 +80,25 @@ export const StyledRow = styled.div<{ isNotice?: boolean }>`
 export const Title = styled.h3<{ isNotice?: boolean }>`
   margin: 0;
   font-size: ${(props) => (props.isNotice ? '1.05rem' : '1rem')};
-  color: ${(props) => (props.isNotice ? '#b8860b' : palette.accent)};
+  color: ${(props) => (props.isNotice ? '#b8860b' : palette.accent)} !important;
   cursor: pointer;
   font-weight: ${(props) => (props.isNotice ? '700' : '600')};
   line-height: 1.4;
+  text-decoration: none !important;
 
   &:hover {
-    text-decoration: underline;
     opacity: 0.8;
+    text-decoration: none !important;
+  }
+
+  &:visited {
+    color: ${(props) => (props.isNotice ? '#b8860b' : palette.accent)} !important;
+    text-decoration: none !important;
+  }
+
+  &:link {
+    color: ${(props) => (props.isNotice ? '#b8860b' : palette.accent)} !important;
+    text-decoration: none !important;
   }
 
   @media (max-width: 768px) {

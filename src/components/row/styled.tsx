@@ -37,6 +37,9 @@ export const StyledTable = styled.table`
 `;
 export const TableBody = styled.div`
   width: 100%;
+  max-height: 600px;
+  overflow-y: auto;
+  overflow-x: hidden;
 `;
 
 export const HeaderRow = styled.tr`

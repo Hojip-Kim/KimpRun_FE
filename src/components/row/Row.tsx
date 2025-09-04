@@ -1,6 +1,12 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+  useMemo,
+} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { setKimp, setToken, setTokenPrice } from '@/redux/reducer/widgetReduce';
@@ -142,8 +148,8 @@ const Row = ({
     // 현재 필터링된 토큰들만 대상으로 정렬 (Map 사용으로 성능 최적화)
     const filteredRowData = Object.fromEntries(
       filteredTokens
-        .filter(token => dataToSort[token])
-        .map(token => [token, dataToSort[token]])
+        .filter((token) => dataToSort[token])
+        .map((token) => [token, dataToSort[token]])
     );
 
     // 필터링된 데이터가 없으면 정렬하지 않음
@@ -195,19 +201,19 @@ const Row = ({
   // Symbol to ID 매핑 캐시 (성능 최적화)
   const tokenIdCache = useMemo(() => {
     if (!tokenMapping) return new Map();
-    
+
     const cache = new Map<string, number | null>();
-    
+
     // firstMarketList 매핑
-    tokenMapping.firstMarketList?.forEach(token => {
+    tokenMapping.firstMarketList?.forEach((token) => {
       cache.set(token.symbol, token.id);
     });
-    
+
     // secondMarketList 매핑 (중복시 덮어쓰기)
-    tokenMapping.secondMarketList?.forEach(token => {
+    tokenMapping.secondMarketList?.forEach((token) => {
       cache.set(token.symbol, token.id);
     });
-    
+
     return cache;
   }, [tokenMapping]);
 
@@ -228,7 +234,11 @@ const Row = ({
 
       // 1. 즉시 UI 상태 변경 (빠른 반응성)
       setExpandedRow(token);
-      updateWidgetToken(token);
+      
+      // Widget 상태 업데이트를 다음 틱으로 지연
+      setTimeout(() => {
+        updateWidgetToken(token);
+      }, 0);
 
       // 2. 코인 상세 정보 로딩 (비동기 처리)
       // coinDetails는 함수 내부에서 최신 상태를 참조
@@ -296,7 +306,7 @@ const Row = ({
     if (isMountedRef.current) {
       const newExchangeKey = `${selectedMainMarket}-${selectedCompareMarket}`;
       setCurrentExchange(newExchangeKey);
-      
+
       // 정렬 상태를 기본값(누적 거래액 desc)으로 초기화
       setSortConfig({ key: 'acc_trade_price24', direction: 'desc' });
 
@@ -312,34 +322,45 @@ const Row = ({
     }
   }, [selectedMainMarket, selectedCompareMarket]);
 
-  // 무한스크롤 핸들러 (전체 페이지 스크롤 사용)
-  const handleInfiniteScroll = useCallback(() => {
-    if (isLoadingMore) return;
+  // TableBody 내부 스크롤 기반 무한스크롤
+  const tableBodyRef = useRef<HTMLDivElement>(null);
 
-    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-    const threshold = 200; // 바닥에서 200px 전에 로드
-    
+  const handleInfiniteScroll = useCallback(() => {
+    if (isLoadingMore || !tableBodyRef.current) return;
+
+    const element = tableBodyRef.current;
+    const { scrollTop, scrollHeight, clientHeight } = element;
+    const threshold = 200; // 바닥에서 200px 전에 자연스럽게 로드
+
     if (scrollHeight - scrollTop - clientHeight < threshold) {
       const filteredTokensSet = new Set(filteredTokens);
       const renderTokens = tokenOrderList.filter(
         (token) => filteredTokensSet.has(token) && rowData[token]
       );
-      
+
       if (visibleRowsCount < renderTokens.length) {
         setIsLoadingMore(true);
-        
-        setTimeout(() => {
-          setVisibleRowsCount(prev => Math.min(prev + 50, renderTokens.length));
-          setIsLoadingMore(false);
-        }, 300);
+
+        // 즉시 더 많은 데이터 표시 (로딩 시간 없음)
+        setVisibleRowsCount((prev) => Math.min(prev + 50, renderTokens.length));
+        setIsLoadingMore(false);
       }
     }
-  }, [isLoadingMore, filteredTokens, tokenOrderList, rowData, visibleRowsCount]);
+  }, [
+    isLoadingMore,
+    filteredTokens,
+    tokenOrderList,
+    rowData,
+    visibleRowsCount,
+  ]);
 
-  // 전체 페이지 스크롤 이벤트 리스너 등록
+  // TableBody 내부 스크롤 이벤트 리스너 등록
   useEffect(() => {
-    window.addEventListener('scroll', handleInfiniteScroll);
-    return () => window.removeEventListener('scroll', handleInfiniteScroll);
+    const element = tableBodyRef.current;
+    if (!element) return;
+
+    element.addEventListener('scroll', handleInfiniteScroll);
+    return () => element.removeEventListener('scroll', handleInfiniteScroll);
   }, [handleInfiniteScroll]);
 
   useEffect(() => {
@@ -419,12 +440,12 @@ const Row = ({
 
     if (rowData && firstDataset && secondTokenDataList) {
       const exchangeKey = `${selectedMainMarket}-${selectedCompareMarket}`;
-      
+
       // 같은 거래소에서만 이전 데이터로 설정 (cross-exchange 비교 방지)
       if (currentExchange === exchangeKey && Object.keys(rowData).length > 0) {
         setPrevRowData(rowData);
       }
-      
+
       updateRowData(rowData, firstDataset, secondDataset).then(
         (updatedData) => {
           if (!isMountedRef.current) return;
@@ -578,7 +599,7 @@ const Row = ({
           </thead>
         </HeaderTable>
 
-        <TableBody>
+        <TableBody ref={tableBodyRef}>
           <BodyTable>
             <tbody>
               {useMemo(() => {
@@ -588,16 +609,18 @@ const Row = ({
                 );
                 // 가상화: visibleRowsCount만큼만 렌더링
                 const visibleTokens = renderTokens.slice(0, visibleRowsCount);
-                
+
                 const exchangeKey = `${selectedMainMarket}-${selectedCompareMarket}`;
                 const shouldUsePrevData = currentExchange === exchangeKey;
-                
+
                 return visibleTokens.map((token) => (
                   <TableRowComponent
                     key={token}
                     token={token}
                     data={rowData[token]}
-                    prevData={shouldUsePrevData ? prevRowData[token] : undefined}
+                    prevData={
+                      shouldUsePrevData ? prevRowData[token] : undefined
+                    }
                     expandedRow={expandedRow}
                     fadeOutClass={fadeOutClass[token]}
                     onRowClick={rowClick}
@@ -605,61 +628,24 @@ const Row = ({
                     loadingCoinDetail={loadingCoinDetail === token}
                   />
                 ));
-              }, [tokenOrderList, filteredTokens, rowData, visibleRowsCount, selectedMainMarket, selectedCompareMarket, currentExchange, prevRowData, expandedRow, fadeOutClass, rowClick, coinDetails, loadingCoinDetail])}
+              }, [
+                tokenOrderList,
+                filteredTokens,
+                rowData,
+                visibleRowsCount,
+                selectedMainMarket,
+                selectedCompareMarket,
+                currentExchange,
+                prevRowData,
+                expandedRow,
+                fadeOutClass,
+                rowClick,
+                coinDetails,
+                loadingCoinDetail,
+              ])}
             </tbody>
           </BodyTable>
         </TableBody>
-        {useMemo(() => {
-          const filteredTokensSet = new Set(filteredTokens);
-          const renderTokens = tokenOrderList.filter(
-            (token) => filteredTokensSet.has(token) && rowData[token]
-          );
-          const hasMoreTokens = renderTokens.length > visibleRowsCount;
-          
-          if (isLoadingMore) {
-            return (
-              <div style={{ 
-                padding: '1rem', 
-                textAlign: 'center',
-                borderTop: `1px solid ${palette.border}` 
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem',
-                  color: palette.textMuted,
-                  fontSize: '0.875rem'
-                }}>
-                  <div style={{
-                    width: '16px',
-                    height: '16px',
-                    border: `2px solid ${palette.border}`,
-                    borderTop: `2px solid ${palette.accent}`,
-                    borderRadius: '50%',
-                    animation: 'spin 1s linear infinite'
-                  }} />
-                  더 많은 코인 정보를 불러오는 중...
-                </div>
-              </div>
-            );
-          }
-          
-          if (hasMoreTokens) {
-            return (
-              <div style={{ 
-                padding: '1rem', 
-                textAlign: 'center',
-                borderTop: `1px solid ${palette.border}`,
-                color: palette.textMuted,
-                fontSize: '0.875rem'
-              }}>
-                스크롤하여 더 많은 코인을 확인하세요 ({renderTokens.length - visibleRowsCount}개 더)
-              </div>
-            );
-          }
-          return null;
-        }, [tokenOrderList, filteredTokens, rowData, visibleRowsCount, isLoadingMore])}
       </TableWrapper>
     </RowContainer>
   );

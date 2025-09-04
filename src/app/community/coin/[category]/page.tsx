@@ -28,7 +28,11 @@ export default async function CategoryPage({
   const size = parseInt(searchParams.size || '15', 10);
 
   try {
-    const categories = await getCategories();
+    // 병렬 요청으로 성능 향상
+    const [categories, postsResponse] = await Promise.all([
+      getCategories(),
+      getPostsByCategory(category, page, size)
+    ]);
 
     if (categories.status === 202) {
       return (
@@ -52,9 +56,6 @@ export default async function CategoryPage({
         />
       );
     }
-
-    // 기존 API로 데이터 가져오기 (1-based 페이지)
-    const postsResponse = await getPostsByCategory(category, page, size);
 
     if (!postsResponse.success) {
       return (
