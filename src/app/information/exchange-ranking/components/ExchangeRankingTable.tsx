@@ -6,13 +6,11 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { ExchangeRankingItem } from '@/types/exchangeRanking';
 import { palette } from '@/styles/palette';
+import { cardStyle } from '@/components/styled/common';
 
 // 스타일 컴포넌트들
 const TableContainer = styled.div`
-  background: ${palette.card};
-  border-radius: 12px;
-  border: 1px solid ${palette.border};
-  box-shadow: ${palette.shadow};
+  ${cardStyle}
   overflow: hidden;
   margin-bottom: 2rem;
 `;
@@ -88,7 +86,7 @@ const UpdatedCell = styled(TableHeaderCell)`
   text-align: center;
 
   @media (max-width: 768px) {
-    min-width: 80px;
+    display: none;
   }
 `;
 
@@ -97,7 +95,7 @@ const FeeCell = styled(TableHeaderCell)`
   text-align: right;
 
   @media (max-width: 768px) {
-    min-width: 70px;
+    display: none;
   }
 `;
 
@@ -211,12 +209,20 @@ const UpdatedTableCell = styled(TableCell)`
   text-align: center;
   font-size: 0.75rem;
   color: ${palette.textSecondary};
+
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 
 const FeeTableCell = styled(TableCell)`
   text-align: right;
   font-weight: 600;
   font-family: 'Courier New', monospace;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 
 const SupportedTableCell = styled(TableCell)`
@@ -254,6 +260,10 @@ const ExpandableContent = styled.td`
     to {
       opacity: 1;
     }
+  }
+
+  @media (max-width: 768px) {
+    padding: 1rem;
   }
 `;
 
@@ -561,7 +571,7 @@ const ExchangeTableRow: React.FC<ExchangeRankingRowProps> = ({
         </SupportedTableCell>
       </TableRow>
       <ExpandableRow $isExpanded={isExpanded}>
-        <ExpandableContent colSpan={7}>
+        <ExpandableContent colSpan={window.innerWidth <= 768 ? 4 : 7}>
           {isExpanded && <ExchangeDetailExpanded exchange={exchange} />}
         </ExpandableContent>
       </ExpandableRow>

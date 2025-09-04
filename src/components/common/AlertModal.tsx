@@ -140,7 +140,7 @@ const ModalTitle = styled.h3`
   letter-spacing: -0.025em;
 
   @media (max-width: 768px) {
-    font-size: 1.125rem;
+    font-size: 1rem;
   }
 `;
 

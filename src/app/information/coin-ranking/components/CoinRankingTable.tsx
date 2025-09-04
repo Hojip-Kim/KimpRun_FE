@@ -73,7 +73,7 @@ const PriceCell = styled(TableHeaderCell)`
   text-align: right;
 
   @media (max-width: 768px) {
-    min-width: 85px;
+    display: none;
   }
 `;
 
@@ -82,7 +82,7 @@ const SupplyCell = styled(TableHeaderCell)`
   text-align: right;
 
   @media (max-width: 768px) {
-    min-width: 90px;
+    display: none;
   }
 `;
 
@@ -193,6 +193,10 @@ const PriceTableCell = styled(TableCell)`
   text-align: right;
   font-weight: 600;
   font-family: 'Courier New', monospace;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 
 const SupplyTableCell = styled(TableCell)`
@@ -202,7 +206,7 @@ const SupplyTableCell = styled(TableCell)`
   font-size: 0.75rem;
 
   @media (max-width: 768px) {
-    font-size: 0.7rem;
+    display: none;
   }
 `;
 
@@ -247,6 +251,10 @@ const ExpandableContent = styled.td`
       opacity: 1;
       max-height: 500px;
     }
+  }
+
+  @media (max-width: 768px) {
+    padding: 1rem;
   }
 `;
 
@@ -426,9 +434,9 @@ const CoinDetailExpanded: React.FC<{
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '2rem',
-        padding: '1rem 0',
+        gridTemplateColumns: window.innerWidth <= 768 ? '1fr' : '1fr 1fr',
+        gap: window.innerWidth <= 768 ? '1.5rem' : '2rem',
+        padding: window.innerWidth <= 768 ? '0.5rem 0' : '1rem 0',
       }}
     >
       <div>

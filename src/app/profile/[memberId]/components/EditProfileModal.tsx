@@ -22,11 +22,17 @@ const ModalOverlay = styled.div<{ $isOpen: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 9999;
   opacity: ${(props) => (props.$isOpen ? 1 : 0)};
   visibility: ${(props) => (props.$isOpen ? 'visible' : 'hidden')};
   transition: all 0.3s ease;
   padding: 1rem;
+  overflow-y: auto;
+
+  @media (max-width: 768px) {
+    align-items: flex-start;
+    padding: 0.5rem;
+  }
 `;
 
 const ModalContainer = styled.div<{ $isOpen: boolean }>`
@@ -41,11 +47,15 @@ const ModalContainer = styled.div<{ $isOpen: boolean }>`
     props.$isOpen ? 'scale(1) translateY(0)' : 'scale(0.9) translateY(20px)'};
   transition: all 0.3s ease;
   position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
 
   @media (max-width: 768px) {
-    padding: 1.5rem;
-    margin: 1rem;
-    border-radius: 16px;
+    padding: 1rem;
+    margin: 0.5rem;
+    border-radius: 12px;
+    margin-top: 2rem;
+    max-width: calc(100vw - 1rem);
   }
 `;
 
@@ -67,7 +77,7 @@ const ModalTitle = styled.h2`
   margin: 0;
 
   @media (max-width: 768px) {
-    font-size: 1.25rem;
+    font-size: 1rem;
   }
 `;
 
@@ -126,6 +136,11 @@ const Input = styled.input`
 
   &::placeholder {
     color: ${palette.textMuted};
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.75rem;
+    font-size: 0.9rem;
   }
 `;
 

@@ -442,7 +442,7 @@ const TableRowComponent = React.memo(
             style={getChangeRateStyle(data.change_rate, data.rate_change)}
           >
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span>{formatPercentage(data.change_rate * 10)}</span>
+              <span>{formatPercentage(data.change_rate)}</span>
               <span style={{ color: 'var(--text-muted)' }}>
                 {data.opening_price ? formatPrice(data.opening_price) : ''}
               </span>
