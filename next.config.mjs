@@ -6,12 +6,8 @@ const nextConfig = {
   },
   reactStrictMode: false,
   webpack: (config, options) => {
-    // 프로덕션에서는 캐시 활성화
-    if (process.env.NODE_ENV === 'production') {
-      config.cache = {
-        type: 'filesystem',
-      };
-    } else {
+    // 개발 모드에서 캐시 문제 방지
+    if (process.env.NODE_ENV !== 'production') {
       config.cache = false;
     }
     return config;
