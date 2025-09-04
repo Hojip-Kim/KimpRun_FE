@@ -363,7 +363,7 @@ const WritePost: React.FC = () => {
                       selected={img === selectedImage}
                       onClick={() => setSelectedImage(img)}
                     >
-                      <img src={img} alt={`미리보기 ${index + 1}`} />
+                      <img src={img} alt={`미리보기 ${index + 1}`} loading="lazy" width="100" height="100" />
                     </ImageItem>
                   ))}
                 </ImageList>

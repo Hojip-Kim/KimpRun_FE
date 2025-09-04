@@ -2,7 +2,8 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { MdOutlineKeyboardArrowDown } from 'react-icons/md';
+import Image from 'next/image';
+import { MdOutlineKeyboardArrowDown } from '@/components/icons';
 import {
   DropdownButton,
   DropdownContainer,
@@ -104,7 +105,7 @@ const Dropdown = <T extends string | number = string>({
       >
         <DropdownValue>
           {current?.iconSrc ? (
-            <img src={current.iconSrc} alt={current.iconAlt || 'icon'} />
+            <img src={current.iconSrc} alt={current.iconAlt || 'icon'} loading="lazy" width="16" height="16" />
           ) : null}
           <DropdownLabel>{current?.label ?? '선택'}</DropdownLabel>
         </DropdownValue>
@@ -135,7 +136,7 @@ const Dropdown = <T extends string | number = string>({
               >
                 {opt.iconSrc ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={opt.iconSrc} alt={opt.iconAlt || 'icon'} />
+                  <img src={opt.iconSrc} alt={opt.iconAlt || 'icon'} loading="lazy" width="16" height="16" />
                 ) : null}
                 {opt.label}
               </DropdownItem>
@@ -156,7 +157,7 @@ const Dropdown = <T extends string | number = string>({
             >
               {opt.iconSrc ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={opt.iconSrc} alt={opt.iconAlt || 'icon'} />
+                <img src={opt.iconSrc} alt={opt.iconAlt || 'icon'} loading="lazy" width="16" height="16" />
               ) : null}
               {opt.label}
             </DropdownItem>

@@ -8,6 +8,12 @@ export const RowContainer = styled.div`
   flex-direction: column;
   padding-bottom: 12px;
   min-height: 0;
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
   @media (max-width: 768px) {
     flex: 1;
   }
@@ -16,28 +22,11 @@ export const RowContainer = styled.div`
 export const TableWrapper = styled.div`
   width: 100%;
   margin: 0 20px 0px 0px;
-  flex: 1;
-  overflow-y: auto;
   overflow-x: hidden;
-  scroll-padding-bottom: 120px;
-  padding-bottom: 120px;
   border: 1px solid ${palette.border};
   border-radius: 12px;
   background: ${palette.card};
   box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
-
-  &::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.3);
-    border-radius: 4px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background-color: rgba(0, 0, 0, 0.2);
-  }
 `;
 
 export const StyledTable = styled.table`
@@ -67,9 +56,10 @@ export const TableHeader = styled.th`
   font-size: 0.6rem;
   text-align: center;
   position: relative;
-  padding: 3px;
+  padding: 8px 3px;
   display: table-cell;
   width: ${100 / 7}%;
+  min-height: 40px;
   box-sizing: border-box;
   border-bottom: 1px solid ${palette.border};
   cursor: pointer;
@@ -81,6 +71,8 @@ export const TableHeader = styled.th`
   }
   @media (max-width: 768px) {
     width: calc(100% / 5);
+    min-height: 36px;
+    padding: 6px 3px;
   }
 `;
 
@@ -106,6 +98,7 @@ export const SortButton = styled.button`
   padding: 0;
   color: ${palette.textMuted};
   transition: all 0.2s ease;
+  will-change: transform, color;
   position: absolute;
   right: 5px;
   top: 50%;
@@ -131,6 +124,7 @@ export const SortButton = styled.button`
 
     svg {
       transform: scale(1.2);
+      will-change: transform;
     }
   }
 `;
@@ -150,6 +144,7 @@ export const TableRow = styled.tr<{ $isExpanded?: boolean }>`
   border-bottom: 1px solid ${palette.border};
   transition: background-color 0.2s ease;
   cursor: pointer;
+  will-change: background-color;
 
   @media (max-width: 768px) {
     td:nth-child(5),
@@ -185,10 +180,14 @@ export const TableCell = styled.td`
   font-size: 0.6rem;
   display: table-cell;
   width: 16%;
-  padding: 3px;
+  min-height: 44px;
+  padding: 8px 3px;
   box-sizing: border-box;
+  vertical-align: middle;
   @media (max-width: 768px) {
     width: calc(100% / 5);
+    min-height: 40px;
+    padding: 6px 3px;
   }
 `;
 

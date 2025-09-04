@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { Provider, useSelector } from 'react-redux';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+const ReactQueryDevtools = dynamic(() => import('@tanstack/react-query-devtools').then(m => ({ default: m.ReactQueryDevtools })), { ssr: false });
 import store, { RootState } from '@/redux/store';
 import Nav from '../../../components/nav/Nav';
 import { persistStore } from 'redux-persist';

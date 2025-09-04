@@ -57,7 +57,7 @@ const updatePostApi = async (
   message: string;
 }> => {
   const response = await clientRequest.patch(
-    `${clientEnv.API_BASE_URL}/${boardId}`,
+    `${clientEnv.API_BASE_URL}/board/${boardId}`,
     { title, content }
   );
 
@@ -79,7 +79,7 @@ const deletePostApi = async (
   message: string;
 }> => {
   const response = await clientRequest.delete(
-    `${clientEnv.API_BASE_URL}/${boardId}/soft`
+    `${clientEnv.API_BASE_URL}/board/${boardId}/soft`
   );
 
   if (response.success && response.status === 200) {

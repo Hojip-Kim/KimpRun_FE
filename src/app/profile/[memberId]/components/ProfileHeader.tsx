@@ -132,6 +132,9 @@ export default function ProfileHeader({
                 <img
                   src={profileInfo.profileImageUrl}
                   alt={profileInfo.nickname}
+                  loading="lazy"
+                  width="80"
+                  height="80"
                 />
               ) : (
                 profileInfo.nickname.charAt(0).toUpperCase()

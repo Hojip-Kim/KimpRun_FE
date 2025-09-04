@@ -153,7 +153,7 @@ export default function ProfileContent({
           <FollowItem key={follower.memberId}>
             <FollowAvatar>
               {follower.profileImageUrl ? (
-                <img src={follower.profileImageUrl} alt={follower.nickname} />
+                <img src={follower.profileImageUrl} alt={follower.nickname} loading="lazy" width="40" height="40" />
               ) : (
                 follower.nickname.charAt(0).toUpperCase()
               )}
@@ -184,7 +184,7 @@ export default function ProfileContent({
           <FollowItem key={follow.memberId}>
             <FollowAvatar>
               {follow.profileImageUrl ? (
-                <img src={follow.profileImageUrl} alt={follow.nickname} />
+                <img src={follow.profileImageUrl} alt={follow.nickname} loading="lazy" width="40" height="40" />
               ) : (
                 follow.nickname.charAt(0).toUpperCase()
               )}

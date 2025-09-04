@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import Image from 'next/image';
 import { numberToKorean, rateCompareByOriginPrice } from '@/method';
 import { formatPrice, formatPercentage } from '@/utils/priceUtils';
 import {
@@ -35,19 +36,19 @@ const CoinDetailView = React.memo(
           minWidth: '80px',
         }}
       >
-        <img
+        <Image
           src={coinDetail.logo}
           alt={coinDetail.symbol}
-          loading="lazy"
+          width={36}
+          height={36}
           style={{
-            width: '36px',
-            height: '36px',
             borderRadius: '50%',
             marginBottom: '0.4rem',
           }}
           onError={(e) => {
             (e.target as HTMLImageElement).style.display = 'none';
           }}
+          priority={false}
         />
         <div style={{ textAlign: 'center' }}>
           <h3
@@ -349,7 +350,6 @@ interface TableRowProps {
   loadingCoinDetail?: boolean;
 }
 
-
 const getChangeRateStyle = (rate, change?) => {
   if ((rate > 0 && change === 'RISE') || rate > 0) {
     return { color: '#45E8BC' };
@@ -361,20 +361,23 @@ const getChangeRateStyle = (rate, change?) => {
 };
 
 const priceChangeStyle = (prev: number, cur: number) => {
-  if (prev === undefined)
-    return { transition: 'background-color 0.4s ease-in-out' };
+  const baseStyle = {
+    transition: 'background-color 0.4s ease-in-out',
+    willChange: 'background-color',
+  };
+  if (prev === undefined) return baseStyle;
   if (prev < cur) {
     return {
+      ...baseStyle,
       backgroundColor: 'rgba(69, 232, 188, 0.2)',
-      transition: 'background-color 0.4s ease-in-out',
     };
   } else if (prev > cur) {
     return {
+      ...baseStyle,
       backgroundColor: 'rgba(239, 68, 68, 0.2)',
-      transition: 'background-color 0.4s ease-in-out',
     };
   } else {
-    return { transition: 'background-color 0.4s ease-in-out' };
+    return baseStyle;
   }
 };
 const TableRowComponent = React.memo(
@@ -388,6 +391,80 @@ const TableRowComponent = React.memo(
     coinDetail,
     loadingCoinDetail,
   }: TableRowProps) => {
+    // 무거운 계산들을 메모화하여 성능 최적화
+    const memoizedStyles = useMemo(
+      () => ({
+        priceChangeStyle: priceChangeStyle(
+          prevData?.trade_price,
+          data.trade_price
+        ),
+        kimpStyle: getChangeRateStyle(
+          rateCompareByOriginPrice(data.trade_price / data.secondPrice)
+        ),
+        changeRateStyle: getChangeRateStyle(data.change_rate, data.rate_change),
+        highestPriceStyle: getChangeRateStyle(
+          rateCompareByOriginPrice(data.trade_price / data.highest_price)
+        ),
+        lowestPriceStyle: getChangeRateStyle(
+          rateCompareByOriginPrice(data.trade_price / data.lowest_price)
+        ),
+      }),
+      [
+        prevData?.trade_price,
+        data.trade_price,
+        data.secondPrice,
+        data.change_rate,
+        data.rate_change,
+        data.highest_price,
+        data.lowest_price,
+      ]
+    );
+
+    // 포맷된 값들을 메모화
+    const memoizedValues = useMemo(
+      () => ({
+        formattedPrice: data.trade_price ? formatPrice(data.trade_price) : '',
+        formattedSecondPrice: data.secondPrice
+          ? formatPrice(data.secondPrice)
+          : '',
+        formattedKimp: formatPercentage(data.kimp),
+        formattedChangeRate: formatPercentage(data.change_rate / 10),
+        formattedOpeningPrice: data.opening_price
+          ? formatPrice(data.opening_price)
+          : '',
+        formattedHighestPrice:
+          data.highest_price !== 0
+            ? formatPrice(data.highest_price) + '원'
+            : '정보 없음',
+        formattedLowestPrice:
+          data.lowest_price !== 0
+            ? formatPrice(data.lowest_price) + '원'
+            : '정보 없음',
+        formattedAccTradePrice: numberToKorean(data.acc_trade_price24) + '원',
+        priceDiff: data.secondPrice
+          ? (() => {
+              const diff = Math.abs(data.trade_price - data.secondPrice);
+              return diff >= 1
+                ? diff.toFixed(2)
+                : parseFloat(diff.toPrecision(2)).toString();
+            })()
+          : '',
+        highestPricePercentage: data.highest_price
+          ? (
+              rateCompareByOriginPrice(data.trade_price / data.highest_price) *
+              100
+            ).toFixed(2) + '%'
+          : '',
+        lowestPricePercentage: data.lowest_price
+          ? (
+              rateCompareByOriginPrice(data.trade_price / data.lowest_price) *
+              100
+            ).toFixed(2) + '%'
+          : '',
+      }),
+      [data]
+    );
+
     return (
       <React.Fragment>
         <StyledTableRow
@@ -396,41 +473,25 @@ const TableRowComponent = React.memo(
             onRowClick(token);
           }}
           className={fadeOutClass || ''}
-          style={priceChangeStyle(prevData?.trade_price, data.trade_price)}
+          style={memoizedStyles.priceChangeStyle}
         >
           <TableCell>{data.token}</TableCell>
           {/* 코인 가격 */}
           <TableCell>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span>
-                {data.trade_price ? formatPrice(data.trade_price) : ''}
-              </span>
+              <span>{memoizedValues.formattedPrice}</span>
               <span style={{ color: 'var(--text-muted)' }}>
-                {data.secondPrice ? formatPrice(data.secondPrice) : ''}
+                {memoizedValues.formattedSecondPrice}
               </span>
             </div>
           </TableCell>
           {/* 김프 */}
-          <TableCell
-            style={getChangeRateStyle(
-              rateCompareByOriginPrice(data.trade_price / data.secondPrice)
-            )}
-          >
+          <TableCell style={memoizedStyles.kimpStyle}>
             {data.secondPrice ? (
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span>{formatPercentage(data.kimp)}</span>
+                <span>{memoizedValues.formattedKimp}</span>
                 <span style={{ color: 'var(--text-muted)' }}>
-                  {(() => {
-                    const priceDiff = Math.abs(
-                      data.trade_price - data.secondPrice
-                    );
-
-                    if (priceDiff >= 1) {
-                      return priceDiff.toFixed(2);
-                    }
-
-                    return parseFloat(priceDiff.toPrecision(2)).toString();
-                  })()}
+                  {memoizedValues.priceDiff}
                 </span>
               </div>
             ) : (
@@ -438,60 +499,30 @@ const TableRowComponent = React.memo(
             )}
           </TableCell>
           {/* 변동률 */}
-          <TableCell
-            style={getChangeRateStyle(data.change_rate, data.rate_change)}
-          >
+          <TableCell style={memoizedStyles.changeRateStyle}>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span>{formatPercentage(data.change_rate)}</span>
+              <span>{memoizedValues.formattedChangeRate}</span>
               <span style={{ color: 'var(--text-muted)' }}>
-                {data.opening_price ? formatPrice(data.opening_price) : ''}
+                {memoizedValues.formattedOpeningPrice}
               </span>
             </div>
           </TableCell>
           {/* 52주 고가 */}
           <TableCell>
-            <div>
-              {data.highest_price !== 0
-                ? formatPrice(data.highest_price) + '원'
-                : '정보 없음'}
-            </div>
-            <div
-              style={getChangeRateStyle(
-                rateCompareByOriginPrice(data.trade_price / data.highest_price)
-              )}
-            >
-              {data.highest_price
-                ? (
-                    rateCompareByOriginPrice(
-                      data.trade_price / data.highest_price
-                    ) * 100
-                  ).toFixed(2) + '%'
-                : ''}
+            <div>{memoizedValues.formattedHighestPrice}</div>
+            <div style={memoizedStyles.highestPriceStyle}>
+              {memoizedValues.highestPricePercentage}
             </div>
           </TableCell>
           {/* 52주 저가 */}
           <TableCell>
-            <div>
-              {data.lowest_price !== 0
-                ? formatPrice(data.lowest_price) + '원'
-                : '정보 없음'}
-            </div>
-            <div
-              style={getChangeRateStyle(
-                rateCompareByOriginPrice(data.trade_price / data.lowest_price)
-              )}
-            >
-              {data.lowest_price
-                ? (
-                    rateCompareByOriginPrice(
-                      data.trade_price / data.lowest_price
-                    ) * 100
-                  ).toFixed(2) + '%'
-                : ''}
+            <div>{memoizedValues.formattedLowestPrice}</div>
+            <div style={memoizedStyles.lowestPriceStyle}>
+              {memoizedValues.lowestPricePercentage}
             </div>
           </TableCell>
           <TableCell style={{ fontSize: '0.6rem', color: 'gray' }}>
-            {numberToKorean(data.acc_trade_price24) + '원'}
+            {memoizedValues.formattedAccTradePrice}
           </TableCell>
         </StyledTableRow>
         {expandedRow === token && (

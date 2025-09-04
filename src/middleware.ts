@@ -44,9 +44,13 @@ export async function middleware(req: NextRequest) {
     }
   } else {
     // 쿠키가 존재하지 않으면 새로 발급
+    const randomBytes = crypto.getRandomValues(new Uint8Array(16));
+    const randomString = toBase64Url(randomBytes);
     const payload = JSON.stringify({
       id: crypto.randomUUID(),
+      random: randomString,
       iat: Date.now(),
+      timestamp: Date.now() + Math.random() * 1000,
     });
     const payloadB64Url = toBase64Url(new TextEncoder().encode(payload));
     const signature = await sign(payload);

@@ -146,7 +146,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             <LoginButton type="submit">로그인</LoginButton>
           </form>
           <GoogleLoginButton onClick={handleGoogleLogin}>
-            <img src="/google.png" alt="google icon" />
+            <img src="/google.png" alt="google icon" loading="lazy" width="20" height="20" />
             Google로 로그인
           </GoogleLoginButton>
           <div className="remember-row">

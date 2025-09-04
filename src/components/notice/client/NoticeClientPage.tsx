@@ -332,7 +332,10 @@ const NoticeClientPage = ({
                                 ] || '/logo.png'
                               }
                               alt={`${notice.exchangeType} logo`}
-                              style={{ width: 14, height: 14, borderRadius: 3 }}
+                              loading="lazy"
+                              width="14"
+                              height="14"
+                              style={{ borderRadius: 3 }}
                             />
                             {notice.exchangeType}
                           </ExchangeBadge>
