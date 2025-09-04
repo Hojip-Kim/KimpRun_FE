@@ -4,8 +4,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { palette } from '@/styles/palette';
 import { useTheme } from '@/hooks/useTheme';
-import { MdPalette, MdLightMode, MdDarkMode } from 'react-icons/md';
-import { IoClose } from 'react-icons/io5';
+import { MdPalette, MdLightMode, MdDarkMode, IoClose } from '@/components/icons';
 
 const Fab = styled.button`
   position: fixed;

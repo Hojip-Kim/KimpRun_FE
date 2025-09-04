@@ -3,8 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
-import Modal from '@/components/modal/modal';
-import LoginForm from '@/components/login/loginForm';
 import { IMessage } from '@stomp/stompjs';
 import { useStompClientSingleton } from '@/hooks/useStompClientSingleton';
 import {
@@ -14,9 +12,13 @@ import {
   updateGuestNickname as updateGuestNicknameAction,
   setUuid,
 } from '@/redux/reducer/authReducer';
-import ProfileForm from '../profile/ProfileForm';
-import NicknameModal from '../profile/NicknameModal';
-import NewNoticeModal from '../notice/client/NewNoticeModal';
+import dynamic from 'next/dynamic';
+
+const Modal = dynamic(() => import('@/components/modal/modal'), { ssr: false });
+const LoginForm = dynamic(() => import('@/components/login/loginForm'), { ssr: false });
+const ProfileForm = dynamic(() => import('../profile/ProfileForm'), { ssr: false });
+const NicknameModal = dynamic(() => import('../profile/NicknameModal'), { ssr: false });
+const NewNoticeModal = dynamic(() => import('../notice/client/NewNoticeModal'), { ssr: false });
 import ThemeToggle from '../theme/ThemeToggle';
 import { Notice } from '../notice/type';
 import { NoticeModalContainer } from '../notice/client/style';
@@ -55,7 +57,7 @@ import {
   setTether,
   setUserCount,
 } from '@/redux/reducer/infoReducer';
-import { FaUser, FaUserCircle, FaUserCog } from 'react-icons/fa';
+import { FaUser, FaUserCircle, FaUserCog } from '@/components/icons';
 import { clientEnv } from '@/utils/env';
 
 import { clientRequest } from '@/server/fetch';

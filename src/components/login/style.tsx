@@ -1,22 +1,13 @@
 'use client';
 
 import styled from 'styled-components';
+import { secondaryButton } from '@/components/styled/common';
 
 export const LoginButton = styled.button`
+  ${secondaryButton}
   margin-top: 10px;
-  color: var(--text-primary);
   padding: 12px;
-  border: 1px solid var(--border);
   border-radius: 10px;
-  cursor: pointer;
-  background: var(--input);
-  transition: all 0.3s ease;
-
-  &:hover {
-    color: var(--accent);
-    background-color: var(--bg-container);
-    border-color: var(--accent);
-  }
 
   &:disabled {
     opacity: 0.6;

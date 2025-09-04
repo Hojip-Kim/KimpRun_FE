@@ -2,10 +2,12 @@ import { Metadata } from 'next';
 import RowPageClient from './components/RowPageClient';
 import NoticeServerPage from '@/components/notice/server/NoticeServerPage';
 import { MarketType } from '@/types/marketType';
-import TradingViewWidget from '@/components/tradingview/TradingViewWidget';
 import './page.css';
 import Chat from '@/components/chat/Chat';
 import React, { Suspense } from 'react';
+import nextDynamic from 'next/dynamic';
+
+const TradingViewWidget = nextDynamic(() => import('@/components/tradingview/TradingViewWidget'), { ssr: false });
 import {
   NoticeSkeleton,
   ChatSkeleton,

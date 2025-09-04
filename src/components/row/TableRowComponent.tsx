@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { numberToKorean, rateCompareByOriginPrice } from '@/method';
+import { formatPrice, formatPercentage } from '@/utils/priceUtils';
 import {
   TableCell,
   TableRow as StyledTableRow,
@@ -348,27 +349,6 @@ interface TableRowProps {
   loadingCoinDetail?: boolean;
 }
 
-// 가격의 정수 자릿수에 따라 소수점을 조절하는 함수
-const formatPrice = (price: number): string => {
-  if (!price) return '0';
-
-  const integerPart = Math.floor(price);
-  const integerDigits = integerPart.toString().length;
-
-  if (integerDigits >= 4) {
-    // 4자리 이상: 정수로 표시
-    return Math.round(price).toLocaleString();
-  } else if (integerDigits >= 2) {
-    // 2-3자리: 소수점 1자리
-    return price.toFixed(1);
-  } else if (integerDigits === 1) {
-    // 1자리: 소수점 2자리
-    return price.toFixed(2);
-  } else {
-    // 1보다 작은 경우: 소수점 4자리
-    return price.toFixed(4);
-  }
-};
 
 const getChangeRateStyle = (rate, change?) => {
   if ((rate > 0 && change === 'RISE') || rate > 0) {
@@ -438,7 +418,7 @@ const TableRowComponent = React.memo(
           >
             {data.secondPrice ? (
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span>{(data.kimp * 100).toFixed(2)}%</span>
+                <span>{formatPercentage(data.kimp)}</span>
                 <span style={{ color: 'var(--text-muted)' }}>
                   {(() => {
                     const priceDiff = Math.abs(
@@ -462,7 +442,7 @@ const TableRowComponent = React.memo(
             style={getChangeRateStyle(data.change_rate, data.rate_change)}
           >
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span>{(data.change_rate * 10).toFixed(2)}%</span>
+              <span>{formatPercentage(data.change_rate * 10)}</span>
               <span style={{ color: 'var(--text-muted)' }}>
                 {data.opening_price ? formatPrice(data.opening_price) : ''}
               </span>

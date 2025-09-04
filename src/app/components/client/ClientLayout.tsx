@@ -10,8 +10,10 @@ import { persistStore } from 'redux-persist';
 import { PersistGate } from 'redux-persist/integration/react';
 import { LayoutWrapper, MainContent } from './style';
 import MobileTabBar from '@/components/nav/MobileTabBar';
-import MobileChatFab from '@/components/chat/MobileChatFab';
-import DesktopChatFab from '@/components/chat/DesktopChatFab';
+import dynamic from 'next/dynamic';
+
+const MobileChatFab = dynamic(() => import('@/components/chat/MobileChatFab'), { ssr: false });
+const DesktopChatFab = dynamic(() => import('@/components/chat/DesktopChatFab'), { ssr: false });
 import MobileThemeFab from '@/components/theme/MobileThemeFab';
 import MobileNoticeFab from '@/components/notice/MobileNoticeFab';
 import ScrollFab from '@/components/common/ScrollFab';

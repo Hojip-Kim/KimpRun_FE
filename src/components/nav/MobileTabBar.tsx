@@ -5,10 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import styled from 'styled-components';
 import { palette } from '@/styles/palette';
 import { clientEnv } from '@/utils/env';
-import { FiHome } from 'react-icons/fi';
-import { MdOutlineForum } from 'react-icons/md';
-import { LuBarChart3 } from 'react-icons/lu';
-import { IoNewspaperOutline } from 'react-icons/io5';
+import { FiHome, MdOutlineForum, LuBarChart3, IoNewspaperOutline } from '@/components/icons';
 
 const Bar = styled.nav`
   position: fixed;

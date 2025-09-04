@@ -2,6 +2,7 @@ import React from 'react';
 import { Post } from '../types';
 import Link from 'next/link';
 import ProfileImage from '@/components/common/ProfileImage';
+import { formatKoreanDateTime } from '@/utils/dateUtils';
 import {
   StyledRow,
   TitleSection,
@@ -28,16 +29,6 @@ interface BoardRowProps {
 }
 
 const BoardRow: React.FC<BoardRowProps> = ({ post }) => {
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('ko-KR', {
-      year: '2-digit',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
-  };
 
   const handleAuthorClick = (e?: React.MouseEvent) => {
     if (e) {
@@ -82,7 +73,7 @@ const BoardRow: React.FC<BoardRowProps> = ({ post }) => {
               </AuthorLink>
             </div>
           </AuthorCell>
-          <DateCell>{formatDate(post.createdAt)}</DateCell>
+          <DateCell>{formatKoreanDateTime(post.createdAt)}</DateCell>
         </TitleSection>
 
         <StatsSection>
@@ -124,7 +115,7 @@ const BoardRow: React.FC<BoardRowProps> = ({ post }) => {
             }}
           >
             <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>
-              {formatDate(post.createdAt)}
+              {formatKoreanDateTime(post.createdAt)}
             </span>
             
             <MobileStats>

@@ -25,7 +25,15 @@ import { useStompClientSingleton } from '@/hooks/useStompClientSingleton';
 import { IMessage } from '@stomp/stompjs';
 import { MarketDataMap } from '@/types/marketData';
 import MarketSelector from '@/components/market-selector/MarketSelector';
-import TradingViewWidget from '@/components/tradingview/TradingViewWidget';
+import dynamic from 'next/dynamic';
+
+const TradingViewWidget = dynamic(
+  () => import('@/components/tradingview/TradingViewWidget'),
+  { 
+    ssr: false,
+    loading: () => <div style={{ height: '200px', background: 'var(--card)' }}>차트 로딩중...</div>
+  }
+);
 import {
   MarketSelectorSkeleton,
   SearchSkeleton,

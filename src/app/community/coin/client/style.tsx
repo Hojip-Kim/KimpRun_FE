@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { palette } from '@/styles/palette';
+import { primaryButton, mobileOptimized } from '@/components/styled/common';
 
 // board row
 
@@ -267,29 +268,13 @@ export const BoardHeader = styled.div`
 `;
 
 export const WriteButton = styled.button`
-  padding: 0.75rem 1.5rem;
+  ${primaryButton}
   font-size: 0.9rem;
-  font-weight: 600;
-  color: ${palette.bgPage};
-  background: ${palette.accent};
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
   backdrop-filter: blur(8px);
 
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px ${palette.accentRing};
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-
+  ${mobileOptimized}
   @media (max-width: 768px) {
     font-size: 0.7rem;
-    padding: 0.5rem 1rem;
   }
 `;
 

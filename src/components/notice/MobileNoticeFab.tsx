@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { FaBell, FaTimes } from 'react-icons/fa';
+import { FaBell, FaTimes } from '@/components/icons';
 import { palette } from '@/styles/palette';
 import NoticeClientPage from './client/NoticeClientPage';
 import { NoticeResponse } from './type';

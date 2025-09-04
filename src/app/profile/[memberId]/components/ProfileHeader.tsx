@@ -4,6 +4,7 @@ import { ProfileInfo } from '@/types/profile';
 import { RootState } from '@/redux/store';
 import { setUser } from '@/redux/reducer/authReducer';
 import { useGlobalAlert } from '@/providers/AlertProvider';
+import { formatDateWithDaysAgo } from '@/utils/dateUtils';
 import {
   ProfileHeaderCard,
   ProfileHeaderTop,
@@ -26,9 +27,11 @@ import {
   AvatarContainer,
   EditAvatarOverlay,
 } from '../styles';
-import EditProfileModal from './EditProfileModal';
-import ProfileImageModal from './ProfileImageModal';
+import dynamic from 'next/dynamic';
 import { updateNickname } from '../api/profileApi';
+
+const EditProfileModal = dynamic(() => import('./EditProfileModal'), { ssr: false });
+const ProfileImageModal = dynamic(() => import('./ProfileImageModal'), { ssr: false });
 
 interface ProfileHeaderProps {
   profileInfo: ProfileInfo;
@@ -105,23 +108,6 @@ export default function ProfileHeader({
     return false;
   };
 
-  const formatDate = (dateString: string) => {
-    const joinDate = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - joinDate.getTime());
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-    const formattedDate = joinDate
-      .toLocaleDateString('ko-KR', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-      })
-      .replace(/\./g, '.')
-      .replace(/ /g, '');
-
-    return { date: formattedDate, daysAgo: diffDays };
-  };
 
   const getRoleBadge = (role: string) => {
     switch (role.toUpperCase()) {
@@ -228,7 +214,7 @@ export default function ProfileHeader({
           <ProfileDetail>
             <ProfileDetailLabel>가입일</ProfileDetailLabel>
             <ProfileDetailValue>
-              {formatDate(profileInfo.joinedAt).date}
+              {formatDateWithDaysAgo(profileInfo.joinedAt).date}
               <span
                 style={{
                   fontSize: '0.85em',
@@ -237,7 +223,7 @@ export default function ProfileHeader({
                   color: 'inherit',
                 }}
               >
-                {formatDate(profileInfo.joinedAt).daysAgo}일전
+                {formatDateWithDaysAgo(profileInfo.joinedAt).daysAgo}일전
               </span>
             </ProfileDetailValue>
           </ProfileDetail>

@@ -17,7 +17,9 @@ import { profileClientApi } from '@/server/profile/profileApi';
 import ProfileHeader from './components/ProfileHeader';
 import ProfileTabs from './components/ProfileTabs';
 import ProfileContent from './components/ProfileContent';
-import DeleteAccountModal from './components/DeleteAccountModal';
+import dynamic from 'next/dynamic';
+
+const DeleteAccountModal = dynamic(() => import('./components/DeleteAccountModal'), { ssr: false });
 import {
   ProfileContainer,
   ProfileWrapper,

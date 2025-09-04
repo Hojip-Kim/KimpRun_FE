@@ -12,8 +12,7 @@ import {
 } from '@/redux/reducer/chartMapReducer';
 import styled from 'styled-components';
 import { palette } from '@/styles/palette';
-import { FaPlus, FaMinus, FaSearchPlus, FaTimes } from 'react-icons/fa';
-import { BiSearch } from 'react-icons/bi';
+import { FaPlus, FaMinus, FaSearchPlus, FaTimes, BiSearch } from '@/components/icons';
 import dynamic from 'next/dynamic';
 import { ChartMapSkeleton } from '@/components/skeleton/Skeleton';
 import CurrencySelect from '@/components/search/CurrencySelect';

@@ -2,17 +2,16 @@
 
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { cardStyle } from '@/components/styled/common';
 import { palette } from '@/styles/palette';
 import { CoinRankingItem, CoinRankingRowProps } from '@/types/coinRanking';
 import { numberToKorean } from '@/method/common_method';
+import { formatCryptoPrice } from '@/utils/priceUtils';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 
 const TableContainer = styled.div`
-  background: ${palette.card};
-  border-radius: 12px;
-  border: 1px solid ${palette.border};
-  box-shadow: ${palette.shadow};
+  ${cardStyle}
   overflow: hidden;
   margin-bottom: 2rem;
 `;
@@ -252,31 +251,6 @@ const ExpandableContent = styled.td`
 `;
 
 // 유틸리티 함수들
-const formatPrice = (price: string): string => {
-  const numPrice = parseFloat(price);
-
-  if (isNaN(numPrice) || numPrice <= 0) {
-    return 'N/A';
-  }
-
-  if (numPrice >= 1) {
-    return numPrice.toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  } else if (numPrice >= 0.01) {
-    return numPrice.toFixed(4);
-  } else if (numPrice >= 0.0001) {
-    return numPrice.toFixed(6);
-  } else if (numPrice >= 0.000001) {
-    return numPrice.toFixed(8);
-  } else if (numPrice >= 0.00000001) {
-    return numPrice.toFixed(10);
-  } else {
-    // 매우 작은 값도 소수점으로 표시 (최대 12자리)
-    return numPrice.toFixed(12);
-  }
-};
 
 const formatMarketCap = (
   marketCap: string,
@@ -612,7 +586,7 @@ const CoinTableRow: React.FC<CoinRankingRowProps & { dollarRate: number }> = ({
             }
 
             const price = marketCap / circulatingSupply;
-            return formatPrice(price.toString());
+            return formatCryptoPrice(price.toString());
           })()}
         </PriceTableCell>
         <SupplyTableCell>{formatSupply(coin.maxSupply)}</SupplyTableCell>

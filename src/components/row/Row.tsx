@@ -11,7 +11,7 @@ import {
   updateRowDataFirstRender,
   getCoinDetail,
 } from './rowDataFetch';
-import { FaSort, FaSortDown, FaSortUp } from 'react-icons/fa';
+import { FaSort, FaSortDown, FaSortUp } from '@/components/icons';
 import {
   RowContainer,
   TableWrapper,
