@@ -405,9 +405,11 @@ const Nav = () => {
           </NavMenuItem>
           <NavMenuItem>
             <NavMenuLink
-              onClick={() =>
-                router.push(`${clientEnv.COMMUNITY_PAGE}/coin/1?page=1&size=15`)
-              }
+              onClick={() => {
+                const url = `${clientEnv.COMMUNITY_PAGE}/coin/1?page=1&size=15`;
+                router.push(url);
+                router.refresh(); // 강제 새로고침으로 즉시 이동
+              }}
             >
               커뮤니티
             </NavMenuLink>

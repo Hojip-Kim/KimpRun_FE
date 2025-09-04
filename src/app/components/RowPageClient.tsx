@@ -12,7 +12,7 @@ import {
   setSelectedCompareMarket,
 } from '@/redux/reducer/marketReducer';
 import { AppDispatch, RootState } from '@/redux/store';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Search from '@/components/search/Search';
 import { checkAuth } from '@/components/login/server/checkAuth';
@@ -275,10 +275,15 @@ const RowPageClient: React.FC = () => {
   }, [isConnected, subscribe, unsubscribe, handleMarketDataMessage]);
 
   // 초기 설정 및 데이터 로드 - redux-persist 상태 우선 사용
+  const authInitialized = useRef(false);
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        await checkAuth(dispatch);
+        // checkAuth는 한 번만 실행
+        if (!authInitialized.current) {
+          await checkAuth(dispatch);
+          authInitialized.current = true;
+        }
       } catch (error) {
         console.error(error);
         dispatch(setGuestUser());

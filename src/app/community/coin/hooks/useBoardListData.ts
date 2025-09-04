@@ -22,7 +22,9 @@ const fetchBoardList = async (
     endpoint = `${clientEnv.API_BASE_URL}/board/${categoryId}?page=${page}&size=${size}`;
   }
 
-  const response = await clientRequest.get<AllPostData>(endpoint);
+  const response = await clientRequest.get<AllPostData>(endpoint, {
+    cache: 'no-store'
+  });
 
   if (response.success && response.data) {
     return response.data;

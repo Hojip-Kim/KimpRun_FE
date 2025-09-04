@@ -6,7 +6,7 @@ import { clientRequest } from '@/server/fetch';
 
 const statusUrl = clientEnv.STATUS_URL;
 
-interface ResponseAuth {
+export interface ResponseAuth {
   isAuthenticated: boolean;
   member: User;
   uuid?: string;
@@ -18,7 +18,7 @@ export const checkAuth = async (dispatch: AppDispatch) => {
       credentials: 'include',
     });
 
-    // UUID 설정 (있는 경우)
+    // UUID 설정 (백엔드에서 이미 쿠키 설정함)
     if (response.data.uuid) {
       dispatch(setUuid(response.data.uuid));
     }

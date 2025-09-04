@@ -15,7 +15,8 @@ import { Category } from '@/app/admin/type';
 import { AllPostData } from '../../types';
 import Dropdown, { DropdownOption } from '@/components/common/Dropdown';
 import { CommunityBoardSkeleton } from '@/components/skeleton/Skeleton';
-import { useBoardListData } from '../hooks/useBoardListData';
+import { clientRequest } from '@/server/fetch/client';
+import { clientEnv } from '@/utils/env';
 import {
   BoardContainer,
   BoardHeader,
@@ -52,6 +53,10 @@ const Board: React.FC<BoardProps> = ({
   const [currentCategoryId, setCurrentCategoryId] = useState(initialCategoryId);
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [pageSize, setPageSize] = useState(initialSize);
+  const [boardListData, setBoardListData] = useState<AllPostData>(initialPosts);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  
   const router = useRouter();
   const pathname = usePathname();
 
@@ -59,16 +64,37 @@ const Board: React.FC<BoardProps> = ({
     (state: RootState) => state.auth.isAuthenticated
   );
 
-  // React Query로 게시판 데이터 관리
-  const {
-    data: boardListData,
-    isLoading,
-    error,
-    refetch,
-  } = useBoardListData(currentCategoryId, currentPage, pageSize, initialPosts);
-
   const posts = boardListData?.boardResponseDtos || [];
   const totalPosts = boardListData?.count || 0;
+
+  // 데이터 fetching 함수
+  const fetchBoardData = async (categoryId: number, page: number, size: number) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      let endpoint: string;
+      if (categoryId === 1) {
+        endpoint = `${clientEnv.API_BASE_URL}/board/1?page=${page}&size=${size}`;
+      } else {
+        endpoint = `${clientEnv.API_BASE_URL}/board/${categoryId}?page=${page}&size=${size}`;
+      }
+
+      const response = await clientRequest.get<AllPostData>(endpoint, {
+        cache: 'no-store'
+      });
+
+      if (response.success && response.data) {
+        setBoardListData(response.data);
+      } else {
+        throw new Error(response.error || 'Failed to fetch board list');
+      }
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handlePageChange = (newPage: number) => {
     router.push(
@@ -77,10 +103,11 @@ const Board: React.FC<BoardProps> = ({
     setCurrentPage(newPage);
   };
 
-  const handleCategoryChange = (newCategoryId: number) => {
+  const handleCategoryChange = async (newCategoryId: number) => {
     router.push(`/community/coin/${newCategoryId}?page=1&size=${pageSize}`);
     setCurrentCategoryId(newCategoryId);
     setCurrentPage(1);
+    await fetchBoardData(newCategoryId, 1, pageSize);
   };
 
   // 서버에서 전달된 초기 데이터/파라미터가 변경되면 상태 동기화
@@ -119,7 +146,7 @@ const Board: React.FC<BoardProps> = ({
           />
           <div style={{ textAlign: 'center', marginTop: '1rem' }}>
             <button
-              onClick={() => refetch()}
+              onClick={() => fetchBoardData(currentCategoryId, currentPage, pageSize)}
               style={{
                 padding: '0.5rem 1rem',
                 backgroundColor: '#ffd700',

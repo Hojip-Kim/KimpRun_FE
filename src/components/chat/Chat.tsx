@@ -194,10 +194,13 @@ const Chat = () => {
   const isMyMessage = (message: ChatMessage): boolean => {
     if (isAuthenticated && currentUser.memberId) {
       // 로그인한 사용자: memberId로 판별
-      return message.authenticated && message.memberId === currentUser.memberId;
+      return (
+        message.memberId === currentUser.memberId &&
+        message.authenticated === true
+      );
     } else {
       // 비로그인 사용자: UUID로 판별
-      return message.uuid === uuid;
+      return message.uuid === uuid && message.authenticated === false;
     }
   };
 

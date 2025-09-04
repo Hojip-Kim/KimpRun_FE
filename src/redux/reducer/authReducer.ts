@@ -3,7 +3,9 @@ import { AuthState, User } from '../type';
 
 const updateGuestNameCookie = (name: string) => {
   if (typeof window !== 'undefined') {
-    document.cookie = `nickname=${encodeURIComponent(name)}; path=/; max-age=31536000`;
+    document.cookie = `nickname=${encodeURIComponent(
+      name
+    )}; path=/; max-age=31536000`;
   }
 };
 
