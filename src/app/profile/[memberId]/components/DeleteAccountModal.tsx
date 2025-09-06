@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { palette } from '@/styles/palette';
 import { deleteMember } from '../api/profileApi';
+import { useGlobalAlert } from '@/providers/AlertProvider';
 
 interface DeleteAccountModalProps {
   isOpen: boolean;
@@ -274,6 +275,8 @@ export default function DeleteAccountModal({
   const [currentStep, setCurrentStep] = useState<Step>('confirmation');
   const [selectedReasons, setSelectedReasons] = useState<string[]>([]);
 
+  const { showSuccess, showError } = useGlobalAlert();
+
   const handleReasonChange = (reasonId: string) => {
     setSelectedReasons((prev) =>
       prev.includes(reasonId)
@@ -301,13 +304,13 @@ export default function DeleteAccountModal({
   const handleDelete = async () => {
     const isDeleted = await deleteMember(selectedReasons[0]);
     if (isDeleted) {
-      alert('회원탈퇴가 처리되었습니다.');
+      showSuccess('회원탈퇴가 처리되었습니다.');
       onClose();
     } else {
-      alert('회원탈퇴 처리에 실패했습니다.');
+      showError('회원탈퇴 처리에 실패했습니다.');
     }
 
-    alert('회원탈퇴가 처리되었습니다. (API 미구현)');
+    showSuccess('회원탈퇴가 처리되었습니다. (API 미구현)');
     onClose();
   };
 

@@ -102,7 +102,8 @@ const DominanceCell = styled(TableHeaderCell)`
   font-weight: 700;
 
   @media (max-width: 768px) {
-    display: none;
+    min-width: 70px;
+    font-size: 0.7rem;
   }
 `;
 
@@ -228,7 +229,7 @@ const DominanceTableCell = styled(TableCell)`
   font-size: 0.8rem;
 
   @media (max-width: 768px) {
-    display: none;
+    font-size: 0.65rem;
   }
 `;
 
@@ -254,7 +255,123 @@ const ExpandableContent = styled.td`
   }
 
   @media (max-width: 768px) {
-    padding: 1rem;
+    padding: 0.75rem;
+    overflow-x: auto;
+    width: 100%;
+    max-width: calc(100vw - 2rem);
+    box-sizing: border-box;
+  }
+`;
+
+const DetailGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  padding: 1rem 0;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 0.5rem 0;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+`;
+
+const DetailSection = styled.div`
+  h4 {
+    margin: 0 0 1rem 0;
+    color: ${palette.accent};
+  }
+  
+  @media (max-width: 768px) {
+    h4 {
+      font-size: 1rem;
+    }
+  }
+`;
+
+const DetailList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const DetailItem = styled.div`
+  display: flex;
+  justify-content: space-between;
+  
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+`;
+
+const DetailLabel = styled.span`
+  color: ${palette.textSecondary};
+`;
+
+const DetailValue = styled.span`
+  color: ${palette.textPrimary};
+  
+  @media (max-width: 768px) {
+    word-break: break-all;
+    text-align: right;
+  }
+`;
+
+const DescriptionSection = styled.div`
+  grid-column: 1 / -1;
+  margin-top: 1rem;
+
+  h4 {
+    margin: 0 0 0.5rem 0;
+    color: ${palette.accent};
+  }
+
+  p {
+    color: ${palette.textSecondary};
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    h4 {
+      font-size: 0.9rem;
+    }
+    
+    p {
+      font-size: 0.8rem;
+      word-break: break-word;
+      overflow-wrap: break-word;
+    }
+  }
+`;
+
+const ExplorerSection = styled.div`
+  margin-top: 1rem;
+
+  span {
+    color: ${palette.textSecondary};
+    
+    @media (max-width: 768px) {
+      font-size: 0.7rem;
+    }
+  }
+
+  a {
+    color: ${palette.accent};
+    text-decoration: none;
+    margin-right: 0.5rem;
+    
+    @media (max-width: 768px) {
+      font-size: 0.7rem;
+      display: inline-block;
+      margin-bottom: 0.25rem;
+      word-break: break-all;
+    }
   }
 `;
 
@@ -265,12 +382,12 @@ const formatMarketCap = (
   dollarRate: number
 ): React.ReactNode => {
   if (!marketCap || marketCap === '0' || marketCap === 'null') {
-    return 'N/A';
+    return '정보없음';
   }
 
   const numMarketCap = parseFloat(marketCap) * dollarRate; // 달러 환율 곱하기
   if (isNaN(numMarketCap) || numMarketCap <= 0) {
-    return 'N/A';
+    return '정보없음';
   }
 
   // 매우 큰 숫자들을 위한 단위 추가
@@ -431,115 +548,77 @@ const CoinDetailExpanded: React.FC<{
   dollarRate: number;
 }> = ({ coin, dollarRate }) => {
   return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: window.innerWidth <= 768 ? '1fr' : '1fr 1fr',
-        gap: window.innerWidth <= 768 ? '1.5rem' : '2rem',
-        padding: window.innerWidth <= 768 ? '0.5rem 0' : '1rem 0',
-      }}
-    >
-      <div>
-        <h4 style={{ margin: '0 0 1rem 0', color: palette.accent }}>
-          공급량 정보
-        </h4>
-        <div
-          style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: palette.textSecondary }}>최대 공급량:</span>
-            <span style={{ color: palette.textPrimary }}>
-              {formatSupplyDetail(coin.maxSupply)}
-            </span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: palette.textSecondary }}>총 공급량:</span>
-            <span style={{ color: palette.textPrimary }}>
-              {formatSupplyDetail(coin.totalSupply)}
-            </span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: palette.textSecondary }}>유통 공급량:</span>
-            <span style={{ color: palette.textPrimary }}>
-              {formatSupplyDetail(coin.circulatingSupply)}
-            </span>
-          </div>
-        </div>
-      </div>
-      <div>
-        <h4 style={{ margin: '0 0 1rem 0', color: palette.accent }}>
-          시장 정보
-        </h4>
-        <div
-          style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: palette.textSecondary }}>시가총액:</span>
-            <span style={{ color: palette.textPrimary }}>
-              {formatMarketCapToWon(coin.marketCap, dollarRate)}
-            </span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: palette.textSecondary }}>도미넌스:</span>
-            <span style={{ color: palette.textPrimary }}>
+    <DetailGrid>
+      <DetailSection>
+        <h4>공급량 정보</h4>
+        <DetailList>
+          <DetailItem>
+            <DetailLabel>최대 공급량:</DetailLabel>
+            <DetailValue>{formatSupplyDetail(coin.maxSupply)}</DetailValue>
+          </DetailItem>
+          <DetailItem>
+            <DetailLabel>총 공급량:</DetailLabel>
+            <DetailValue>{formatSupplyDetail(coin.totalSupply)}</DetailValue>
+          </DetailItem>
+          <DetailItem>
+            <DetailLabel>유통 공급량:</DetailLabel>
+            <DetailValue>{formatSupplyDetail(coin.circulatingSupply)}</DetailValue>
+          </DetailItem>
+        </DetailList>
+      </DetailSection>
+      
+      <DetailSection>
+        <h4>시장 정보</h4>
+        <DetailList>
+          <DetailItem>
+            <DetailLabel>시가총액:</DetailLabel>
+            <DetailValue>{formatMarketCapToWon(coin.marketCap, dollarRate)}</DetailValue>
+          </DetailItem>
+          <DetailItem>
+            <DetailLabel>도미넌스:</DetailLabel>
+            <DetailValue>
               {coin.dominance !== null && coin.dominance !== undefined
                 ? `${coin.dominance.toFixed(2)}%`
-                : 'N/A'}
-            </span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: palette.textSecondary }}>출시일:</span>
-            <span style={{ color: palette.textPrimary }}>
+                : '정보없음'}
+            </DetailValue>
+          </DetailItem>
+          <DetailItem>
+            <DetailLabel>출시일:</DetailLabel>
+            <DetailValue>
               {coin.dateAdded
                 ? (() => {
                     try {
-                      return new Date(coin.dateAdded).toLocaleDateString(
-                        'ko-KR'
-                      );
+                      return new Date(coin.dateAdded).toLocaleDateString('ko-KR');
                     } catch {
                       return '정보 없음';
                     }
                   })()
                 : '정보 없음'}
-            </span>
-          </div>
-        </div>
-      </div>
-      <div style={{ gridColumn: '1 / -1', marginTop: '1rem' }}>
-        <h4 style={{ margin: '0 0 0.5rem 0', color: palette.accent }}>
-          프로젝트 소개
-        </h4>
-        <p
-          style={{
-            color: palette.textSecondary,
-            lineHeight: '1.6',
-            margin: '0',
-          }}
-        >
-          {coin.description}
-        </p>
+            </DetailValue>
+          </DetailItem>
+        </DetailList>
+      </DetailSection>
+      
+      <DescriptionSection>
+        <h4>프로젝트 소개</h4>
+        <p>{coin.description}</p>
         {coin.explorerUrl && coin.explorerUrl.length > 0 && (
-          <div style={{ marginTop: '1rem' }}>
-            <span style={{ color: palette.textSecondary }}>탐색기: </span>
+          <ExplorerSection>
+            <span>탐색기: </span>
             {coin.explorerUrl.map((url, index) => (
               <a
                 key={index}
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{
-                  color: palette.accent,
-                  textDecoration: 'none',
-                  marginRight: '1rem',
-                }}
               >
                 {new URL(url).hostname}
               </a>
             ))}
-          </div>
+          </ExplorerSection>
         )}
-      </div>
-    </div>
+      </DescriptionSection>
+    </DetailGrid>
   );
 };
 
@@ -578,7 +657,7 @@ const CoinTableRow: React.FC<CoinRankingRowProps & { dollarRate: number }> = ({
               coin.marketCap === 'null' ||
               coin.circulatingSupply === 'null'
             ) {
-              return 'N/A';
+              return '정보없음';
             }
 
             const marketCap = parseFloat(coin.marketCap); // 달러 환율 제거
@@ -590,7 +669,7 @@ const CoinTableRow: React.FC<CoinRankingRowProps & { dollarRate: number }> = ({
               marketCap <= 0 ||
               circulatingSupply <= 0
             ) {
-              return 'N/A';
+              return '정보없음';
             }
 
             const price = marketCap / circulatingSupply;
@@ -604,7 +683,7 @@ const CoinTableRow: React.FC<CoinRankingRowProps & { dollarRate: number }> = ({
         <DominanceTableCell>
           {coin.dominance !== null && coin.dominance !== undefined
             ? `${coin.dominance.toFixed(2)}%`
-            : 'N/A'}
+            : '정보없음'}
         </DominanceTableCell>
       </TableRow>
       <ExpandableRow $isExpanded={isExpanded}>

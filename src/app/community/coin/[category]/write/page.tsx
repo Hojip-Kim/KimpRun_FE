@@ -9,6 +9,7 @@ import { RootState } from '@/redux/store';
 import { FaEye, FaPencilAlt, FaCheck, FaImage } from 'react-icons/fa';
 import type ReactQuill from 'react-quill';
 import { serverEnv } from '@/utils/env';
+import { useGlobalAlert } from '@/providers/AlertProvider';
 
 const ReactQuillComponent = dynamic(
   async () => {
@@ -54,9 +55,11 @@ const WritePost: React.FC = () => {
     (state: RootState) => state.auth.isAuthenticated
   );
 
+  const { showError, showWarning } = useGlobalAlert();
+
   useEffect(() => {
     if (!isAuthenticated) {
-      alert('로그인 후 이용해주세요.');
+      showWarning('로그인 후 이용해주세요.');
       router.push('/');
     }
   }, [isAuthenticated, router]);
@@ -126,11 +129,11 @@ const WritePost: React.FC = () => {
       if (response.status === 200) {
         setShowSuccessModal(true);
       } else {
-        alert('게시글 작성에 실패했습니다.');
+        showError('게시글 작성에 실패했습니다.');
       }
     } catch (error) {
       console.error(error);
-      alert('게시글 작성 중 오류가 발생했습니다.');
+      showError('게시글 작성 중 오류가 발생했습니다.');
     } finally {
       setIsSubmitting(false);
     }

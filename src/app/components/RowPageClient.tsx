@@ -17,6 +17,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Search from '@/components/search/Search';
 import { checkAuth } from '@/components/login/server/checkAuth';
 import { setGuestUser } from '@/redux/reducer/authReducer';
+import { useGlobalAlert } from '@/providers/AlertProvider';
 import { firstDataSet, secondDataSet, TokenNameMapping } from '../types';
 import { RowContainer, MobileChartContainer } from './style';
 import { MarketType } from '@/types/marketType';
@@ -47,6 +48,7 @@ const RowPageClient: React.FC = () => {
   const DEFAULT_COMPARE_MARKET = MarketType.BINANCE;
 
   const dispatch: AppDispatch = useDispatch();
+  const { showError, showWarning } = useGlobalAlert();
 
   const setMainMarket = (market: MarketType) => {
     dispatch(setSelectedMainMarket(market));
@@ -374,7 +376,7 @@ const RowPageClient: React.FC = () => {
       setTokenMapping(mapping);
     } catch (error) {
       console.error('❌ 데이터 로딩 오류:', error);
-      alert('데이터를 불러오는 중 오류가 발생했습니다. 다시 시도해주세요.');
+      showError('데이터를 불러오는 중 오류가 발생했습니다. 다시 시도해주세요.');
     } finally {
       setLoading(false);
     }
@@ -389,7 +391,7 @@ const RowPageClient: React.FC = () => {
 
     // 웹소켓이 지원되지 않는 거래소 선택 시 경고 (추후 확장을 위함)
     if (!selectedOption?.hasWebsocket) {
-      alert('해당 거래소는 아직 실시간 데이터가 지원되지 않습니다.');
+      showWarning('해당 거래소는 아직 실시간 데이터가 지원되지 않습니다.');
       return;
     }
 
@@ -399,7 +401,7 @@ const RowPageClient: React.FC = () => {
 
     // 같은 거래소 선택 방지
     if (newMainMarket === newCompareMarket) {
-      alert('메인 거래소와 비교 거래소는 다르게 선택해주세요.');
+      showWarning('메인 거래소와 비교 거래소는 다르게 선택해주세요.');
       return;
     }
 

@@ -68,7 +68,8 @@ const VolumeCell = styled(TableHeaderCell)`
   text-align: right;
 
   @media (max-width: 768px) {
-    display: none;
+    min-width: 80px;
+    font-size: 0.7rem;
   }
 `;
 
@@ -195,7 +196,7 @@ const VolumeTableCell = styled(TableCell)`
   font-family: 'Courier New', monospace;
 
   @media (max-width: 768px) {
-    display: none;
+    font-size: 0.65rem;
   }
 `;
 
@@ -264,6 +265,7 @@ const ExpandableContent = styled.td`
 
   @media (max-width: 768px) {
     padding: 1rem;
+    overflow-x: auto;
   }
 `;
 

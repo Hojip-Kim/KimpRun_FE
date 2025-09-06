@@ -22,6 +22,7 @@ export const loginDataFetch = async (
       {
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
       }
     );
 

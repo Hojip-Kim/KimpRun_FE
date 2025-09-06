@@ -8,6 +8,7 @@ import { fetchUserInfo } from '@/components/auth/fetchUserInfo';
 import TermsAgreement from '@/components/signup/TermsAgreement';
 import styled from 'styled-components';
 import { LoginButton } from '@/components/login/style';
+import { useGlobalAlert } from '@/providers/AlertProvider';
 
 const CallbackContainer = styled.div`
   display: flex;
@@ -82,6 +83,7 @@ const OAuthCallbackPage: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useDispatch();
+  const { showWarning } = useGlobalAlert();
 
   const [status, setStatus] = useState<
     'loading' | 'needs_agreement' | 'success' | 'error'
@@ -163,7 +165,7 @@ const OAuthCallbackPage: React.FC = () => {
 
   const handleCompleteSignup = async () => {
     if (!termsAgreed) {
-      alert('서비스 이용약관에 동의해주세요.');
+      showWarning('서비스 이용약관에 동의해주세요.');
       return;
     }
 

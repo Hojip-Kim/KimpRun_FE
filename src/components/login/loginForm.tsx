@@ -65,36 +65,18 @@ const LoginForm: React.FC<LoginFormProps> = ({
       localStorage.removeItem('email');
     }
 
-    const loginResponse: responseData = await loginDataFetch(
-      loginUrl,
-      email,
-      password
-    );
-    if (loginResponse) {
-      if (loginResponse.result === 'success') {
-        await dispatch(setIsAuthenticated());
-        const userInfo = await fetchUserInfo();
+    try {
+      const loginResponse: responseData = await loginDataFetch(
+        loginUrl,
+        email,
+        password
+      );
 
-        const parseUserInfo = {
-          name: userInfo?.member.name,
-          email: userInfo?.member.email,
-          role: userInfo?.member.role,
-          memberId: userInfo?.member.memberId,
-        };
-
-        if (userInfo?.isAuthenticated) {
-          await dispatch(setUser(parseUserInfo));
-        }
-        showSuccess('로그인 성공');
-        closeModal();
-      } else if (loginResponse.result === 'check') {
-        const userConfirmed = window.confirm(
-          `다른 기기에서 접속이 감지되었습니다.\n접속 IP: ${loginResponse.data}\n\n계속 진행하시겠습니까?`
-        );
-
-        if (userConfirmed) {
+      console.log('loginResponse', loginResponse);
+      if (loginResponse) {
+        if (loginResponse.result === 'success') {
           await dispatch(setIsAuthenticated());
-          const userInfo: UserInfo = await fetchUserInfo();
+          const userInfo = await fetchUserInfo();
 
           const parseUserInfo = {
             name: userInfo?.member.name,
@@ -103,17 +85,64 @@ const LoginForm: React.FC<LoginFormProps> = ({
             memberId: userInfo?.member.memberId,
           };
 
-          if (userInfo) {
+          if (userInfo?.isAuthenticated) {
             await dispatch(setUser(parseUserInfo));
           }
-          showSuccess('로그인 성공');
-          closeModal();
-        } else {
-          window.location.href = '/change-password'; // 비밀번호 변경 페이지 URL로 수정 필요
+          showSuccess('로그인 성공', {
+            onConfirm: () => {
+              // 성공 알림 확인 후 리다이렉트
+              const redirectUrl = sessionStorage.getItem('loginRedirectUrl');
+              sessionStorage.removeItem('loginRedirectUrl');
+              
+              if (redirectUrl) {
+                window.location.href = redirectUrl;
+              } else {
+                closeModal();
+              }
+            }
+          });
+        } else if (loginResponse.result === 'check') {
+          const userConfirmed = window.confirm(
+            `다른 기기에서 접속이 감지되었습니다.\n접속 IP: ${loginResponse.data}\n\n계속 진행하시겠습니까?`
+          );
+
+          if (userConfirmed) {
+            await dispatch(setIsAuthenticated());
+            const userInfo: UserInfo = await fetchUserInfo();
+
+            const parseUserInfo = {
+              name: userInfo?.member.name,
+              email: userInfo?.member.email,
+              role: userInfo?.member.role,
+              memberId: userInfo?.member.memberId,
+            };
+
+            if (userInfo) {
+              await dispatch(setUser(parseUserInfo));
+            }
+            showSuccess('로그인 성공', {
+              onConfirm: () => {
+                // 성공 알림 확인 후 리다이렉트
+                const redirectUrl = sessionStorage.getItem('loginRedirectUrl');
+                sessionStorage.removeItem('loginRedirectUrl');
+                
+                if (redirectUrl) {
+                  window.location.href = redirectUrl;
+                } else {
+                  closeModal();
+                }
+              }
+            });
+          } else {
+            window.location.href = '/reset-password'; // 비밀번호 재설정 페이지로 수정
+          }
         }
+      } else {
+        showError('로그인 실패');
       }
-    } else {
-      showError('로그인 실패');
+    } catch (error) {
+      console.error('로그인 오류:', error);
+      showError('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.');
     }
   };
 
@@ -146,7 +175,13 @@ const LoginForm: React.FC<LoginFormProps> = ({
             <LoginButton type="submit">로그인</LoginButton>
           </form>
           <GoogleLoginButton onClick={handleGoogleLogin}>
-            <img src="/google.png" alt="google icon" loading="lazy" width="20" height="20" />
+            <img
+              src="/google.png"
+              alt="google icon"
+              loading="lazy"
+              width="20"
+              height="20"
+            />
             Google로 로그인
           </GoogleLoginButton>
           <div className="remember-row">

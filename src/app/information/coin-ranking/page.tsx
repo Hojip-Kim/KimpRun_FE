@@ -1,6 +1,6 @@
 import React from 'react';
 import { Metadata } from 'next';
-import { CoinRankingService } from './services/coinRankingService';
+import { getCoinRanking, searchCoinBySymbol } from './services/coinRankingService';
 import { CoinRankingResponse } from '@/types/coinRanking';
 import CoinRankingLayoutClient from './components/CoinRankingLayoutClient';
 
@@ -8,6 +8,7 @@ interface CoinRankingPageProps {
   searchParams: {
     page?: string;
     size?: string;
+    symbol?: string;
   };
 }
 
@@ -19,15 +20,22 @@ export default async function CoinRankingPage({
 }: CoinRankingPageProps) {
   const page = Number(searchParams.page) || 1;
   const size = Number(searchParams.size) || 100;
+  const searchSymbol = searchParams.symbol?.trim().toUpperCase() || '';
 
   let initialData: CoinRankingResponse | null = null;
   let error: string | null = null;
 
   try {
     // 서버에서 초기 데이터 로딩 (SSR)
-    initialData = await CoinRankingService.getCoinRanking(page, size);
+    if (searchSymbol) {
+      // 검색 모드: 특정 심볼 검색
+      initialData = await searchCoinBySymbol(searchSymbol, page, size);
+    } else {
+      // 일반 모드: 전체 코인 순위
+      initialData = await getCoinRanking(page, size);
+    }
   } catch (err) {
-    console.error('서버에서 코인 순위 데이터 로딩 실패:', err);
+    console.error('서버에서 코인 데이터 로딩 실패:', err);
     error =
       err instanceof Error
         ? err.message
@@ -41,6 +49,7 @@ export default async function CoinRankingPage({
       initialError={error}
       initialPage={page}
       initialSize={size}
+      searchSymbol={searchSymbol}
     />
   );
 }
@@ -54,9 +63,9 @@ export async function generateMetadata({
   const page = Number(searchParams.page) || 1;
 
   try {
-    const data = await CoinRankingService.getCoinRanking(page, 10);
-    const totalCoins = data.data.totalElements;
-    const totalPages = data.data.totalPages;
+    const data = await getCoinRanking(page, 10);
+    const totalCoins = data.totalElements;
+    const totalPages = data.totalPages;
 
     return {
       title: `코인 순위 ${page}페이지 | 실시간 암호화폐 시가총액 순위 | 김프런(kimprun)`,

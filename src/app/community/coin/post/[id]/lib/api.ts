@@ -1,7 +1,7 @@
 import { BoardData, Comment } from '../types';
 import { serverEnv } from '@/utils/env';
 import { ApiResponse } from '@/server/type';
-import { serverRequest } from '@/server/fetch';
+import { serverRequest, clientRequest } from '@/server/fetch';
 
 const boardUrl = serverEnv.BOARD_URL;
 const commentUrl = serverEnv.COMMENT_URL;
@@ -37,15 +37,12 @@ export async function createComment(
   // URL 끝점만 사용하여 잘못된 URL 합성 방지
   const endpoint = `/${boardId}/create`;
   try {
-    const response = await serverRequest.post<Comment>(
+    const response = await clientRequest.post<Comment>(
       commentUrl + endpoint,
       {
         content,
         depth,
         parentCommentId,
-      },
-      {
-        cache: 'no-store', // 캐시 비허용 - 실시간 댓글 생성
       }
     );
 

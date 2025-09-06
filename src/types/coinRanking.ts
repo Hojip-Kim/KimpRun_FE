@@ -1,12 +1,30 @@
-// 코인순위 API 응답 타입
+// 코인순위 API 응답 타입 (직접 페이지네이션 객체 반환)
 export interface CoinRankingResponse {
-  status: number;
-  message: string;
-  data: {
-    totalPages: number;
-    totalElements: number;
-    size: number;
-    content: CoinRankingItem[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  content: CoinRankingItem[];
+  number: number;
+  numberOfElements: number;
+  first: boolean;
+  last: boolean;
+  empty: boolean;
+  sort: {
+    empty: boolean;
+    unsorted: boolean;
+    sorted: boolean;
+  };
+  pageable: {
+    pageNumber: number;
+    pageSize: number;
+    sort: {
+      empty: boolean;
+      unsorted: boolean;
+      sorted: boolean;
+    };
+    offset: number;
+    unpaged: boolean;
+    paged: boolean;
   };
 }
 

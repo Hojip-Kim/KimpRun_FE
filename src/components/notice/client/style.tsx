@@ -454,6 +454,26 @@ export const NoticeModal = styled.div<{
     `
     visibility: hidden;
   `}
+
+  @media (max-width: 768px) {
+    width: calc(100vw - 32px);
+    max-width: 320px;
+    right: 16px;
+    top: 16px;
+    padding: 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 480px) {
+    width: calc(100vw - 24px);
+    max-width: 280px;
+    right: 12px;
+    top: 12px;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+  }
 `;
 
 export const ModalHeader = styled.div`
@@ -463,6 +483,16 @@ export const ModalHeader = styled.div`
   margin-bottom: 15px;
   padding-bottom: 10px;
   border-bottom: 1px solid #333;
+
+  @media (max-width: 768px) {
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+  }
+
+  @media (max-width: 480px) {
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+  }
 `;
 
 export const ModalTitle = styled.h3`
@@ -477,6 +507,24 @@ export const ModalTitle = styled.h3`
   &::before {
     content: '🔔';
     font-size: 18px;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 14px;
+    gap: 6px;
+    
+    &::before {
+      font-size: 16px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    font-size: 13px;
+    gap: 4px;
+    
+    &::before {
+      font-size: 14px;
+    }
   }
 `;
 
@@ -536,6 +584,18 @@ export const ModalNoticeTitle = styled.h4`
   margin: 10px 0;
   line-height: 1.4;
   transition: color 0.3s ease;
+
+  @media (max-width: 768px) {
+    font-size: 13px;
+    margin: 8px 0;
+    line-height: 1.3;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 12px;
+    margin: 6px 0;
+    line-height: 1.2;
+  }
 `;
 
 export const ModalActions = styled.div`
@@ -544,6 +604,19 @@ export const ModalActions = styled.div`
   margin-top: 15px;
   padding-top: 15px;
   border-top: 1px solid #333;
+
+  @media (max-width: 768px) {
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+  }
+
+  @media (max-width: 480px) {
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 10px;
+    flex-direction: column;
+  }
 `;
 
 export const ModalButton = styled.button<{ variant?: 'primary' | 'secondary' }>`
@@ -577,6 +650,18 @@ export const ModalButton = styled.button<{ variant?: 'primary' | 'secondary' }>`
       border-color: #555;
     }
   `}
+
+  @media (max-width: 768px) {
+    padding: 7px 12px;
+    font-size: 13px;
+    border-radius: 5px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: 4px;
+  }
 `;
 
 export const ModalAutoCloseTimer = styled.div`
@@ -584,6 +669,16 @@ export const ModalAutoCloseTimer = styled.div`
   text-align: center;
   color: #888;
   font-size: 12px;
+
+  @media (max-width: 768px) {
+    margin-top: 8px;
+    font-size: 11px;
+  }
+
+  @media (max-width: 480px) {
+    margin-top: 6px;
+    font-size: 10px;
+  }
 `;
 
 export const TimerBar = styled.div<{ progress: number }>`

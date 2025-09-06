@@ -19,6 +19,24 @@ export const NavbarWrapper = styled.nav`
   width: 111.11%; // scale(0.9)의 역보정
   margin-left: -5.56%; // 중앙 정렬
 
+  @media (max-width: 1350px) {
+    transform: scale(0.85);
+    width: 117.65%; // scale(0.85)의 역보정
+    margin-left: -8.825%;
+  }
+
+  @media (max-width: 1200px) {
+    transform: scale(0.8);
+    width: 125%; // scale(0.8)의 역보정
+    margin-left: -12.5%;
+  }
+
+  @media (max-width: 992px) {
+    transform: scale(0.75);
+    width: 133.33%; // scale(0.75)의 역보정
+    margin-left: -16.665%;
+  }
+
   @media (max-width: 768px) {
     height: 56px;
     transform: scale(0.95);
@@ -43,7 +61,7 @@ export const TopSection = styled.div`
 export const BottomSection = styled.div`
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
   height: 40px;
   padding: 0 24px;
   border-top: 1px solid var(--border);
@@ -420,7 +438,8 @@ export const NavMenuItem = styled.li`
 `;
 
 export const NavMenuLink = styled.span`
-  display: block;
+  display: flex;
+  align-items: center;
   width: 100%;
   height: 100%;
 `;

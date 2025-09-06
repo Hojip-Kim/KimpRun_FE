@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useGlobalAlert } from '@/providers/AlertProvider';
-import { clientEnv } from '@/utils/env';
+import { clientRequest } from '@/server/fetch';
 import { FormContainer, LoginButton } from '../login/style';
 import {
   ResetContainer,
@@ -11,9 +11,18 @@ import {
   VerificationCodeInput,
   SuccessMessage,
 } from '@/components/reset-password/style';
+import dynamic from 'next/dynamic';
+import { clientEnv } from '@/utils/env';
+
+const Modal = dynamic(() => import('@/components/modal/modal'), { ssr: false });
 
 interface ResetPasswordFormProps {
   closeModal: () => void;
+}
+
+interface EmailVerificationResponse {
+  isExisted: boolean;
+  verificationCode?: string;
 }
 
 type ResetStep = 'email' | 'verification' | 'password' | 'success';
@@ -24,9 +33,13 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
   const [currentStep, setCurrentStep] = useState<ResetStep>('email');
   const [email, setEmail] = useState<string>('');
   const [verificationCode, setVerificationCode] = useState<string>('');
+  const [receivedVerificationCode, setReceivedVerificationCode] =
+    useState<string>('');
   const [newPassword, setNewPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isUserNotFoundModalOpen, setIsUserNotFoundModalOpen] =
+    useState<boolean>(false);
 
   const { showSuccess, showError } = useGlobalAlert();
 
@@ -39,28 +52,39 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
       return;
     }
 
+    // 즉시 인증 단계로 이동
+    setCurrentStep('verification');
+
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `${clientEnv.API_BASE_URL}/user/password/reset-request`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email }),
-        }
+      const baseUrl = clientEnv.API_BASE_URL;
+      console.log('email', email);
+      const response = await clientRequest.post<EmailVerificationResponse>(
+        `${baseUrl}/user/email`,
+        { email }
       );
 
-      if (response.ok) {
-        showSuccess('인증 코드가 이메일로 전송되었습니다.');
-        setCurrentStep('verification');
+      if (response.success && response.data) {
+        const { isExisted, verificationCode } = response.data;
+
+        if (!isExisted) {
+          // 사용자가 존재하지 않는 경우 모달 표시하고 이메일 단계로 돌아가기
+          setCurrentStep('email');
+          setIsUserNotFoundModalOpen(true);
+        } else if (isExisted && verificationCode) {
+          // 사용자가 존재하고 인증 코드가 있는 경우
+          setReceivedVerificationCode(verificationCode);
+        } else {
+          setCurrentStep('email');
+          showError('인증 코드 생성에 실패했습니다.');
+        }
       } else {
-        const errorData = await response.json();
-        showError(errorData.message || '이메일 전송에 실패했습니다.');
+        setCurrentStep('email');
+        showError('이메일 전송에 실패했습니다.');
       }
     } catch (error) {
       console.error('이메일 인증 요청 오류:', error);
+      setCurrentStep('email');
       showError('서버 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
@@ -76,28 +100,28 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
       return;
     }
 
+    // 로컬 검증 - 받은 인증코드와 비교
+    if (verificationCode !== receivedVerificationCode) {
+      showError('인증 코드가 올바르지 않습니다.');
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `${clientEnv.API_BASE_URL}/user/password/verify-code`,
+      const baseUrl = clientEnv.API_BASE_URL;
+      const response = await clientRequest.post(
+        `${baseUrl}/user/email/verify`,
         {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email,
-            verificationCode,
-          }),
+          email,
+          verificationCode,
         }
       );
 
-      if (response.ok) {
+      if (response.success) {
         showSuccess('인증이 완료되었습니다.');
         setCurrentStep('password');
       } else {
-        const errorData = await response.json();
-        showError(errorData.message || '인증 코드가 올바르지 않습니다.');
+        showError('인증 코드가 올바르지 않습니다.');
       }
     } catch (error) {
       console.error('인증 코드 확인 오류:', error);
@@ -105,6 +129,25 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // 비밀번호 유효성 검사 함수
+  const validatePassword = (password: string): string | null => {
+    if (password.length < 8) {
+      return '비밀번호는 최소 8자 이상이어야 합니다.';
+    }
+
+    // 숫자 포함 검사
+    if (!/\d/.test(password)) {
+      return '비밀번호에 숫자를 최소 1개 포함해야 합니다.';
+    }
+
+    // 특수문자 포함 검사
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      return '비밀번호에 특수문자를 최소 1개 포함해야 합니다.';
+    }
+
+    return null;
   };
 
   // 3단계: 새 비밀번호 설정
@@ -121,30 +164,31 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
       return;
     }
 
-    if (newPassword.length < 8) {
-      showError('비밀번호는 최소 8자 이상이어야 합니다.');
+    const validationError = validatePassword(newPassword);
+    if (validationError) {
+      showError(validationError);
       return;
     }
 
     setIsLoading(true);
     try {
-      const response = await fetch(`${clientEnv.API_BASE_URL}/user/password`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const baseUrl = clientEnv.API_BASE_URL;
+      const response = await clientRequest.patch(
+        `${baseUrl}/user/password`,
+        {
           email,
           password: newPassword,
-        }),
-      });
+        },
+        {
+          credentials: 'include',
+        }
+      );
 
-      if (response.ok) {
+      if (response.success) {
         showSuccess('비밀번호가 성공적으로 변경되었습니다.');
         setCurrentStep('success');
       } else {
-        const errorData = await response.json();
-        showError(errorData.message || '비밀번호 변경에 실패했습니다.');
+        showError('비밀번호 변경에 실패했습니다.');
       }
     } catch (error) {
       console.error('비밀번호 변경 오류:', error);
@@ -308,6 +352,39 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
       </StepIndicator>
 
       <FormContainer>{renderStepContent()}</FormContainer>
+
+      {/* 사용자 없음 모달 */}
+      {isUserNotFoundModalOpen && (
+        <Modal
+          width={400}
+          height={200}
+          element={
+            <div style={{ textAlign: 'center', padding: '1rem' }}>
+              <h3 style={{ marginBottom: '1rem', color: '#ef4444' }}>
+                계정을 찾을 수 없습니다
+              </h3>
+              <p
+                style={{
+                  marginBottom: '1.5rem',
+                  lineHeight: '1.5',
+                  color: '#666',
+                }}
+              >
+                입력하신 이메일 주소로 등록된 계정이 존재하지 않습니다.
+                <br />
+                이메일 주소를 다시 확인하거나 새로 회원가입을 해주세요.
+              </p>
+              <LoginButton
+                onClick={() => setIsUserNotFoundModalOpen(false)}
+                style={{ width: '100%' }}
+              >
+                확인
+              </LoginButton>
+            </div>
+          }
+          setModal={setIsUserNotFoundModalOpen}
+        />
+      )}
     </ResetContainer>
   );
 };

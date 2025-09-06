@@ -10,6 +10,7 @@ import { clientRequest } from '@/server/fetch';
 import styled from 'styled-components';
 import { palette } from '@/styles/palette';
 import NicknameModal from './NicknameModal';
+import { useGlobalAlert } from '@/providers/AlertProvider';
 
 const userInfoUrl = clientEnv.USER_INFO_URL;
 const updateNicknameUrl = clientEnv.UPDATE_NICKNAME_URL;
@@ -74,6 +75,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
 }) => {
   const user = useSelector((state: RootState) => state.auth.user);
   const dispatch = useDispatch();
+  const { showError, showSuccess } = useGlobalAlert();
 
   const [userInfo, setUserInfo] = useState<UserInfo>({
     email: '',
@@ -114,16 +116,16 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
         if (user) dispatch(setUser({ ...user, name: newNickname }));
         setIsNicknameOpen(false);
       } else {
-        alert('닉네임 변경 실패');
+        showError('닉네임 변경 실패');
       }
     } catch (error) {
       console.error('닉네임 변경 오류:', error);
       if (error instanceof Error && error.message.includes('400')) {
-        alert(
+        showError(
           '이미 다른 사용자가 사용 중인 닉네임입니다.\n다른 닉네임을 선택해주세요.'
         );
       } else {
-        alert('닉네임 변경 중 오류 발생');
+        showError('닉네임 변경 중 오류 발생');
       }
     }
   };

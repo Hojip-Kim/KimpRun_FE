@@ -8,7 +8,7 @@ const DEFAULT_CONFIG: FetchConfig = {
   },
   credentials: 'include',
   timeout: 10000,
-  retries: 3,
+  retries: 0,
   retryDelay: 1000,
 };
 

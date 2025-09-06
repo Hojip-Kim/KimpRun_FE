@@ -15,13 +15,23 @@ import {
 import dynamic from 'next/dynamic';
 
 const Modal = dynamic(() => import('@/components/modal/modal'), { ssr: false });
-const LoginForm = dynamic(() => import('@/components/login/loginForm'), { ssr: false });
-const ProfileForm = dynamic(() => import('../profile/ProfileForm'), { ssr: false });
-const NicknameModal = dynamic(() => import('../profile/NicknameModal'), { ssr: false });
-const NewNoticeModal = dynamic(() => import('../notice/client/NewNoticeModal'), { ssr: false });
+const LoginForm = dynamic(() => import('@/components/login/loginForm'), {
+  ssr: false,
+});
+const ProfileForm = dynamic(() => import('../profile/ProfileForm'), {
+  ssr: false,
+});
+const NicknameModal = dynamic(() => import('../profile/NicknameModal'), {
+  ssr: false,
+});
+const NewNoticeModal = dynamic(
+  () => import('../notice/client/NewNoticeModal'),
+  { ssr: false }
+);
 import ThemeToggle from '../theme/ThemeToggle';
 import { Notice } from '../notice/type';
 import { NoticeModalContainer } from '../notice/client/style';
+import CoinSearchNav from '../common/CoinSearchNav';
 import {
   ActionButton,
   ActionButtons,
@@ -275,6 +285,9 @@ const Nav = () => {
   };
 
   const handleLoginClick = () => {
+    // 현재 페이지 URL을 저장
+    const currentUrl = window.location.href;
+    sessionStorage.setItem('loginRedirectUrl', currentUrl);
     router.push('/login');
   };
 
@@ -292,6 +305,13 @@ const Nav = () => {
       if (response.success) {
         showSuccess('로그아웃 성공');
         dispatch(logout());
+
+        // 세션 스토리지 정리
+        sessionStorage.clear();
+
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       } else {
         showError('로그아웃 실패');
       }
@@ -406,7 +426,9 @@ const Nav = () => {
           <NavMenuItem>
             <NavMenuLink
               onClick={() => {
-                router.push(`${clientEnv.COMMUNITY_PAGE}/coin/1?page=1&size=15`);
+                router.push(
+                  `${clientEnv.COMMUNITY_PAGE}/coin/1?page=1&size=15`
+                );
               }}
             >
               커뮤니티
@@ -481,6 +503,9 @@ const Nav = () => {
             뉴스
           </NavMenuItem>
         </NavMenu>
+        
+        {/* 코인 검색 */}
+        <CoinSearchNav />
       </BottomSection>
 
       {isModalActive && (
@@ -535,7 +560,7 @@ const Nav = () => {
               onSave={async (newName) => {
                 if (isAuthenticated) {
                   // 로그인 사용자는 기존 로직 사용 (추후 프로필 API로 변경 필요)
-                  await dispatch(setUser({ ...user, name: newName }));
+                  dispatch(setUser({ ...user, name: newName }));
                   setIsNicknameModalOpen(false);
                 } else {
                   // 비로그인 사용자는 게스트 API 사용

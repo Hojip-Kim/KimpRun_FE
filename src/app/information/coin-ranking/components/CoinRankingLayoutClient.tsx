@@ -12,6 +12,7 @@ interface CoinRankingLayoutClientProps {
   initialError: string | null;
   initialPage: number;
   initialSize: number;
+  searchSymbol?: string;
 }
 
 /**
@@ -23,6 +24,7 @@ export default function CoinRankingLayoutClient({
   initialError,
   initialPage,
   initialSize,
+  searchSymbol,
 }: CoinRankingLayoutClientProps) {
   return (
     <InformationLayout>
@@ -33,6 +35,7 @@ export default function CoinRankingLayoutClient({
           initialError={initialError}
           initialPage={initialPage}
           initialSize={initialSize}
+          searchSymbol={searchSymbol}
         />
       </ErrorBoundary>
     </InformationLayout>

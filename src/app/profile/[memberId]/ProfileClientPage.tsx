@@ -14,12 +14,14 @@ import {
 } from '@/types/profile';
 import { PageResponse } from '@/types/page';
 import { profileClientApi } from '@/server/profile/profileApi';
+import { useGlobalAlert } from '@/providers/AlertProvider';
 import ProfileHeader from './components/ProfileHeader';
 import ProfileTabs from './components/ProfileTabs';
 import ProfileContent from './components/ProfileContent';
 import dynamic from 'next/dynamic';
 
 const DeleteAccountModal = dynamic(() => import('./components/DeleteAccountModal'), { ssr: false });
+const PasswordChangeModal = dynamic(() => import('./components/PasswordChangeModal'), { ssr: false });
 import {
   ProfileContainer,
   ProfileWrapper,
@@ -53,6 +55,8 @@ export default function ProfileClientPage({
     (state: RootState) => state.auth.isAuthenticated
   );
 
+  const { showError, showSuccess, showWarning } = useGlobalAlert();
+
   const [currentTab, setCurrentTab] = useState<ProfileTab>(initialTab);
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [data, setData] = useState(initialData);
@@ -61,6 +65,7 @@ export default function ProfileClientPage({
   const [followerCount, setFollowerCount] = useState(profileInfo.followerCount);
   const [currentProfileInfo, setCurrentProfileInfo] = useState(profileInfo);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isPasswordChangeModalOpen, setIsPasswordChangeModalOpen] = useState(false);
 
   // 현재 사용자가 프로필 소유자인지 확인
   const isOwnProfile = isAuthenticated && currentUser?.memberId === memberId;
@@ -197,7 +202,7 @@ export default function ProfileClientPage({
   // 팔로우/언팔로우 핸들러
   const handleFollowToggle = async () => {
     if (!isAuthenticated) {
-      alert('로그인이 필요합니다.');
+      showWarning('로그인이 필요합니다.');
       return;
     }
 
@@ -213,14 +218,14 @@ export default function ProfileClientPage({
         setFollowerCount((prev) => (isFollowing ? prev - 1 : prev + 1));
 
         if (result.message) {
-          alert(result.message);
+          showSuccess(result.message);
         }
       } else {
-        alert(result.message || '요청 처리 중 오류가 발생했습니다.');
+        showError(result.message || '요청 처리 중 오류가 발생했습니다.');
       }
     } catch (error) {
       console.error('팔로우 토글 오류:', error);
-      alert('요청 처리 중 오류가 발생했습니다.');
+      showError('요청 처리 중 오류가 발생했습니다.');
     }
   };
 
@@ -258,6 +263,17 @@ export default function ProfileClientPage({
 
         {isOwnProfile && (
           <DeleteAccountSection>
+            <DeleteAccountButton 
+              onClick={() => setIsPasswordChangeModalOpen(true)}
+              style={{ 
+                backgroundColor: '#3b82f6', 
+                marginRight: '1rem',
+                color: 'white',
+                border: '1px solid #3b82f6'
+              }}
+            >
+              비밀번호 변경
+            </DeleteAccountButton>
             <DeleteAccountButton onClick={() => setIsDeleteModalOpen(true)}>
               회원탈퇴
             </DeleteAccountButton>
@@ -268,6 +284,11 @@ export default function ProfileClientPage({
       <DeleteAccountModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
+      />
+
+      <PasswordChangeModal
+        isOpen={isPasswordChangeModalOpen}
+        onClose={() => setIsPasswordChangeModalOpen(false)}
       />
     </ProfileContainer>
   );

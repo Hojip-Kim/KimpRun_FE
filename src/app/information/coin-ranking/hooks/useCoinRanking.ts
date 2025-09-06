@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from 'react';
 import { CoinRankingResponse } from '@/types/coinRanking';
-import { CoinRankingService } from '../services/coinRankingService';
 
 export interface UseCoinRankingReturn {
   data: CoinRankingResponse | null;

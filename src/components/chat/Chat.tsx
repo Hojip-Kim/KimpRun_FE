@@ -63,7 +63,33 @@ import ProfileImage from '@/components/common/ProfileImage';
 
 const Chat = () => {
   const router = useRouter();
-  const { showConfirm } = useGlobalAlert();
+  const { showConfirm, showSuccess, showError } = useGlobalAlert();
+
+  // 시간 포맷 함수 - 오늘 메시지는 시/분만, 이전 날짜는 전체 날짜/시간 표시
+  const formatMessageTime = (dateInput: string | Date) => {
+    const messageDate = dateInput instanceof Date ? dateInput : new Date(dateInput);
+    const today = new Date();
+    
+    // 오늘 자정
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    
+    if (messageDate >= todayStart) {
+      // 오늘 작성된 메시지: 시/분만 표시
+      return messageDate.toLocaleTimeString('ko-KR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } else {
+      // 이전 날짜 메시지: 연/월/일 시/분까지 표시
+      return messageDate.toLocaleString('ko-KR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    }
+  };
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -327,16 +353,16 @@ const Chat = () => {
       );
 
       if (result.success) {
-        alert(result.message);
+        showSuccess(result.message);
         setShowReportModal(false);
         setReportReason('');
         setReportTarget(null);
       } else {
-        alert(result.message);
+        showError(result.message);
       }
     } catch (error) {
       console.error('신고 처리 오류:', error);
-      alert('신고 처리 중 오류가 발생했습니다.');
+      showError('신고 처리 중 오류가 발생했습니다.');
     }
   };
 
@@ -825,10 +851,6 @@ const Chat = () => {
     <ChatContainer>
       <ChatWrapper>
         <ChatHeader>
-          <ConnectionStatus status={getConnectionStatusType()}>
-            <span style={{ marginRight: '8px' }}>💬</span>
-            {getConnectionStatus()}
-          </ConnectionStatus>
           {((blockedMembers && blockedMembers.length > 0) ||
             (blockedGuests && blockedGuests.length > 0)) && (
             <UnblockAllButton
@@ -893,13 +915,7 @@ const Chat = () => {
                       <strong>{message.nickname}:</strong> {message.content}
                     </div>
                     <div style={{ fontSize: '10px', color: '#999' }}>
-                      {new Date(message.registedAt).toLocaleTimeString(
-                        'ko-KR',
-                        {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        }
-                      )}
+                      {formatMessageTime(message.registedAt)}
                     </div>
                   </div>
                 </div>
@@ -1031,10 +1047,7 @@ const Chat = () => {
                   </MessageBubble>
                   {/* 모든 메시지에 말풍선 옆 시간 표시 */}
                   <MessageTimeSide $isSelf={isMyMessage(message)}>
-                    {new Date(message.registedAt).toLocaleTimeString('ko-KR', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
+                    {formatMessageTime(message.registedAt)}
                   </MessageTimeSide>
                   {/* 내 메시지에만 삭제 버튼 표시 */}
                   {isMyMessage(message) && (
@@ -1072,7 +1085,11 @@ const Chat = () => {
             onKeyDown={handleKeyDown}
             onCompositionStart={handleCompositionStart}
             onCompositionEnd={handleCompositionEnd}
-            placeholder="메시지를 입력하세요..."
+            placeholder={
+              !isConnected 
+                ? "연결이 불안정합니다. 잠시 기다려주세요..." 
+                : "메시지를 입력하세요..."
+            }
             disabled={!isConnected || cooldownUntil > Date.now()}
           />
           <SendButton
