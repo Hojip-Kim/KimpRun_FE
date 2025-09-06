@@ -155,6 +155,10 @@ export const Content = styled.div`
   word-break: keep-all;
   overflow-wrap: break-word;
 
+  /* Quill 기본 스타일 추가 */
+  color: ${palette.textPrimary};
+
+  /* 헤더 스타일링 */
   h1,
   h2,
   h3,
@@ -164,6 +168,7 @@ export const Content = styled.div`
     margin-top: 1.2em;
     margin-bottom: 0.5em;
     color: ${palette.accent};
+    font-weight: 600;
   }
 
   h1 {
@@ -181,21 +186,67 @@ export const Content = styled.div`
     font-size: 0.9rem;
   }
 
+  /* 텍스트 스타일링 */
   p {
     margin-bottom: 1em;
+    color: ${palette.textPrimary};
   }
 
+  /* 리스트 스타일링 */
   ul,
   ol {
     margin-bottom: 1em;
     padding-left: 2em;
+    color: ${palette.textPrimary};
   }
 
+  li {
+    margin-bottom: 0.5em;
+  }
+
+  /* Quill 특별 스타일 */
+  .ql-align-center {
+    text-align: center;
+  }
+  
+  .ql-align-right {
+    text-align: right;
+  }
+  
+  .ql-align-left {
+    text-align: left;
+  }
+  
+  .ql-align-justify {
+    text-align: justify;
+  }
+
+  /* 텍스트 포맷팅 */
+  strong,
+  .ql-bold {
+    font-weight: bold;
+  }
+
+  em,
+  .ql-italic {
+    font-style: italic;
+  }
+
+  .ql-underline {
+    text-decoration: underline;
+  }
+
+  .ql-strike {
+    text-decoration: line-through;
+  }
+
+  /* 코드 블록 */
   code {
     background-color: ${palette.input};
     padding: 0.2em 0.4em;
     border-radius: 3px;
     color: ${palette.accent};
+    font-family: 'Courier New', monospace;
   }
 
   pre {
@@ -203,14 +254,31 @@ export const Content = styled.div`
     padding: 1em;
     overflow-x: auto;
     border-radius: 3px;
+    border: 1px solid ${palette.border};
   }
 
+  .ql-code-block {
+    background-color: ${palette.input};
+    padding: 1em;
+    border-radius: 3px;
+    border: 1px solid ${palette.border};
+    font-family: 'Courier New', monospace;
+    color: ${palette.textPrimary};
+    margin: 1em 0;
+  }
+
+  /* 인용구 */
   blockquote {
     border-left: 4px solid ${palette.accent};
     padding-left: 1em;
+    margin: 1em 0;
     color: ${palette.textMuted};
+    background-color: ${palette.input};
+    border-radius: 0 3px 3px 0;
+    padding: 0.5em 1em;
   }
 
+  /* 링크 */
   a {
     color: ${palette.accent};
     text-decoration: none;
@@ -218,6 +286,42 @@ export const Content = styled.div`
     &:hover {
       text-decoration: underline;
     }
+  }
+
+  /* 이미지 */
+  img {
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    border-radius: 4px;
+    margin: 1em auto;
+    display: block;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    
+    /* 데스크톱에서 최대 크기 제한 */
+    @media (min-width: 769px) {
+      max-width: 80%;
+      max-height: 600px;
+      object-fit: contain;
+    }
+  }
+
+  /* Quill 에디터에서 생성되는 특수 클래스들 */
+  .ql-indent-1 {
+    padding-left: 2em;
+  }
+  .ql-indent-2 {
+    padding-left: 4em;
+  }
+  .ql-indent-3 {
+    padding-left: 6em;
+  }
+
+  /* 줄바꿈 처리 */
+  br {
+    content: '';
+    display: block;
+    margin: 0.5em 0;
   }
 
   @media (max-width: 768px) {
@@ -231,6 +335,36 @@ export const Content = styled.div`
     }
     h3 {
       font-size: 0.8rem;
+    }
+
+    .ql-code-block,
+    pre {
+      font-size: 0.65rem;
+      padding: 0.75em;
+    }
+
+    blockquote {
+      padding: 0.4em 0.8em;
+    }
+
+    /* 모바일에서 이미지 크기 조정 */
+    img {
+      max-width: 95%;
+      max-height: 300px;
+      object-fit: contain;
+      border-radius: 3px;
+      margin: 0.75em auto;
+    }
+  }
+
+  @media (max-width: 480px) {
+    /* 아주 작은 화면에서는 더 작게 */
+    img {
+      max-width: 100%;
+      max-height: 250px;
+      object-fit: contain;
+      border-radius: 2px;
+      margin: 0.5em auto;
     }
   }
 `;

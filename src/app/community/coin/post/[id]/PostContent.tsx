@@ -34,6 +34,7 @@ const ReactQuillComponent = dynamic(
 );
 
 import 'react-quill/dist/quill.snow.css';
+import 'react-quill/dist/quill.core.css';
 import {
   Title,
   MetaInfo,
@@ -324,7 +325,10 @@ const PostContent: React.FC<{
           />
         </EditContentContainer>
       ) : (
-        <Content dangerouslySetInnerHTML={{ __html: currentContent }} />
+        <Content 
+          className="ql-editor" 
+          dangerouslySetInnerHTML={{ __html: currentContent }} 
+        />
       )}
 
       {/* 김프가 스타일 좋아요 버튼 */}

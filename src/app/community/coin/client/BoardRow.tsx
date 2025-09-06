@@ -39,7 +39,10 @@ const BoardRow: React.FC<BoardRowProps> = ({ post }) => {
   };
 
   return (
-    <Link href={`/community/coin/post/${post.boardId}`}>
+    <Link 
+      href={`/community/coin/post/${post.boardId}`}
+      style={{ textDecoration: 'none' }}
+    >
       <StyledRow isNotice={post.isPin}>
         {/* 데스크톱 레이아웃 */}
         <TitleSection>

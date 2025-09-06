@@ -40,6 +40,12 @@ export const StyledRow = styled.div<{ isNotice?: boolean }>`
   position: relative;
   min-height: 60px;
   align-items: center;
+  text-decoration: none !important;
+
+  /* 모든 하위 텍스트 요소의 밑줄 제거 */
+  * {
+    text-decoration: none !important;
+  }
 
   ${(props) =>
     props.isNotice &&
@@ -55,6 +61,11 @@ export const StyledRow = styled.div<{ isNotice?: boolean }>`
       props.isNotice
         ? '0 2px 8px rgba(255, 215, 0, 0.2)'
         : '0 2px 8px rgba(0, 0, 0, 0.1)'};
+
+    /* 호버 시에도 밑줄 제거 */
+    * {
+      text-decoration: none !important;
+    }
   }
 
   &:last-child {
@@ -73,6 +84,11 @@ export const StyledRow = styled.div<{ isNotice?: boolean }>`
       background: ${(props) =>
         props.isNotice ? 'rgba(255, 215, 0, 0.15)' : palette.accentRing};
       box-shadow: none;
+
+      /* 모바일 호버 시에도 밑줄 제거 */
+      * {
+        text-decoration: none !important;
+      }
     }
   }
 `;
