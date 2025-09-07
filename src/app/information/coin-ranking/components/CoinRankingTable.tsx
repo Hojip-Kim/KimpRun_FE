@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { cardStyle } from '@/components/styled/common';
 import { palette } from '@/styles/palette';
@@ -14,6 +14,12 @@ const TableContainer = styled.div`
   ${cardStyle}
   overflow: hidden;
   margin-bottom: 2rem;
+  
+  @media (max-width: 768px) {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100%;
+  }
 `;
 
 const Table = styled.table`
@@ -21,6 +27,12 @@ const Table = styled.table`
   border-collapse: collapse;
   font-size: 0.85rem;
   line-height: 1.3;
+  
+  @media (max-width: 768px) {
+    table-layout: fixed;
+    width: 100%;
+    max-width: 100%;
+  }
 `;
 
 const TableHeader = styled.thead`
@@ -256,10 +268,13 @@ const ExpandableContent = styled.td`
 
   @media (max-width: 768px) {
     padding: 0.75rem;
-    overflow-x: auto;
-    width: 100%;
-    max-width: calc(100vw - 2rem);
+    overflow: hidden;
+    width: 100vw;
+    max-width: calc(100vw - 1.5rem);
     box-sizing: border-box;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
   }
 `;
 
@@ -276,10 +291,13 @@ const DetailGrid = styled.div`
     width: 100%;
     max-width: 100%;
     overflow: hidden;
+    min-width: 0;
   }
 `;
 
 const DetailSection = styled.div`
+  min-width: 0;
+  
   h4 {
     margin: 0 0 1rem 0;
     color: ${palette.accent};
@@ -319,12 +337,14 @@ const DetailValue = styled.span`
   @media (max-width: 768px) {
     word-break: break-all;
     text-align: right;
+    min-width: 0;
   }
 `;
 
 const DescriptionSection = styled.div`
   grid-column: 1 / -1;
   margin-top: 1rem;
+  min-width: 0;
 
   h4 {
     margin: 0 0 0.5rem 0;
@@ -346,6 +366,7 @@ const DescriptionSection = styled.div`
       font-size: 0.8rem;
       word-break: break-word;
       overflow-wrap: break-word;
+      min-width: 0;
     }
   }
 `;
@@ -629,6 +650,18 @@ const CoinTableRow: React.FC<CoinRankingRowProps & { dollarRate: number }> = ({
   onClick,
   dollarRate,
 }) => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   return (
     <>
       <TableRow $isExpanded={isExpanded} onClick={onClick}>
@@ -687,9 +720,16 @@ const CoinTableRow: React.FC<CoinRankingRowProps & { dollarRate: number }> = ({
         </DominanceTableCell>
       </TableRow>
       <ExpandableRow $isExpanded={isExpanded}>
-        <ExpandableContent colSpan={6}>
+        <ExpandableContent colSpan={isMobile ? 4 : 6}>
           {isExpanded && (
-            <CoinDetailExpanded coin={coin} dollarRate={dollarRate} />
+            <div style={{ 
+              width: '100%', 
+              maxWidth: '100%', 
+              overflow: 'hidden',
+              boxSizing: 'border-box'
+            }}>
+              <CoinDetailExpanded coin={coin} dollarRate={dollarRate} />
+            </div>
           )}
         </ExpandableContent>
       </ExpandableRow>
