@@ -5,6 +5,23 @@ const nextConfig = {
     styledComponents: true,
   },
   reactStrictMode: false,
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 's2.coinmarketcap.com',
+        port: '',
+        pathname: '/static/img/coins/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'assets.coingecko.com',
+        port: '',
+        pathname: '/coins/images/**',
+      },
+    ],
+    domains: ['s2.coinmarketcap.com', 'assets.coingecko.com'],
+  },
   webpack: (config, options) => {
     // 개발 모드에서 캐시 문제 방지
     if (process.env.NODE_ENV !== 'production') {
