@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import styled from 'styled-components';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { FaEye, FaPencilAlt, FaCheck, FaImage } from 'react-icons/fa';
@@ -47,9 +47,7 @@ const WritePost: React.FC = () => {
 
   const quillRef = useRef<ReactQuill>(null);
 
-  const pathname = usePathname();
   const router = useRouter();
-  const categoryIdFromPath = pathname.split('/').slice(-2)[0];
 
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated
@@ -83,11 +81,10 @@ const WritePost: React.FC = () => {
           );
 
           setCategories(categoryOptions);
-
-          // 현재 경로의 카테고리 ID로 초기값 설정
-          const currentCategoryId = parseInt(categoryIdFromPath, 10);
-          if (!isNaN(currentCategoryId)) {
-            setSelectedCategory(currentCategoryId);
+          
+          // 기본값을 첫 번째 카테고리로 설정
+          if (categoryOptions.length > 0) {
+            setSelectedCategory(categoryOptions[0].value);
           }
         }
       } catch (error) {
@@ -98,7 +95,7 @@ const WritePost: React.FC = () => {
     };
 
     fetchCategories();
-  }, [categoryIdFromPath]);
+  }, []);
 
   useEffect(() => {
     const extractedImages = extractImagesFromContent(content);
@@ -180,7 +177,7 @@ const WritePost: React.FC = () => {
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
-                d="M3 7V17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7Z"
+                d="M3 7V17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 17V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7Z"
                 stroke="currentColor"
                 strokeWidth="2"
               />
@@ -321,6 +318,15 @@ const WritePost: React.FC = () => {
         </WriteHeader>
         <WriteContent>
           <form onSubmit={handleSubmit}>
+            <CategoryContainer>
+              <CategoryLabel htmlFor="category">카테고리</CategoryLabel>
+              <Dropdown
+                options={categories}
+                value={selectedCategory}
+                onChange={(value: number) => setSelectedCategory(value)}
+              />
+            </CategoryContainer>
+
             <FormGroup>
               <Label htmlFor="title">제목</Label>
               <TitleInput
@@ -414,9 +420,10 @@ const CategoryContainer = styled.div`
 `;
 
 const CategoryLabel = styled.label`
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 600;
-  color: ${palette.textSecondary};
+  color: ${palette.textPrimary};
+  letter-spacing: 0.025em;
 `;
 
 // 성공 모달 스타일 - 모던 디자인

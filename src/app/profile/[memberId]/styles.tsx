@@ -1048,16 +1048,85 @@ export const DeleteAccountButton = styled.button`
   background: transparent;
   color: #ef4444;
   border: 1px solid #ef4444;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+    transition: left 0.5s ease;
+  }
 
   &:hover {
     background: #ef4444;
     color: white;
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px -4px rgba(239, 68, 68, 0.4);
+
+    &::before {
+      left: 100%;
+    }
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+export const PasswordChangeButton = styled.button`
+  padding: 0.75rem 1.5rem;
+  background: ${palette.accent};
+  color: ${palette.bgPage};
+  border: 1px solid ${palette.accent};
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  margin-right: 1rem;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+    transition: left 0.5s ease;
+  }
+
+  &:hover {
+    background: transparent;
+    color: ${palette.accent};
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px -4px ${palette.accentRing};
+
+    &::before {
+      left: 100%;
+    }
   }
 
   &:active {

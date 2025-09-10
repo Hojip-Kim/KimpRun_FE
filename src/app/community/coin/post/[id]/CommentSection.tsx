@@ -2,12 +2,13 @@
 
 import React, { useState, useMemo } from 'react';
 import type { Comment } from './types';
-import { createComment, formatDate } from './lib/api';
-import { FaReply } from 'react-icons/fa';
+import { createComment, formatDate, deleteComment } from './lib/api';
+import { FaReply, FaTimes } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { useGlobalAlert } from '@/providers/AlertProvider';
 import ProfileImage from '@/components/common/ProfileImage';
+import Modal from '@/components/modal/modal';
 import {
   CommentSectionContainer,
   CommentTitle,
@@ -41,12 +42,14 @@ const CommentSection: React.FC<CommentSectionProps> = ({
 }) => {
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
+  const [deletingCommentId, setDeletingCommentId] = useState<number | null>(null);
 
-  // Redux에서 인증 상태 가져오기
+  // Redux에서 인증 상태와 사용자 정보 가져오기
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated
   );
-  const { showWarning } = useGlobalAlert();
+  const currentUser = useSelector((state: RootState) => state.auth.user);
+  const { showWarning, showSuccess, showError } = useGlobalAlert();
 
   const structuredComments = useMemo(() => {
     const commentMap = new Map();
@@ -102,6 +105,33 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     }
   };
 
+  const handleDeleteComment = async (commentId: number) => {
+    if (!currentUser?.memberId) {
+      showWarning('로그인이 필요합니다.');
+      return;
+    }
+
+    try {
+      const success = await deleteComment(commentId);
+      if (success) {
+        showSuccess('댓글이 삭제되었습니다.');
+        // 새로고침을 통해 댓글을 새로 받아옴
+        window.location.reload();
+      } else {
+        showError('댓글 삭제에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('댓글 삭제 중 오류:', error);
+      showError('댓글 삭제 중 오류가 발생했습니다.');
+    } finally {
+      setDeletingCommentId(null);
+    }
+  };
+
+  const confirmDelete = (commentId: number) => {
+    setDeletingCommentId(commentId);
+  };
+
   const RenderComments = ({ comments }: { comments: Comment[] }) => (
     <>
       {comments.map((comment) => (
@@ -132,9 +162,40 @@ const CommentSection: React.FC<CommentSectionProps> = ({
                   </CommentAuthor>
                 </div>
               </div>
-              <CommentDate>{formatDate(comment.createdAt)}</CommentDate>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <CommentDate>{formatDate(comment.createdAt)}</CommentDate>
+                {/* 자신의 댓글이고 내용이 null이 아닌 경우에만 삭제 버튼 표시 */}
+                {isAuthenticated && 
+                 currentUser?.memberId === comment.memberId && 
+                 comment.content !== null && (
+                  <button
+                    onClick={() => confirmDelete(comment.id)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#999',
+                      cursor: 'pointer',
+                      padding: '4px',
+                      borderRadius: '4px',
+                      fontSize: '12px',
+                      transition: 'color 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = '#ff4444'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = '#999'; }}
+                  >
+                    <FaTimes />
+                  </button>
+                )}
+              </div>
             </CommentHeader>
-            <CommentContent>{comment.content}</CommentContent>
+            <CommentContent 
+              style={{
+                color: comment.content === null ? '#999' : 'inherit',
+                fontStyle: comment.content === null ? 'italic' : 'normal'
+              }}
+            >
+              {comment.content === null ? '삭제된 댓글입니다.' : comment.content}
+            </CommentContent>
             <CommentActions>
               {/* depth 1 이하일 때만 답글 버튼 표시 */}
               {comment.depth < 1 && (
@@ -215,6 +276,62 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       )}
 
       <RenderComments comments={structuredComments} />
+
+      {/* 삭제 확인 모달 */}
+      {deletingCommentId && (
+        <Modal
+          width={400}
+          height={200}
+          element={
+            <div style={{ 
+              padding: '2rem', 
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem'
+            }}>
+              <h3 style={{ margin: 0, color: '#333' }}>댓글 삭제</h3>
+              <p style={{ margin: 0, color: '#666' }}>
+                댓글을 삭제하시겠습니까?<br/>
+                삭제된 댓글은 복구할 수 없습니다.
+              </p>
+              <div style={{ 
+                display: 'flex', 
+                gap: '0.5rem', 
+                justifyContent: 'center',
+                marginTop: '1rem'
+              }}>
+                <button
+                  onClick={() => setDeletingCommentId(null)}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    background: '#fff',
+                    cursor: 'pointer'
+                  }}
+                >
+                  취소
+                </button>
+                <button
+                  onClick={() => handleDeleteComment(deletingCommentId)}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    border: 'none',
+                    borderRadius: '4px',
+                    background: '#ff4444',
+                    color: '#fff',
+                    cursor: 'pointer'
+                  }}
+                >
+                  삭제
+                </button>
+              </div>
+            </div>
+          }
+          setModal={() => setDeletingCommentId(null)}
+        />
+      )}
     </CommentSectionContainer>
   );
 };

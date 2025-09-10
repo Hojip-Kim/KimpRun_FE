@@ -1,7 +1,7 @@
 export interface Comment {
   id: number;
   parentCommentId: number | null;
-  content: string;
+  content: string | null;
   depth: number;
   email: string;
   nickName: string;

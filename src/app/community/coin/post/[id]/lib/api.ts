@@ -58,6 +58,25 @@ export async function createComment(
   }
 }
 
+export async function deleteComment(commentId: number): Promise<boolean> {
+  const endpoint = `/${commentId}/soft`;
+  try {
+    const response = await clientRequest.delete(
+      commentUrl + endpoint
+    );
+
+    if (response.success) {
+      return true;
+    } else {
+      console.error('댓글 삭제 실패:', response.error || 'Unknown error');
+      return false;
+    }
+  } catch (error) {
+    console.error('댓글 삭제 중 오류 발생:', error);
+    return false;
+  }
+}
+
 export const formatDate = (dateInput: string | Date) => {
   const date = new Date(dateInput);
   if (isNaN(date.getTime())) {

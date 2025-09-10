@@ -124,7 +124,7 @@ const Board: React.FC<BoardProps> = ({
     })) || [];
 
   const handleWritePost = () => {
-    router.push(`/community/coin/${currentCategoryId}/write`);
+    router.push('/community/coin/write');
   };
 
   const showPagination = totalPosts >= 0;
