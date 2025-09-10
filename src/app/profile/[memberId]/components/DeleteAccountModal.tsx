@@ -38,18 +38,36 @@ const Overlay = styled.div<{ $isOpen: boolean }>`
   justify-content: center;
   z-index: 1000;
   backdrop-filter: blur(4px);
+  padding: 1rem;
+  
+  @media (max-height: 700px) {
+    align-items: flex-start;
+    padding-top: 2rem;
+  }
 `;
 
 const Modal = styled.div`
   background: ${palette.card};
   border-radius: 16px;
   padding: 2rem;
+  width: 100%;
   max-width: 500px;
-  width: 90%;
-  max-height: 80vh;
+  max-height: calc(100vh - 2rem);
   overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   border: 1px solid ${palette.border};
+  margin: auto;
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    border-radius: 12px;
+    max-height: calc(100vh - 1rem);
+  }
+
+  @media (max-height: 600px) {
+    max-height: calc(100vh - 1rem);
+    padding: 1rem;
+  }
 `;
 
 const ModalHeader = styled.div`

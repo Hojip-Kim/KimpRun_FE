@@ -423,30 +423,30 @@ const Nav = () => {
           <NavMenuItem onClick={() => router.push(clientEnv.MAIN_PAGE)}>
             메인페이지
           </NavMenuItem>
-          <NavMenuItem>
-            <NavMenuLink
-              onClick={() => {
-                router.push(
-                  `${clientEnv.COMMUNITY_PAGE}/coin/1?page=1&size=15`
-                );
-              }}
-            >
-              커뮤니티
-            </NavMenuLink>
+          <NavMenuItem
+            onClick={() => {
+              router.push(
+                `${clientEnv.COMMUNITY_PAGE}/coin/1?page=1&size=15`
+              );
+            }}
+          >
+            커뮤니티
             <SubMenu>
               <SubMenuItem
-                onClick={() =>
-                  router.push(`${clientEnv.COMMUNITY_PAGE}/expert`)
-                }
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.push(`${clientEnv.COMMUNITY_PAGE}/expert`);
+                }}
               >
                 전문가 게시판
               </SubMenuItem>
               <SubMenuItem
-                onClick={() =>
+                onClick={(e) => {
+                  e.stopPropagation();
                   router.push(
                     `${clientEnv.COMMUNITY_PAGE}/coin/1?page=1&size=15`
-                  )
-                }
+                  );
+                }}
               >
                 코인 게시판
               </SubMenuItem>

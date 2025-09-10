@@ -6,6 +6,7 @@ import { palette } from '@/styles/palette';
 import { useGlobalAlert } from '@/providers/AlertProvider';
 import { clientRequest } from '@/server/fetch';
 import { clientEnv } from '@/utils/env';
+import { useRouter } from 'next/navigation';
 
 interface PasswordChangeModalProps {
   isOpen: boolean;
@@ -33,19 +34,38 @@ const ModalOverlay = styled.div<{ $isOpen: boolean }>`
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  backdrop-filter: blur(4px);
+  padding: 1rem;
+  
+  @media (max-height: 700px) {
+    align-items: flex-start;
+    padding-top: 2rem;
+  }
 `;
 
 const ModalContainer = styled.div`
   background: ${palette.card};
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 2rem;
-  width: 500px;
-  max-width: 90vw;
-  max-height: 90vh;
+  width: 100%;
+  max-width: 500px;
+  max-height: calc(100vh - 2rem);
   overflow-y: auto;
   position: relative;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   border: 1px solid ${palette.border};
+  margin: auto;
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    border-radius: 12px;
+    max-height: calc(100vh - 1rem);
+  }
+
+  @media (max-height: 600px) {
+    max-height: calc(100vh - 1rem);
+    padding: 1rem;
+  }
 `;
 
 const CloseButton = styled.button`
@@ -181,6 +201,39 @@ const PasswordRequirement = styled.div`
   line-height: 1.4;
 `;
 
+const ForgotPasswordSection = styled.div`
+  text-align: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid ${palette.border};
+`;
+
+const ForgotPasswordText = styled.p`
+  font-size: 0.875rem;
+  color: ${palette.textSecondary};
+  margin-bottom: 0.75rem;
+`;
+
+const ForgotPasswordButton = styled.button`
+  background: none;
+  border: none;
+  color: ${palette.accent};
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: ${palette.textPrimary};
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
 // 비밀번호 유효성 검사 함수 (ResetPasswordForm과 동일)
 const validatePassword = (password: string): string | null => {
   if (password.length < 8) {
@@ -211,6 +264,7 @@ const PasswordChangeModal: React.FC<PasswordChangeModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
 
   const { showSuccess, showError } = useGlobalAlert();
+  const router = useRouter();
 
   const handleClose = () => {
     setCurrentStep('verify');
@@ -296,6 +350,11 @@ const PasswordChangeModal: React.FC<PasswordChangeModalProps> = ({
     }
   };
 
+  const handleForgotPassword = () => {
+    handleClose();
+    router.push('/reset-password');
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -333,6 +392,13 @@ const PasswordChangeModal: React.FC<PasswordChangeModalProps> = ({
                 </Button>
               </ButtonGroup>
             </Form>
+            
+            <ForgotPasswordSection>
+              <ForgotPasswordText>비밀번호를 잊어버리셨나요?</ForgotPasswordText>
+              <ForgotPasswordButton onClick={handleForgotPassword}>
+                비밀번호 재설정 페이지로 이동
+              </ForgotPasswordButton>
+            </ForgotPasswordSection>
           </StepContent>
 
           {/* 2단계: 새 비밀번호 설정 */}

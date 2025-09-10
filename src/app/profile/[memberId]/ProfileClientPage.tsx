@@ -27,6 +27,7 @@ import {
   ProfileWrapper,
   DeleteAccountSection,
   DeleteAccountButton,
+  PasswordChangeButton,
 } from './styles';
 import { ProfileSkeleton } from '@/components/skeleton/Skeleton';
 
@@ -263,17 +264,11 @@ export default function ProfileClientPage({
 
         {isOwnProfile && (
           <DeleteAccountSection>
-            <DeleteAccountButton 
+            <PasswordChangeButton 
               onClick={() => setIsPasswordChangeModalOpen(true)}
-              style={{ 
-                backgroundColor: '#3b82f6', 
-                marginRight: '1rem',
-                color: 'white',
-                border: '1px solid #3b82f6'
-              }}
             >
               비밀번호 변경
-            </DeleteAccountButton>
+            </PasswordChangeButton>
             <DeleteAccountButton onClick={() => setIsDeleteModalOpen(true)}>
               회원탈퇴
             </DeleteAccountButton>
