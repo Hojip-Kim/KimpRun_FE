@@ -11,6 +11,7 @@ import CoinRankingSkeleton from './CoinRankingSkeleton';
 import CoinSearch from './CoinSearch';
 import { searchCoinBySymbolClient } from '../services/coinRankingService';
 import { useRouter } from 'next/navigation';
+import { parseDate } from '@/utils/dateUtils';
 
 const Container = styled.div`
   max-width: 1400px;
@@ -429,7 +430,9 @@ export default function CoinRankingClientPage({
   const getLatestUpdateDate = () => {
     if (coinData?.content?.[0]?.lastUpdated) {
       try {
-        const date = new Date(coinData.content[0].lastUpdated);
+        const date = parseDate(coinData.content[0].lastUpdated);
+        if (!date) return null;
+
         return date.toLocaleString('ko-KR', {
           year: 'numeric',
           month: '2-digit',

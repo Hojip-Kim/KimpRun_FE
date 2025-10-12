@@ -1,4 +1,5 @@
 import React from 'react';
+import { parseDate } from '@/utils/dateUtils';
 
 interface StructuredDataProps {
   data: Record<string, any>;
@@ -20,17 +21,18 @@ export const createArticleStructuredData = (boardData: {
   title: string;
   content: string;
   memberNickName: string;
-  createdAt: Date | string;
-  updatedAt: Date | string;
+  createdAt: Date | string | number[];
+  updatedAt: Date | string | number[];
   categoryName: string;
   boardId: number;
 }) => {
   // 날짜를 안전하게 ISO 문자열로 변환하는 헬퍼 함수
-  const toISOString = (date: Date | string): string => {
-    if (typeof date === 'string') {
-      return new Date(date).toISOString();
+  const toISOString = (date: Date | string | number[]): string => {
+    const parsedDate = parseDate(date);
+    if (!parsedDate) {
+      return new Date().toISOString(); // fallback
     }
-    return date.toISOString();
+    return parsedDate.toISOString();
   };
 
   return {

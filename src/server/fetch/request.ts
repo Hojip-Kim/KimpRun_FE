@@ -114,6 +114,16 @@ export const createRequest = (baseConfig: Partial<FetchConfig> = {}) => {
         };
       }
 
+      // Spring Page 응답 형식 처리 (content, pageable, totalElements 등이 있는 경우)
+      if ('content' in apiResponse && 'pageable' in apiResponse) {
+        return {
+          success: response.ok,
+          data: apiResponse as T,
+          error: response.ok ? undefined : 'Failed to fetch data',
+          status: response.status,
+        };
+      }
+
       // 백엔드에서 정의되지 않은 형식이 온 경우 (오류 상황)
       console.error('❌ 예상하지 못한 API 응답 형식:', apiResponse);
       return {

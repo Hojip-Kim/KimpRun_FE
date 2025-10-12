@@ -9,6 +9,7 @@ import { numberToKorean } from '@/method/common_method';
 import { formatCryptoPrice } from '@/utils/priceUtils';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
+import { parseDate } from '@/utils/dateUtils';
 
 const TableContainer = styled.div`
   ${cardStyle}
@@ -609,7 +610,8 @@ const CoinDetailExpanded: React.FC<{
               {coin.dateAdded
                 ? (() => {
                     try {
-                      return new Date(coin.dateAdded).toLocaleDateString('ko-KR');
+                      const date = parseDate(coin.dateAdded);
+                      return date ? date.toLocaleDateString('ko-KR') : '정보 없음';
                     } catch {
                       return '정보 없음';
                     }
