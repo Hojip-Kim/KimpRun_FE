@@ -5,7 +5,7 @@ import {
 } from '@/types/exchangeRanking';
 import { serverGet } from '@/server/fetch/server';
 import { clientRequest } from '@/server/fetch/client';
-import { clientEnv } from '@/utils/env';
+import { clientEnv, serverEnv } from '@/utils/env';
 
 // 서버 컴포넌트용 fetch (SSR) - 1-based 페이지
 export async function fetchExchangeRankingServer(
@@ -18,7 +18,7 @@ export async function fetchExchangeRankingServer(
     size: size.toString(),
   });
 
-  const API_BASE_URL = clientEnv.API_BASE_URL;
+  const API_BASE_URL = serverEnv.API_BASE_URL;
   const url = `${API_BASE_URL}/cmc/exchange/all?${searchParams.toString()}`;
 
   try {

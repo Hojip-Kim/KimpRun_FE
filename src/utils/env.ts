@@ -1,57 +1,86 @@
-// 클라이언트 환경 변수 - 빌드 시점에 번들에 포함됨
-export const clientEnv = {
-  API_BASE_URL:
-    process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api',
-  LOGIN_URL: process.env.NEXT_PUBLIC_LOGIN_URL,
+// Base URLs
+const CLIENT_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api';
+const SERVER_API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:8080/api';
 
-  // STOMP WebSocket
-  STOMP_URL: process.env.NEXT_PUBLIC_STOMP_URL,
-
-  // Page
-  MAIN_PAGE: process.env.NEXT_PUBLIC_MAIN_PAGE,
-  COMMUNITY_PAGE: process.env.NEXT_PUBLIC_COMMUNITY_PAGE,
-  INFORMATION_PAGE: process.env.NEXT_PUBLIC_INFORMATION_PAGE,
-  NEWS_PAGE: process.env.NEXT_PUBLIC_NEWS_PAGE,
-  PROFILE_PAGE: process.env.NEXT_PUBLIC_PROFILE_PAGE,
-
-  // Auth
-  ADMIN_URL: process.env.NEXT_PUBLIC_ADMIN_URL,
-  STATUS_URL: process.env.NEXT_PUBLIC_STATUS_URL,
-  LOGOUT_URL: process.env.NEXT_PUBLIC_LOGOUT_URL,
-
-  // Google
-  GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-  GOOGLE_REDIRECT_URL: process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URL,
-  GOOGLE_LOGIN_URL: process.env.NEXT_PUBLIC_GOOGLE_LOGIN_URL,
-
-  // User
-  SIGNUP_URL: process.env.NEXT_PUBLIC_SIGNUP_URL,
-  VERIFY_EMAIL_URL: process.env.NEXT_PUBLIC_VERIFY_EMAIL_URL,
-  SEND_VERIFICATION_CODE_EMAIL_URL:
-    process.env.NEXT_PUBLIC_SEND_VERIFICATION_CODE_EMAIL_URL,
-  UPDATE_NICKNAME_URL: process.env.NEXT_PUBLIC_UPDATE_NICKNAME_URL,
-  USER_INFO_URL: process.env.NEXT_PUBLIC_USER_INFO_URL,
-  DOLLAR_API_URL: process.env.NEXT_PUBLIC_DOLLAR_API_URL,
-  TETHER_API_URL: process.env.NEXT_PUBLIC_TETHER_API_URL,
-  CHAT_LOG_URL: process.env.NEXT_PUBLIC_CHAT_LOG_URL,
-  NOTICE_URL: process.env.NEXT_PUBLIC_NOTICE_URL,
-
-  // Market Data - 클라이언트에서 토큰 데이터를 가져올 수 있는 API
-  MARKET_TOKEN_NAMES_URL: process.env.NEXT_PUBLIC_MARKET_TOKEN_NAMES_URL,
-  MARKET_COMBINED_DATA_URL: process.env.NEXT_PUBLIC_MARKET_COMBINED_DATA_URL,
-  MARKET_SINGLE_DATA: process.env.NEXT_PUBLIC_MARKET_SINGLE_DATA,
-  CMC_SINGLE_COIN_URL: process.env.NEXT_PUBLIC_CMC_SINGLE_COIN_URL,
+// 동적 Origin 감지 함수 (클라이언트에서만 실행)
+const getOrigin = (): string => {
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+  return process.env.NEXT_PUBLIC_FRONTEND_BASE_URL || 'http://localhost:3000';
 };
 
+// 클라이언트 환경 변수 - 빌드 시점에 번들에 포함됨
+export const clientEnv = {
+  // Base URL
+  API_BASE_URL: CLIENT_API_BASE_URL,
+
+  // STOMP WebSocket
+  STOMP_URL: process.env.NEXT_PUBLIC_STOMP_URL || `${process.env.NEXT_PUBLIC_API_BASE_URL?.replace('http', 'ws') || 'ws://localhost:8080/api'}/ws`,
+
+  // Frontend Pages - 상대 경로로 변경하여 www 유지
+  MAIN_PAGE: '/',
+  COMMUNITY_PAGE: '/community',
+  INFORMATION_PAGE: '/information',
+  NEWS_PAGE: '/news',
+  PROFILE_PAGE: '/profile',
+
+  // 절대 URL이 필요한 경우를 위한 함수
+  getAbsoluteUrl: (path: string): string => `${getOrigin()}${path}`,
+
+  // Auth Endpoints
+  LOGIN_URL: `${CLIENT_API_BASE_URL}/login`,
+  LOGOUT_URL: `${CLIENT_API_BASE_URL}/logout`,
+  STATUS_URL: `${CLIENT_API_BASE_URL}/auth/status`,
+
+  // Google OAuth
+  GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
+  GOOGLE_REDIRECT_URL: `${CLIENT_API_BASE_URL}/login/oauth2/code/google`,
+  GOOGLE_LOGIN_URL: `${CLIENT_API_BASE_URL}/oauth2/authorization/google`,
+
+  // User Endpoints
+  SIGNUP_URL: `${CLIENT_API_BASE_URL}/user/sign-up`,
+  VERIFY_EMAIL_URL: `${CLIENT_API_BASE_URL}/user/email/verify`,
+  SEND_VERIFICATION_CODE_EMAIL_URL: `${CLIENT_API_BASE_URL}/user/email/new`,
+  UPDATE_NICKNAME_URL: `${CLIENT_API_BASE_URL}/user/update/nickname`,
+  USER_INFO_URL: `${CLIENT_API_BASE_URL}/user`,
+
+  // Market Info Endpoints
+  DOLLAR_API_URL: `${CLIENT_API_BASE_URL}/marketInfo/dollar`,
+  TETHER_API_URL: `${CLIENT_API_BASE_URL}/marketInfo/tether`,
+
+  // Chat Endpoints
+  CHAT_LOG_URL: `${CLIENT_API_BASE_URL}/chat/allLog`,
+
+  // Notice Endpoints
+  NOTICE_URL: `${CLIENT_API_BASE_URL}/notice`,
+
+  // Market Data Endpoints
+  MARKET_TOKEN_NAMES_URL: `${CLIENT_API_BASE_URL}/market/first/name`,
+  MARKET_COMBINED_DATA_URL: `${CLIENT_API_BASE_URL}/market/first/combine/data`,
+  MARKET_SINGLE_DATA: `${CLIENT_API_BASE_URL}/market/first/single/data`,
+
+  // CMC Endpoints
+  CMC_SINGLE_COIN_URL: `${CLIENT_API_BASE_URL}/cmc/coin`,
+};
+
+// 서버 환경 변수 - 서버 사이드에서만 사용
 export const serverEnv = {
-  API_BASE_URL: process.env.API_BASE_URL,
-  MARKET_FIRST_NAME: process.env.MARKET_FIRST_NAME,
-  MARKET_COMBINE_DATA: process.env.MARKET_COMBINE_DATA,
-  NOTICE_URL: process.env.NOTICE_URL,
-  BOARD_URL: process.env.BOARD_URL,
-  ALL_POSTS_URL: process.env.ALL_POSTS_URL,
-  CATEGORY_URL: process.env.CATEGORY_URL,
-  COMMENT_URL: process.env.COMMENT_URL,
-  MARKET_DATA: process.env.MARKET_DATA,
-  MARKET_SINGLE_DATA: process.env.MARKET_SINGLE_DATA,
+  // Base URL
+  API_BASE_URL: SERVER_API_BASE_URL,
+
+  // Market Endpoints
+  MARKET_FIRST_NAME: `${SERVER_API_BASE_URL}/market/first/name`,
+  MARKET_COMBINE_DATA: `${SERVER_API_BASE_URL}/market/first/combine/data`,
+  MARKET_DATA: `${SERVER_API_BASE_URL}/market/first/combine/data`,
+  MARKET_SINGLE_DATA: `${SERVER_API_BASE_URL}/market/first/single/data`,
+
+  // Notice Endpoints
+  NOTICE_URL: `${SERVER_API_BASE_URL}/notice`,
+
+  // Board/Community Endpoints
+  BOARD_URL: `${SERVER_API_BASE_URL}/board`,
+  ALL_POSTS_URL: `${SERVER_API_BASE_URL}/board/all/`,
+  CATEGORY_URL: `${SERVER_API_BASE_URL}/category`,
+  COMMENT_URL: `${SERVER_API_BASE_URL}/comment`,
 };

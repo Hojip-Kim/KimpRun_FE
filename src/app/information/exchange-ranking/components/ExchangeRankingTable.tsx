@@ -7,6 +7,7 @@ import { RootState } from '@/redux/store';
 import { ExchangeRankingItem } from '@/types/exchangeRanking';
 import { palette } from '@/styles/palette';
 import { cardStyle } from '@/components/styled/common';
+import { parseDate } from '@/utils/dateUtils';
 
 // 스타일 컴포넌트들
 const TableContainer = styled.div`
@@ -288,8 +289,10 @@ const formatFee = (fee: number): string => {
   return fee === 0 ? '0%' : `${fee.toFixed(3)}%`;
 };
 
-const formatDate = (dateString: string): string => {
-  const date = new Date(dateString);
+const formatDate = (dateValue: string | number[]): string => {
+  const date = parseDate(dateValue);
+  if (!date) return '-';
+
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   return `${year}.${month}`;
@@ -474,13 +477,13 @@ const ExchangeDetailExpanded: React.FC<{ exchange: ExchangeRankingItem }> = ({
           <DetailItem>
             <DetailLabel>설립일</DetailLabel>
             <DetailValue>
-              {new Date(exchange.dateLaunched).toLocaleDateString('ko-KR')}
+              {parseDate(exchange.dateLaunched)?.toLocaleDateString('ko-KR') || '-'}
             </DetailValue>
           </DetailItem>
           <DetailItem>
             <DetailLabel>업데이트</DetailLabel>
             <DetailValue>
-              {new Date(exchange.updatedAt).toLocaleDateString('ko-KR')}
+              {parseDate(exchange.updatedAt)?.toLocaleDateString('ko-KR') || '-'}
             </DetailValue>
           </DetailItem>
           <DetailItem>

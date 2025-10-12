@@ -60,16 +60,19 @@ import {
 } from './style';
 import { ChatSkeleton } from '@/components/skeleton/Skeleton';
 import ProfileImage from '@/components/common/ProfileImage';
+import { parseDate } from '@/utils/dateUtils';
 
 const Chat = () => {
   const router = useRouter();
   const { showConfirm, showSuccess, showError } = useGlobalAlert();
 
   // 시간 포맷 함수 - 오늘 메시지는 시/분만, 이전 날짜는 전체 날짜/시간 표시
-  const formatMessageTime = (dateInput: string | Date) => {
-    const messageDate = dateInput instanceof Date ? dateInput : new Date(dateInput);
+  const formatMessageTime = (dateInput: string | Date | number[]) => {
+    const messageDate = parseDate(dateInput);
+    if (!messageDate) return '-';
+
     const today = new Date();
-    
+
     // 오늘 자정
     const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     

@@ -1,5 +1,5 @@
 import { CoinRankingResponse } from '@/types/coinRanking';
-import { clientEnv } from '@/utils/env';
+import { clientEnv, serverEnv } from '@/utils/env';
 import { serverRequest, clientRequest } from '@/server/fetch';
 
 /**
@@ -14,7 +14,7 @@ export const getCoinRanking = async (
 ): Promise<CoinRankingResponse> => {
   try {
     const response = await serverRequest.get<CoinRankingResponse>(
-      `${clientEnv.API_BASE_URL}/cmc/coin/all?page=${page}&size=${size}`,
+      `${serverEnv.API_BASE_URL}/cmc/coin/all?page=${page}&size=${size}`,
       {
         next: {
           revalidate: 60, // 60초마다 재검증
@@ -82,7 +82,7 @@ export const searchCoinBySymbol = async (
 ): Promise<CoinRankingResponse> => {
   try {
     const response = await serverRequest.get<CoinRankingResponse>(
-      `${clientEnv.API_BASE_URL}/cmc/coin/${symbol}?page=${page}&size=${size}`,
+      `${serverEnv.API_BASE_URL}/cmc/coin/${symbol}?page=${page}&size=${size}`,
       {
         cache: 'no-store',
       }

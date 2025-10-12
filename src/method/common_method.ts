@@ -28,16 +28,18 @@ export function rateCompareByOriginPrice(number: number) {
   return num % 100;
 }
 
-import { formatRelativeDate } from '@/utils/dateUtils';
+import { formatRelativeDate, parseDate } from '@/utils/dateUtils';
 
-export const formatNoticeDate = (date: Date) => {
+export const formatNoticeDate = (date: Date | string | number[]) => {
   return formatRelativeDate(date);
 };
 
 // 자정을 넘긴 공지사항인지 확인하는 함수 (오늘 자정 이후 작성된 것만 NEW 표시)
-export const isNewNotice = (date: Date): boolean => {
+export const isNewNotice = (date: Date | string | number[]): boolean => {
   const now = new Date();
-  const noticeDate = new Date(date);
+  const noticeDate = parseDate(date);
+
+  if (!noticeDate) return false;
 
   // 오늘 자정 시간
   const todayMidnight = new Date(now);
