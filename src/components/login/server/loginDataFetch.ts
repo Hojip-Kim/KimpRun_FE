@@ -4,6 +4,7 @@ export interface responseData {
   result: 'success' | 'check';
   message: string;
   data?: string;
+  memberId: number;
 }
 
 export const loginDataFetch = async (
@@ -21,6 +22,7 @@ export const loginDataFetch = async (
       {
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
       }
     );
 

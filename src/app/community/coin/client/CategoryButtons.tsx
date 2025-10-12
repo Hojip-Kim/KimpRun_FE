@@ -23,7 +23,7 @@ const CategoryButtons: React.FC<CategoryButtonsProps> = ({
           passHref
         >
           <CategoryButton active={category.id === currentCategoryId}>
-            {category.name}
+            {category.categoryName}
           </CategoryButton>
         </Link>
       ))}
@@ -32,4 +32,3 @@ const CategoryButtons: React.FC<CategoryButtonsProps> = ({
 };
 
 export default CategoryButtons;
-

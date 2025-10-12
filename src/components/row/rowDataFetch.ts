@@ -1,4 +1,5 @@
 import { firstDataSet, secondDataSet } from '@/app/types';
+import { clientEnv } from '@/utils/env';
 import { clientRequest } from '@/server/fetch';
 import { CoinDetail } from './types';
 
@@ -30,7 +31,7 @@ export async function getRowData(
 export async function getCoinDetail(
   coinId: string
 ): Promise<CoinDetail | null> {
-  const url = new URL('http://localhost:8080/api/cmc/coin');
+  const url = new URL(clientEnv.CMC_SINGLE_COIN_URL);
   url.searchParams.set('coinId', coinId);
 
   try {
@@ -111,12 +112,43 @@ export async function updateRowData(
 ) {
   const updatedRowData = { ...rowData };
 
-  // 메인 거래소 데이터 업데이트
+  // 메인 거래소 데이터 업데이트 - 52주 고가/저가는 선택적으로 업데이트
   Object.entries(firstDataset).forEach(([token, data]) => {
-    updatedRowData[token] = {
-      ...updatedRowData[token],
-      ...data,
-    };
+    if (!updatedRowData[token]) {
+      // 새 토큰인 경우 모든 데이터 설정
+      updatedRowData[token] = { ...data };
+    } else {
+      // 기존 토큰인 경우 선택적 업데이트
+      const existing = updatedRowData[token];
+      
+      // 기본 필드들은 항상 업데이트
+      updatedRowData[token] = {
+        ...existing,
+        token: data.token,
+        trade_price: data.trade_price,
+        change_rate: data.change_rate,
+        rate_change: data.rate_change,
+      };
+      
+      // 선택적 필드들 - 웹소켓에 데이터가 있을 때만 업데이트
+      if (data.acc_trade_price24 !== undefined) {
+        updatedRowData[token].acc_trade_price24 = data.acc_trade_price24;
+      }
+      if (data.opening_price !== undefined) {
+        updatedRowData[token].opening_price = data.opening_price;
+      }
+      if (data.trade_volume !== undefined) {
+        updatedRowData[token].trade_volume = data.trade_volume;
+      }
+      
+      // 52주 고가/저가는 실제 데이터가 있고 0이 아닐 때만 업데이트
+      if (data.highest_price !== undefined && data.highest_price !== 0) {
+        updatedRowData[token].highest_price = data.highest_price;
+      }
+      if (data.lowest_price !== undefined && data.lowest_price !== 0) {
+        updatedRowData[token].lowest_price = data.lowest_price;
+      }
+    }
   });
 
   // 비교 거래소 데이터 업데이트

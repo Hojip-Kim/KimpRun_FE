@@ -2,44 +2,62 @@
 
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { FormContainer, LoginButton } from '@/components/login/style';
 import { signupDataFetch } from './server/signupDataFetch';
 import { clientEnv } from '@/utils/env';
+import { useGlobalAlert } from '@/providers/AlertProvider';
 import {
   emailValidation,
   emailVerification,
   signupValidation,
   verifyEmail,
+  validatePassword,
 } from './client/client';
 
 interface SignupFormProps {
   setIsLoginForm: React.Dispatch<React.SetStateAction<boolean>>;
+  hideInlineTitle?: boolean;
+  hideBackToLogin?: boolean;
 }
 
-const StyledButton = styled.button<{ $isDisabled: boolean }>`
-  background-color: ${(props) => (props.$isDisabled ? '#cccccc' : '#007bff')};
-  color: ${(props) => (props.$isDisabled ? '#666666' : '#ffffff')};
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
+const InlineActionButton = styled.button<{ $isDisabled?: boolean }>`
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--input);
+  color: ${(props) =>
+    props.$isDisabled ? 'var(--text-muted)' : 'var(--text-primary)'};
   cursor: ${(props) => (props.$isDisabled ? 'not-allowed' : 'pointer')};
-  transition: background-color 0.3s;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 
   &:hover {
-    background-color: ${(props) => (props.$isDisabled ? '#cccccc' : '#0056b3')};
+    color: ${(props) =>
+      props.$isDisabled ? 'var(--text-muted)' : 'var(--accent)'};
+    background-color: var(--bg-container);
+    border-color: var(--accent);
   }
 
   &:disabled {
-    background-color: #cccccc;
-    color: #666666;
-    cursor: not-allowed;
+    opacity: 0.7;
   }
+`;
+
+const Row = styled.div`
+  display: flex;
+  gap: 10px;
+  align-items: center;
 `;
 
 interface verifyCodeResponse {
   isVerified: boolean;
 }
 
-const SignupForm: React.FC<SignupFormProps> = ({ setIsLoginForm }) => {
+const SignupForm: React.FC<SignupFormProps> = ({
+  setIsLoginForm,
+  hideInlineTitle = false,
+  hideBackToLogin = false,
+}) => {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
@@ -51,7 +69,15 @@ const SignupForm: React.FC<SignupFormProps> = ({ setIsLoginForm }) => {
   const [verifyCode, setVerifyCode] = useState<string>('');
   const [isVerified, setIsVerified] = useState<boolean>(false);
 
+  const { showError, showSuccess, showWarning } = useGlobalAlert();
+
+  const [termsServiceAgreed, setTermsServiceAgreed] = useState<boolean>(false);
+  const [privacyPolicyAgreed, setPrivacyPolicyAgreed] =
+    useState<boolean>(false);
   const [isFormValid, setIsFormValid] = useState<boolean>(false);
+  const [passwordValidationError, setPasswordValidationError] = useState<
+    string | null
+  >(null);
 
   const verifyEmailUrl = clientEnv.VERIFY_EMAIL_URL;
   const sendVerificationCodeEmailUrl =
@@ -61,13 +87,18 @@ const SignupForm: React.FC<SignupFormProps> = ({ setIsLoginForm }) => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      alert('비밀번호가 일치하지 않습니다.');
+      showWarning('비밀번호가 일치하지 않습니다.');
+      return;
+    }
+
+    if (!termsServiceAgreed || !privacyPolicyAgreed) {
+      showWarning('서비스 이용약관에 동의해주세요.');
       return;
     }
 
     const responseJson = await signupDataFetch(username, email, password);
     if (responseJson) {
-      alert(
+      showSuccess(
         '회원가입 성공! \n' + '환영합니다. ' + responseJson.nickname + '님'
       );
     }
@@ -76,7 +107,15 @@ const SignupForm: React.FC<SignupFormProps> = ({ setIsLoginForm }) => {
 
   useEffect(() => {
     validateForm();
-  }, [username, email, password, confirmPassword, isVerified]);
+  }, [
+    username,
+    email,
+    password,
+    confirmPassword,
+    isVerified,
+    termsServiceAgreed,
+    privacyPolicyAgreed,
+  ]);
 
   const validateForm = () => {
     const isValid = signupValidation(
@@ -84,7 +123,9 @@ const SignupForm: React.FC<SignupFormProps> = ({ setIsLoginForm }) => {
       email,
       password,
       confirmPassword,
-      isVerified
+      isVerified,
+      termsServiceAgreed,
+      privacyPolicyAgreed
     );
 
     isValid ? setIsFormValid(true) : setIsFormValid(false);
@@ -94,20 +135,17 @@ const SignupForm: React.FC<SignupFormProps> = ({ setIsLoginForm }) => {
     e.preventDefault();
 
     if (!emailValidation(email)) {
-      alert('유효한 이메일을 입력해주세요.');
+      showWarning('유효한 이메일을 입력해주세요.');
       return;
     }
 
-    try {
-      const response = await emailVerification(email);
-      if (response) {
-        setIsEmailVerifying(true);
-        setRemainingTime(300); // 5분
-      } else {
-        alert('이메일 인증 요청 중 오류 발생');
-      }
-    } catch (error) {
-      alert('이메일 인증 요청 중 오류 발생');
+    setIsEmailVerifying(true);
+    setRemainingTime(300); // 5분
+    const response = emailVerification(email);
+    if (!response) {
+      setIsEmailVerifying(false);
+      setRemainingTime(0);
+      return;
     }
   };
 
@@ -119,12 +157,12 @@ const SignupForm: React.FC<SignupFormProps> = ({ setIsLoginForm }) => {
       if (response) {
         setIsVerified(true);
         setIsEmailVerifying(false);
-        alert('이메일 인증이 완료되었습니다.');
+        showSuccess('이메일 인증이 완료되었습니다.');
       } else {
-        alert('인증번호가 일치하지 않습니다.');
+        showError('인증번호가 일치하지 않습니다.');
       }
     } catch (error) {
-      alert('인증확인중 오류 발생');
+      showError('인증확인중 오류 발생');
     }
   };
 
@@ -154,6 +192,9 @@ const SignupForm: React.FC<SignupFormProps> = ({ setIsLoginForm }) => {
         break;
       case 'password':
         setPassword(value);
+        // 비밀번호 유효성 검사
+        const validationError = validatePassword(value);
+        setPasswordValidationError(validationError);
         break;
       case 'confirmPassword':
         setConfirmPassword(value);
@@ -162,8 +203,8 @@ const SignupForm: React.FC<SignupFormProps> = ({ setIsLoginForm }) => {
   };
 
   return (
-    <>
-      <h1>회원가입</h1>
+    <FormContainer>
+      {!hideInlineTitle && <h1>회원가입</h1>}
       <form onSubmit={handleSignup}>
         <div>
           <label>사용자 이름</label>
@@ -173,19 +214,21 @@ const SignupForm: React.FC<SignupFormProps> = ({ setIsLoginForm }) => {
             value={username}
             onChange={handleInputChange}
             required
+            placeholder="닉네임을 입력하세요"
           />
         </div>
         <div>
           <label>이메일</label>
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <Row>
             <input
               type="email"
               name="email"
               value={email}
               onChange={handleInputChange}
               required
+              placeholder="example@email.com"
             />
-            <StyledButton
+            <InlineActionButton
               type="button"
               onClick={handleEmailVerification}
               $isDisabled={isEmailVerifying}
@@ -196,10 +239,10 @@ const SignupForm: React.FC<SignupFormProps> = ({ setIsLoginForm }) => {
                     .toString()
                     .padStart(2, '0')}`
                 : '인증하기'}
-            </StyledButton>
-          </div>
+            </InlineActionButton>
+          </Row>
           {isEmailVerifying && (
-            <div style={{ marginTop: '10px', display: 'flex', gap: '10px' }}>
+            <Row style={{ marginTop: '10px' }}>
               <input
                 type="text"
                 placeholder="인증번호 6자리 입력"
@@ -207,15 +250,15 @@ const SignupForm: React.FC<SignupFormProps> = ({ setIsLoginForm }) => {
                 onChange={(e) => setVerifyCode(e.target.value)}
                 maxLength={6}
               />
-              <StyledButton
+              <InlineActionButton
                 type="button"
                 onClick={handleVerifyCode}
                 $isDisabled={!verifyCode}
                 disabled={!verifyCode}
               >
                 확인
-              </StyledButton>
-            </div>
+              </InlineActionButton>
+            </Row>
           )}
         </div>
         <div>
@@ -226,7 +269,19 @@ const SignupForm: React.FC<SignupFormProps> = ({ setIsLoginForm }) => {
             value={password}
             onChange={handleInputChange}
             required
+            placeholder="비밀번호를 입력하세요"
           />
+          {passwordValidationError && (
+            <span style={{ color: 'red', fontSize: '0.8rem' }}>
+              {passwordValidationError}
+            </span>
+          )}
+          {!passwordValidationError && password && (
+            <span style={{ color: '#666', fontSize: '0.75rem' }}>
+              비밀번호는 최소 8자 이상이며, 숫자와 특수문자를 각각 1개 이상
+              포함해야 합니다.
+            </span>
+          )}
         </div>
         <div>
           <label>비밀번호 확인</label>
@@ -236,22 +291,70 @@ const SignupForm: React.FC<SignupFormProps> = ({ setIsLoginForm }) => {
             value={confirmPassword}
             onChange={handleInputChange}
             required
+            placeholder="비밀번호를 다시 입력하세요"
           />
           {password !== confirmPassword && (
             <span style={{ color: 'red' }}>비밀번호가 일치하지 않습니다.</span>
           )}
         </div>
-        <StyledButton
-          type="submit"
-          $isDisabled={!isFormValid}
-          disabled={!isFormValid}
-        >
+
+        <div>
+          <label>서비스 이용약관 동의</label>
+
+          <div className="remember-row">
+            <input
+              type="checkbox"
+              id="terms-service"
+              checked={termsServiceAgreed}
+              onChange={(e) => setTermsServiceAgreed(e.target.checked)}
+            />
+            <label htmlFor="terms-service">
+              (필수){' '}
+              <a
+                href="/terms-of-service"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                서비스 이용약관
+              </a>
+              에 동의합니다.
+            </label>
+          </div>
+
+          <div className="remember-row">
+            <input
+              type="checkbox"
+              id="privacy-policy"
+              checked={privacyPolicyAgreed}
+              onChange={(e) => setPrivacyPolicyAgreed(e.target.checked)}
+            />
+            <label htmlFor="privacy-policy">
+              (필수){' '}
+              <a
+                href="/privacy-policy"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                개인정보 수집 및 이용
+              </a>
+              에 동의합니다.
+            </label>
+          </div>
+        </div>
+
+        <LoginButton type="submit" disabled={!isFormValid}>
           가입하기
-        </StyledButton>
+        </LoginButton>
       </form>
-      <p>이미 계정이 있으신가요?</p>
-      <button onClick={() => setIsLoginForm(true)}>로그인으로 돌아가기</button>
-    </>
+      {!hideBackToLogin && (
+        <>
+          <p>이미 계정이 있으신가요?</p>
+          <button onClick={() => setIsLoginForm(true)}>
+            로그인으로 돌아가기
+          </button>
+        </>
+      )}
+    </FormContainer>
   );
 };
 

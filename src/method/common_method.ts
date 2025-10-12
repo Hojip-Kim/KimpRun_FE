@@ -28,32 +28,21 @@ export function rateCompareByOriginPrice(number: number) {
   return num % 100;
 }
 
-export const formatNoticeDate = (date: Date) => {
-  const now = new Date();
-  const noticeDate = new Date(date);
-  const diffTime = Math.abs(now.getTime() - noticeDate.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+import { formatRelativeDate } from '@/utils/dateUtils';
 
-  if (diffDays === 1) {
-    return '오늘';
-  } else if (diffDays === 2) {
-    return '어제';
-  } else if (diffDays <= 7) {
-    return `${diffDays - 1}일 전`;
-  } else {
-    return noticeDate.toLocaleDateString('ko-KR', {
-      month: 'short',
-      day: 'numeric',
-    });
-  }
+export const formatNoticeDate = (date: Date) => {
+  return formatRelativeDate(date);
 };
 
-// 1일 이내의 공지사항인지 확인하는 함수
+// 자정을 넘긴 공지사항인지 확인하는 함수 (오늘 자정 이후 작성된 것만 NEW 표시)
 export const isNewNotice = (date: Date): boolean => {
   const now = new Date();
   const noticeDate = new Date(date);
-  const diffTime = Math.abs(now.getTime() - noticeDate.getTime());
-  const diffHours = diffTime / (1000 * 60 * 60);
 
-  return diffHours <= 24;
+  // 오늘 자정 시간
+  const todayMidnight = new Date(now);
+  todayMidnight.setHours(0, 0, 0, 0);
+
+  // 자정 이후에 작성된 공지사항만 NEW 표시
+  return noticeDate >= todayMidnight;
 };

@@ -16,6 +16,7 @@ export async function getClientTokenMapping(
     const response = await clientRequest.get<TokenNameMapping>(url.toString(), {
       credentials: 'include',
       headers: { 'Content-type': 'application/json' },
+      cache: 'no-store',
     });
 
     if (response.success) {

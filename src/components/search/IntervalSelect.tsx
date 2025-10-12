@@ -1,21 +1,34 @@
 import React from 'react';
-import { StyledSelect } from './style';
+import Dropdown, { DropdownOption } from '@/components/common/Dropdown';
 
 interface IntervalSelectProps {
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  onChangeValue: (value: string) => void;
+  usePortal?: boolean;
 }
 
-const IntervalSelect: React.FC<IntervalSelectProps> = ({ value, onChange }) => {
+const options: DropdownOption<string>[] = [
+  { value: '5', label: '5m' },
+  { value: '15', label: '15m' },
+  { value: '30', label: '30m' },
+  { value: '60', label: '1h' },
+  { value: '240', label: '4h' },
+  { value: '1440', label: '1d' },
+];
+
+const IntervalSelect: React.FC<IntervalSelectProps> = ({
+  value,
+  onChangeValue,
+  usePortal = false,
+}) => {
   return (
-    <StyledSelect value={value} onChange={onChange}>
-      <option value="5">5분봉</option>
-      <option value="15">15분봉</option>
-      <option value="30">30분봉</option>
-      <option value="60">1시간봉</option>
-      <option value="240">4시간봉</option>
-      <option value="1440">1일봉</option>
-    </StyledSelect>
+    <Dropdown
+      value={value}
+      options={options}
+      onChange={(v) => onChangeValue(String(v))}
+      ariaLabel="봉 간격 선택"
+      usePortal={usePortal}
+    />
   );
 };
 

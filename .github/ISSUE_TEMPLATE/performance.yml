@@ -1,0 +1,80 @@
+name: "PERF: 성능 개선"
+description: 김프런 프론트엔드의 성능 이슈를 보고하거나 개선을 제안합니다.
+title: "[PERF] "
+labels: ["performance", "frontend"]
+body:
+  - type: textarea
+    id: issue
+    attributes:
+      label: 🚀 성능 이슈 설명
+      description: 어떤 성능 문제를 경험하셨나요?
+      placeholder: |
+        - 100개 이상의 코인이 표시될 때 스크롤이 버벅임
+        - WebSocket 데이터 업데이트 시 전체 테이블이 리렌더링됨
+        - 거래소 전환 시 2-3초의 지연 시간 발생
+        - 모바일에서 차트 렌더링이 느림
+    validations:
+      required: true
+
+  - type: textarea
+    id: metrics
+    attributes:
+      label: 📊 측정 지표
+      description: 성능 문제를 측정한 구체적인 지표가 있다면 공유해주세요.
+      placeholder: |
+        - React DevTools Profiler: 리렌더링 시간 300ms
+        - Chrome DevTools Performance: FPS 15-20
+        - 메모리 사용량: 500MB 이상
+        - WebSocket 메시지 처리 지연: 평균 200ms
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: 💥 영향도
+      description: 이 성능 이슈가 사용자 경험에 미치는 영향을 설명해주세요.
+      placeholder: |
+        - 실시간 가격 업데이트가 지연되어 거래 기회를 놓칠 수 있음
+        - 스크롤이 버벅여서 원하는 코인을 찾기 어려움
+        - 모바일에서 사용이 거의 불가능한 수준
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: 💡 개선 제안
+      description: 성능 개선을 위한 아이디어가 있다면 공유해주세요.
+      placeholder: |
+        - React.memo로 TableRowComponent 메모이제이션
+        - 가상 스크롤링 도입으로 DOM 노드 수 감소
+        - WebSocket 데이터 배치 처리 및 디바운싱
+        - Redux 셀렉터 최적화
+        - 이미지 및 아이콘 lazy loading
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: 🎯 성능 이슈 영역
+      description: 어느 부분에서 성능 문제가 발생하나요?
+      multiple: true
+      options:
+        - 초기 로딩
+        - 실시간 데이터 업데이트
+        - 스크롤 성능
+        - 메모리 누수
+        - 네트워크 요청
+        - 렌더링 성능
+        - 상태 관리
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 🔥 우선순위
+      description: 이 성능 이슈의 긴급도는 어떻게 되나요?
+      options:
+        - P0 - 긴급 (서비스 사용 불가)
+        - P1 - 높음 (주요 기능 영향)
+        - P2 - 중간 (사용 불편)
+        - P3 - 낮음 (개선 사항)
+    validations:
+      required: true

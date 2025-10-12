@@ -1,11 +1,14 @@
 interface UserInfo {
   isAuthenticated: boolean;
-  member: {
-    id: number;
-    email: string;
-    nickname: string;
-    role: string;
-  };
+  member?: Member;
+  uuid: string;
 }
 
-export type { UserInfo };
+interface Member {
+  memberId: number;
+  email: string;
+  name: string;
+  role: string;
+}
+
+export type { UserInfo, Member };

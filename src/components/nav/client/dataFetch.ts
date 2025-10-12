@@ -1,14 +1,16 @@
 import { fetchUserInfo } from '@/components/auth/fetchUserInfo';
+import { UserInfo } from '@/components/market-selector/type';
 import { clientRequest } from '@/server/fetch';
 import { ProcessedApiResponse, DollarInfo, TetherInfo } from '@/server/type';
 import { clientEnv } from '@/utils/env';
 
-export const checkUserAuth = async (isAuthenticated: boolean) => {
-  if (isAuthenticated) {
-    const response = await fetchUserInfo();
-    return response?.member;
+export const checkUserAuth = async () => {
+  const response: UserInfo | null = await fetchUserInfo();
+  if (response !== null) {
+    return response;
+  } else {
+    return null;
   }
-  return null;
 };
 
 export const requestTether = async () => {

@@ -1,0 +1,53 @@
+name: "DELETE: 코드/파일/설정 삭제"
+description: 김프런 프론트엔드에서 더 이상 사용되지 않는 코드, 파일, 설정 등을 삭제합니다.
+title: "[DELETE] "
+labels: ["delete", "cleanup", "frontend"]
+body:
+  - type: textarea
+    id: target
+    attributes:
+      label: 🗑️ 삭제 대상
+      description: 어떤 코드/파일/설정/모듈을 삭제하나요?
+      placeholder: |
+        - src/components/deprecated/OldExchangeSelector.tsx
+        - src/hooks/useLegacyWebSocket.ts
+        - public/images/old-logos/
+        - 사용하지 않는 Redux reducer
+        - env.local.bak 파일
+    validations:
+      required: true
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: 📌 삭제 사유
+      description: 삭제하는 이유를 설명해주세요 (사용되지 않음, 리팩터링, 환경 통합 등)
+      placeholder: |
+        - STOMP WebSocket으로 전환하면서 기존 Socket.io 코드가 불필요
+        - 거래소 선택 UI가 리뉴얼되어 기존 컴포넌트 사용 안함
+        - styled-components로 마이그레이션 후 CSS 파일 불필요
+        - 개발 환경에서만 사용했던 테스트 데이터
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: 🚨 기능 영향 여부
+      description: 이 삭제가 기능 동작에 영향을 줄 가능성이 있다면 설명해주세요.
+      placeholder: |
+        - 없음 (npm run build 및 Jest 테스트 통과)
+        - WebSocket 연결 코드와 관련 있어 확인 필요
+        - Redux persist 설정에 영향 가능성 있음
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ✅ 삭제 전 체크리스트
+      options:
+        - label: 기능에 영향이 없는지 확인함
+        - label: 관련 테스트가 모두 통과함
+        - label: Git blame 및 history 확인 완료
+        - label: CI/CD 영향 없음 확인

@@ -11,6 +11,7 @@ import { redirect } from 'next/navigation';
 import { ProcessedApiResponse } from '@/server/type';
 import { Category, CategoryResponse } from '../type';
 import { InputForm } from './style';
+import { useGlobalAlert } from '@/providers/AlertProvider';
 
 interface AdminPageProps {
   initialCategories: Category[];
@@ -23,11 +24,12 @@ const AdminPageClient = ({ initialCategories }: AdminPageProps) => {
   const [editCategoryName, setEditCategoryName] = useState<string>('');
 
   const user = useSelector((state: RootState) => state.auth.user);
+  const { showError, showSuccess, showWarning } = useGlobalAlert();
 
   const checkUserRole = () => {
     const userRole = user?.role;
     if (userRole !== 'OPERATOR' && userRole !== 'MANAGER') {
-      alert('관리자가 아닙니다');
+      showWarning('관리자가 아닙니다');
       redirect('/');
     }
   };
@@ -44,9 +46,9 @@ const AdminPageClient = ({ initialCategories }: AdminPageProps) => {
         // 새로 생성된 카테고리를 목록에 추가 (전체 카테고리 목록을 다시 설정)
         setCategories(response.data.categories);
         setCategoryName('');
-        alert(`카테고리 추가 완료`);
+        showSuccess(`카테고리 추가 완료`);
       } else {
-        alert('카테고리 추가 실패');
+        showError('카테고리 추가 실패');
       }
     } catch (error) {
       console.error(error);
@@ -68,13 +70,13 @@ const AdminPageClient = ({ initialCategories }: AdminPageProps) => {
         );
         setEditingCategory(null);
         setEditCategoryName('');
-        alert('카테고리 수정 완료');
+        showSuccess('카테고리 수정 완료');
       } else {
-        alert('카테고리 수정 실패');
+        showError('카테고리 수정 실패');
       }
     } catch (error) {
       console.error(error);
-      alert('카테고리 수정 실패');
+      showError('카테고리 수정 실패');
     }
   };
 
@@ -83,9 +85,9 @@ const AdminPageClient = ({ initialCategories }: AdminPageProps) => {
       const response: ProcessedApiResponse<Boolean> = await deleteCategory(id);
       if (response.success) {
         setCategories(categories.filter((category) => category.id !== id));
-        alert(`카테고리 삭제 완료 : ${id}`);
+        showSuccess(`카테고리 삭제 완료 : ${id}`);
       } else {
-        alert(`카테고리 삭제 실패 : ${id}`);
+        showError(`카테고리 삭제 실패 : ${id}`);
       }
     } catch (error) {
       console.error(error);
@@ -139,11 +141,11 @@ const AdminPageClient = ({ initialCategories }: AdminPageProps) => {
                 </form>
               ) : (
                 <>
-                  {category.id} : {category.name}
+                  {category.id} : {category.categoryName}
                   <button
                     onClick={() => {
                       setEditingCategory(category.id);
-                      setEditCategoryName(category.name);
+                      setEditCategoryName(category.categoryName);
                     }}
                   >
                     수정

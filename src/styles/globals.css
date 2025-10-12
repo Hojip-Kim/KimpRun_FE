@@ -1,6 +1,8 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+
+
+/* React Quill 스타일 */
+@import 'react-quill/dist/quill.snow.css';
+@import 'react-quill/dist/quill.core.css';
 
 :root {
   --foreground-rgb: 0, 0, 0;
@@ -36,4 +38,25 @@ body {
 
 * {
   box-sizing: border-box;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: var(--text-primary) !important;
+  caret-color: var(--text-primary);
+  -webkit-box-shadow: 0 0 0px 1000px var(--input) inset !important;
+  box-shadow: 0 0 0px 1000px var(--input) inset !important;
+  transition: background-color 9999s ease-out 0s !important;
+  border: 1px solid var(--border-soft) !important;
+}
+
+input:autofill,
+textarea:autofill,
+select:autofill {
+  filter: none;
+  background: var(--input) !important;
+  color: var(--text-primary) !important;
 }

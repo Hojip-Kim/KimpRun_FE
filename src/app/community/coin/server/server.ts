@@ -16,7 +16,7 @@ export async function getAllPosts(
         success: false,
         error: 'ALL_POSTS_URL not configured',
         status: 500,
-        data: { boards: [], boardCount: 0 },
+        data: { boardResponseDtos: [], count: 0 },
       };
     }
 
@@ -34,7 +34,7 @@ export async function getAllPosts(
         success: false,
         error: response.error || '게시글을 가져오는데 실패했습니다.',
         status: response.status || 500,
-        data: { boards: [], boardCount: 0 },
+        data: { boardResponseDtos: [], count: 0 },
       };
     }
   } catch (error) {
@@ -43,7 +43,7 @@ export async function getAllPosts(
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
       status: 500,
-      data: { boards: [], boardCount: 0 },
+      data: { boardResponseDtos: [], count: 0 },
     };
   }
 }
@@ -58,7 +58,7 @@ export async function getPosts(
         success: false,
         error: 'BOARD_URL not configured',
         status: 500,
-        data: { boards: [], boardCount: 0 },
+        data: { boardResponseDtos: [], count: 0 },
       };
     }
 
@@ -76,7 +76,7 @@ export async function getPosts(
         success: false,
         error: response.error || '게시글을 가져오는데 실패했습니다.',
         status: response.status || 500,
-        data: { boards: [], boardCount: 0 },
+        data: { boardResponseDtos: [], count: 0 },
       };
     }
   } catch (error) {
@@ -85,7 +85,7 @@ export async function getPosts(
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
       status: 500,
-      data: { boards: [], boardCount: 0 },
+      data: { boardResponseDtos: [], count: 0 },
     };
   }
 }

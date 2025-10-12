@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { palette } from '@/styles/palette';
 
 export const Container = styled.div`
   display: flex;
@@ -11,21 +12,21 @@ export const Container = styled.div`
 `;
 
 export const Title = styled.h1`
-  color: white;
+  color: ${palette.textPrimary};
   font-size: 1.5rem;
   font-weight: bold;
   margin-bottom: 1rem;
 `;
 
 export const MessageCard = styled.div`
-  background-color: #1f2937;
+  background: ${palette.card};
   padding: 1.5rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  border: 1px solid #374151;
+  border-radius: 12px;
+  border: 1px solid ${palette.border};
+  box-shadow: ${palette.shadow};
 `;
 
 export const Message = styled.p`
-  color: #e5e7eb;
+  color: ${palette.textSecondary};
   font-size: 1.125rem;
 `;

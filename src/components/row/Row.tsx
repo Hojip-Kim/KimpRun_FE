@@ -1,6 +1,12 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+  useMemo,
+} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { setKimp, setToken, setTokenPrice } from '@/redux/reducer/widgetReduce';
@@ -11,7 +17,7 @@ import {
   updateRowDataFirstRender,
   getCoinDetail,
 } from './rowDataFetch';
-import { FaSort, FaSortDown, FaSortUp } from 'react-icons/fa';
+import { FaSort, FaSortDown, FaSortUp } from '@/components/icons';
 import {
   RowContainer,
   TableWrapper,
@@ -26,6 +32,7 @@ import {
 import TableRowComponent from './TableRowComponent';
 import { RowType, dataListType, CoinDetail } from './types';
 import { sortDataByConfig } from './util';
+import { palette } from '@/styles/palette';
 const Row = ({
   firstTokenNameList,
   firstTokenDataList,
@@ -40,10 +47,11 @@ const Row = ({
   const [prevRowData, setPrevRowData] = useState<{
     [key: string]: dataListType;
   }>({});
+  const [currentExchange, setCurrentExchange] = useState<string>('');
   const [rowData, setRowData] = useState<{ [key: string]: dataListType }>({});
   const [sortConfig, setSortConfig] = useState({
-    key: '',
-    direction: '',
+    key: 'acc_trade_price24',
+    direction: 'desc',
   });
   const [fadeOutClass, setFadeOutClass] = useState({});
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
@@ -53,6 +61,8 @@ const Row = ({
   const [loadingCoinDetail, setLoadingCoinDetail] = useState<string | null>(
     null
   );
+  const [visibleRowsCount, setVisibleRowsCount] = useState(50); // 초기에 50개만 렌더링
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const isMountedRef = useRef(true);
 
@@ -135,13 +145,12 @@ const Row = ({
       return;
     }
 
-    // 현재 필터링된 토큰들만 대상으로 정렬
-    const filteredRowData = {};
-    filteredTokens.forEach((token) => {
-      if (dataToSort[token]) {
-        filteredRowData[token] = dataToSort[token];
-      }
-    });
+    // 현재 필터링된 토큰들만 대상으로 정렬 (Map 사용으로 성능 최적화)
+    const filteredRowData = Object.fromEntries(
+      filteredTokens
+        .filter((token) => dataToSort[token])
+        .map((token) => [token, dataToSort[token]])
+    );
 
     // 필터링된 데이터가 없으면 정렬하지 않음
     if (Object.keys(filteredRowData).length === 0) {
@@ -159,8 +168,9 @@ const Row = ({
 
     // 기존 리덕스 토큰 순서에서 필터링되지 않은 토큰들은 유지하고, 필터링된 토큰들만 정렬된 순서로 교체
     const currentTokenOrder = [...tokenOrderList];
+    const filteredTokensSet = new Set(filteredTokens);
     const nonFilteredTokens = currentTokenOrder.filter(
-      (token) => !filteredTokens.includes(token)
+      (token) => !filteredTokensSet.has(token)
     );
     const newTokenOrder = [...sortedFilteredTokenOrder, ...nonFilteredTokens];
 
@@ -188,30 +198,31 @@ const Row = ({
     }
   }, [sortConfig, filteredTokens]);
 
-  // Symbol을 ID로 변환하는 헬퍼 함수
+  // Symbol to ID 매핑 캐시 (성능 최적화)
+  const tokenIdCache = useMemo(() => {
+    if (!tokenMapping) return new Map();
+
+    const cache = new Map<string, number | null>();
+
+    // firstMarketList 매핑
+    tokenMapping.firstMarketList?.forEach((token) => {
+      cache.set(token.symbol, token.id);
+    });
+
+    // secondMarketList 매핑 (중복시 덮어쓰기)
+    tokenMapping.secondMarketList?.forEach((token) => {
+      cache.set(token.symbol, token.id);
+    });
+
+    return cache;
+  }, [tokenMapping]);
+
+  // Symbol을 ID로 변환하는 헬퍼 함수 (캐시 사용)
   const getTokenId = useCallback(
     (symbol: string): number | null => {
-      if (!tokenMapping) {
-        return null;
-      }
-
-      // firstMarketList에서 먼저 찾기
-      const tokenInFirst = tokenMapping.firstMarketList?.find(
-        (token) => token.symbol === symbol
-      );
-
-      if (tokenInFirst) return tokenInFirst.id;
-
-      // secondMarketList에서 찾기
-      const tokenInSecond = tokenMapping.secondMarketList?.find(
-        (token) => token.symbol === symbol
-      );
-
-      if (tokenInSecond) return tokenInSecond.id;
-
-      return null;
+      return tokenIdCache.get(symbol) || null;
     },
-    [tokenMapping, selectedMainMarket, selectedCompareMarket]
+    [tokenIdCache]
   );
 
   const rowClick = useCallback(
@@ -223,7 +234,11 @@ const Row = ({
 
       // 1. 즉시 UI 상태 변경 (빠른 반응성)
       setExpandedRow(token);
-      updateWidgetToken(token);
+      
+      // Widget 상태 업데이트를 다음 틱으로 지연
+      setTimeout(() => {
+        updateWidgetToken(token);
+      }, 0);
 
       // 2. 코인 상세 정보 로딩 (비동기 처리)
       // coinDetails는 함수 내부에서 최신 상태를 참조
@@ -286,12 +301,67 @@ const Row = ({
     };
   }, []);
 
-  // 거래소 변경 시 정렬 상태 초기화
+  // 거래소 변경 시 모든 상태 완전 초기화
   useEffect(() => {
     if (isMountedRef.current) {
-      setSortConfig({ key: '', direction: '' });
+      const newExchangeKey = `${selectedMainMarket}-${selectedCompareMarket}`;
+      setCurrentExchange(newExchangeKey);
+
+      // 정렬 상태를 기본값(누적 거래액 desc)으로 초기화
+      setSortConfig({ key: 'acc_trade_price24', direction: 'desc' });
+
+      // 모든 데이터 상태 완전 초기화 (이전 SSR 데이터 제거)
+      setNameList([]);
+      setDataList([]);
+      setPrevRowData({});
+      setRowData({});
+      setFadeOutClass({});
+      setExpandedRow(null);
+      setCoinDetails({});
+      setLoadingCoinDetail(null);
     }
   }, [selectedMainMarket, selectedCompareMarket]);
+
+  // TableBody 내부 스크롤 기반 무한스크롤
+  const tableBodyRef = useRef<HTMLDivElement>(null);
+
+  const handleInfiniteScroll = useCallback(() => {
+    if (isLoadingMore || !tableBodyRef.current) return;
+
+    const element = tableBodyRef.current;
+    const { scrollTop, scrollHeight, clientHeight } = element;
+    const threshold = 200; // 바닥에서 200px 전에 자연스럽게 로드
+
+    if (scrollHeight - scrollTop - clientHeight < threshold) {
+      const filteredTokensSet = new Set(filteredTokens);
+      const renderTokens = tokenOrderList.filter(
+        (token) => filteredTokensSet.has(token) && rowData[token]
+      );
+
+      if (visibleRowsCount < renderTokens.length) {
+        setIsLoadingMore(true);
+
+        // 즉시 더 많은 데이터 표시 (로딩 시간 없음)
+        setVisibleRowsCount((prev) => Math.min(prev + 50, renderTokens.length));
+        setIsLoadingMore(false);
+      }
+    }
+  }, [
+    isLoadingMore,
+    filteredTokens,
+    tokenOrderList,
+    rowData,
+    visibleRowsCount,
+  ]);
+
+  // TableBody 내부 스크롤 이벤트 리스너 등록
+  useEffect(() => {
+    const element = tableBodyRef.current;
+    if (!element) return;
+
+    element.addEventListener('scroll', handleInfiniteScroll);
+    return () => element.removeEventListener('scroll', handleInfiniteScroll);
+  }, [handleInfiniteScroll]);
 
   useEffect(() => {
     if (!isMountedRef.current) return;
@@ -369,7 +439,13 @@ const Row = ({
     if (!isMountedRef.current) return;
 
     if (rowData && firstDataset && secondTokenDataList) {
-      setPrevRowData(rowData);
+      const exchangeKey = `${selectedMainMarket}-${selectedCompareMarket}`;
+
+      // 같은 거래소에서만 이전 데이터로 설정 (cross-exchange 비교 방지)
+      if (currentExchange === exchangeKey && Object.keys(rowData).length > 0) {
+        setPrevRowData(rowData);
+      }
+
       updateRowData(rowData, firstDataset, secondDataset).then(
         (updatedData) => {
           if (!isMountedRef.current) return;
@@ -385,20 +461,23 @@ const Row = ({
             applySorting(updatedData, sortConfig);
           }
 
-          const newFadeOutClass = {};
-          Object.keys(firstDataset).forEach((token) => {
-            const prev = prevRowData[token]?.trade_price;
-            const cur = firstDataset[token].trade_price;
-            if (prev !== undefined && prev !== cur) {
-              newFadeOutClass[token] = 'fade-out';
+          // 같은 거래소에서만 애니메이션 효과 적용
+          if (currentExchange === exchangeKey) {
+            const newFadeOutClass = {};
+            for (const token in firstDataset) {
+              const prev = prevRowData[token]?.trade_price;
+              const cur = firstDataset[token].trade_price;
+              if (prev !== undefined && prev !== cur) {
+                newFadeOutClass[token] = 'fade-out';
+              }
             }
-          });
-          setFadeOutClass(newFadeOutClass);
+            setFadeOutClass(newFadeOutClass);
 
-          setTimeout(() => {
-            if (!isMountedRef.current) return;
-            setFadeOutClass({});
-          }, 200);
+            setTimeout(() => {
+              if (!isMountedRef.current) return;
+              setFadeOutClass({});
+            }, 200);
+          }
         }
       );
     }
@@ -407,7 +486,7 @@ const Row = ({
       updateTokenPrice(token);
       updateKimp(token);
     }
-  }, [firstDataset, dollar, tether, selectedCompareMarket]);
+  }, [firstDataset, dollar, tether, selectedCompareMarket, currentExchange]);
 
   return (
     <RowContainer>
@@ -520,19 +599,28 @@ const Row = ({
           </thead>
         </HeaderTable>
 
-        <TableBody>
+        <TableBody ref={tableBodyRef}>
           <BodyTable>
             <tbody>
-              {(() => {
+              {useMemo(() => {
+                const filteredTokensSet = new Set(filteredTokens);
                 const renderTokens = tokenOrderList.filter(
-                  (token) => filteredTokens.includes(token) && rowData[token]
+                  (token) => filteredTokensSet.has(token) && rowData[token]
                 );
-                return renderTokens.map((token) => (
+                // 가상화: visibleRowsCount만큼만 렌더링
+                const visibleTokens = renderTokens.slice(0, visibleRowsCount);
+
+                const exchangeKey = `${selectedMainMarket}-${selectedCompareMarket}`;
+                const shouldUsePrevData = currentExchange === exchangeKey;
+
+                return visibleTokens.map((token) => (
                   <TableRowComponent
                     key={token}
                     token={token}
                     data={rowData[token]}
-                    prevData={prevRowData[token]}
+                    prevData={
+                      shouldUsePrevData ? prevRowData[token] : undefined
+                    }
                     expandedRow={expandedRow}
                     fadeOutClass={fadeOutClass[token]}
                     onRowClick={rowClick}
@@ -540,7 +628,21 @@ const Row = ({
                     loadingCoinDetail={loadingCoinDetail === token}
                   />
                 ));
-              })()}
+              }, [
+                tokenOrderList,
+                filteredTokens,
+                rowData,
+                visibleRowsCount,
+                selectedMainMarket,
+                selectedCompareMarket,
+                currentExchange,
+                prevRowData,
+                expandedRow,
+                fadeOutClass,
+                rowClick,
+                coinDetails,
+                loadingCoinDetail,
+              ])}
             </tbody>
           </BodyTable>
         </TableBody>
@@ -549,4 +651,4 @@ const Row = ({
   );
 };
 
-export default Row;
+export default React.memo(Row);

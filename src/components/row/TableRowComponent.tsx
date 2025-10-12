@@ -1,137 +1,340 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import Image from 'next/image';
 import { numberToKorean, rateCompareByOriginPrice } from '@/method';
+import { formatPrice, formatPercentage } from '@/utils/priceUtils';
 import {
   TableCell,
   TableRow as StyledTableRow,
   ExpandableContent,
 } from './styled';
 import { dataListType, CoinDetail } from './types';
+import { CoinDetailSkeleton } from '@/components/skeleton/Skeleton';
 
 // 코인 상세 정보 컴포넌트 (메모이제이션으로 성능 최적화)
 const CoinDetailView = React.memo(
   ({ coinDetail }: { coinDetail: CoinDetail }) => (
     <div
       style={{
-        padding: '20px',
         display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '20px',
+        gridTemplateColumns: 'auto 1fr 1fr',
+        gridTemplateRows: 'auto auto',
+        gap: '1rem',
+        padding: '0.5rem',
+        alignItems: 'flex-start',
+        fontSize: '0.75rem',
       }}
+      className="coin-detail-responsive"
     >
+      {/* 코인 로고와 기본 정보 */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          minWidth: '80px',
+        }}
+      >
+        <Image
+          src={coinDetail.logo}
+          alt={coinDetail.symbol}
+          width={36}
+          height={36}
+          style={{
+            borderRadius: '50%',
+            marginBottom: '0.4rem',
+          }}
+          onError={(e) => {
+            (e.target as HTMLImageElement).style.display = 'none';
+          }}
+          priority={false}
+        />
+        <div style={{ textAlign: 'center' }}>
+          <h3
+            style={{
+              margin: '0 0 0.25rem 0',
+              color: 'var(--accent)',
+              fontSize: '0.85rem',
+              fontWeight: '600',
+            }}
+          >
+            {coinDetail.name}
+          </h3>
+          <p
+            style={{
+              margin: '0',
+              color: 'var(--text-muted)',
+              fontSize: '0.7rem',
+              fontWeight: '500',
+            }}
+          >
+            {coinDetail.symbol}
+          </p>
+          <p
+            style={{
+              margin: '0.25rem 0 0 0',
+              color: 'var(--text-secondary)',
+              fontSize: '0.65rem',
+            }}
+          >
+            #{coinDetail.rank ? coinDetail.rank.toLocaleString() : '정보 없음'}
+          </p>
+        </div>
+      </div>
+
+      {/* 공급량 정보 */}
       <div>
+        <h4
+          style={{
+            margin: '0 0 0.75rem 0',
+            color: 'var(--accent)',
+            fontSize: '0.8rem',
+            fontWeight: '600',
+          }}
+        >
+          공급량 정보
+        </h4>
         <div
           style={{
             display: 'flex',
-            alignItems: 'center',
-            marginBottom: '15px',
+            flexDirection: 'column',
+            gap: '0.4rem',
           }}
+          className="supply-info-container"
         >
-          <img
-            src={coinDetail.logo}
-            alt={coinDetail.symbol}
-            loading="lazy"
+          <div
             style={{
-              width: '48px',
-              height: '48px',
-              marginRight: '15px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
             }}
-            onError={(e) => {
-              (e.target as HTMLImageElement).style.display = 'none';
-            }}
-          />
-          <div>
-            <h3 style={{ margin: '0', color: '#45E8BC' }}>{coinDetail.name}</h3>
-            <p style={{ margin: '0', color: 'gray' }}>{coinDetail.symbol}</p>
+          >
+            <span
+              style={{ color: 'var(--text-secondary)', fontSize: '0.7rem' }}
+            >
+              최대 공급량
+            </span>
+            <span
+              style={{
+                color: 'var(--text-primary)',
+                fontSize: '0.7rem',
+                fontWeight: '600',
+              }}
+            >
+              {coinDetail.maxSupply !== '0'
+                ? Number(coinDetail.maxSupply).toLocaleString()
+                : '무제한'}
+            </span>
           </div>
-        </div>
-
-        <div style={{ marginBottom: '10px' }}>
-          <strong>순위:</strong> #{coinDetail.rank.toLocaleString()}
-        </div>
-
-        <div style={{ marginBottom: '10px' }}>
-          <strong>최대 공급량:</strong>{' '}
-          {coinDetail.maxSupply !== '0'
-            ? Number(coinDetail.maxSupply).toLocaleString()
-            : '∞'}
-        </div>
-
-        <div style={{ marginBottom: '10px' }}>
-          <strong>총 공급량:</strong>{' '}
-          {coinDetail.totalSupply
-            ? Number(coinDetail.totalSupply).toLocaleString()
-            : 'N/A'}
-        </div>
-        <div style={{ marginBottom: '10px' }}>
-          <strong>유통량:</strong>{' '}
-          {coinDetail.circulatingSupply
-            ? Number(coinDetail.circulatingSupply).toLocaleString()
-            : 'N/A'}
-        </div>
-        <div style={{ marginBottom: '10px' }}>
-          <strong>시가총액:</strong>{' '}
-          {coinDetail.marketCap
-            ? numberToKorean(Number(coinDetail.marketCap)) + '원'
-            : 'N/A'}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <span
+              style={{ color: 'var(--text-secondary)', fontSize: '0.7rem' }}
+            >
+              총 공급량
+            </span>
+            <span
+              style={{
+                color: 'var(--text-primary)',
+                fontSize: '0.7rem',
+                fontWeight: '600',
+              }}
+            >
+              {coinDetail.totalSupply
+                ? Number(coinDetail.totalSupply).toLocaleString()
+                : '정보 없음'}
+            </span>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <span
+              style={{ color: 'var(--text-secondary)', fontSize: '0.7rem' }}
+            >
+              유통 공급량
+            </span>
+            <span
+              style={{
+                color: 'var(--text-primary)',
+                fontSize: '0.7rem',
+                fontWeight: '600',
+              }}
+            >
+              {coinDetail.circulatingSupply
+                ? Number(coinDetail.circulatingSupply).toLocaleString()
+                : '정보 없음'}
+            </span>
+          </div>
         </div>
       </div>
 
+      {/* 시장 정보 */}
       <div>
-        <div style={{ marginBottom: '15px' }}>
-          <strong>플랫폼:</strong>
-          <div style={{ marginTop: '5px' }}>
-            {coinDetail.platforms.length !== 0
-              ? coinDetail.platforms.map((platform, index) => (
-                  <span
-                    key={index}
-                    style={{
-                      display: 'inline-block',
-                      background: '#333',
-                      padding: '4px 8px',
-                      margin: '2px',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                    }}
-                  >
-                    {platform}
-                  </span>
-                ))
-              : '메인넷'}
+        <h4
+          style={{
+            margin: '0 0 0.75rem 0',
+            color: 'var(--accent)',
+            fontSize: '0.8rem',
+            fontWeight: '600',
+          }}
+        >
+          시장 정보
+        </h4>
+        <div
+          style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <span
+              style={{ color: 'var(--text-secondary)', fontSize: '0.7rem' }}
+            >
+              시가총액
+            </span>
+            <span
+              style={{
+                color: 'var(--text-primary)',
+                fontSize: '0.7rem',
+                fontWeight: '600',
+              }}
+            >
+              {coinDetail.marketCap
+                ? numberToKorean(Number(coinDetail.marketCap)) + '원'
+                : '정보 없음'}
+            </span>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <span
+              style={{ color: 'var(--text-secondary)', fontSize: '0.7rem' }}
+            >
+              업데이트
+            </span>
+            <span
+              style={{
+                color: 'var(--text-primary)',
+                fontSize: '0.7rem',
+                fontWeight: '600',
+              }}
+            >
+              {new Date(coinDetail.lastUpdated).toLocaleDateString('ko-KR')}
+            </span>
           </div>
         </div>
 
-        <div style={{ marginBottom: '15px' }}>
-          <strong>탐색기 링크:</strong>
-          <div style={{ marginTop: '5px' }}>
-            {coinDetail.explorerUrl.map((url, index) => (
-              <div key={index} style={{ marginBottom: '2px' }}>
-                <a
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={url}
+        {/* 플랫폼 태그 - 컴팩트하게 */}
+        {coinDetail.platforms.length > 0 && (
+          <div style={{ marginTop: '0.75rem' }}>
+            <div style={{ marginBottom: '0.25rem' }}>
+              <span
+                style={{ color: 'var(--text-secondary)', fontSize: '0.65rem' }}
+              >
+                플랫폼
+              </span>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
+              {coinDetail.platforms.slice(0, 3).map((platform, index) => (
+                <span
+                  key={index}
                   style={{
-                    color: '#45E8BC',
-                    textDecoration: 'none',
-                    fontSize: '0.9rem',
-                    display: 'block',
-                    wordBreak: 'break-all',
+                    display: 'inline-block',
+                    background: 'var(--input)',
+                    color: 'var(--text-primary)',
+                    padding: '0.2rem 0.4rem',
+                    borderRadius: '3px',
+                    fontSize: '0.6rem',
+                    border: '1px solid var(--border)',
                   }}
                 >
-                  {url.length > 30 ? `${url.substring(0, 30)}...` : url}
-                </a>
-              </div>
+                  {platform}
+                </span>
+              ))}
+              {coinDetail.platforms.length > 3 && (
+                <span
+                  style={{ color: 'var(--text-muted)', fontSize: '0.6rem' }}
+                >
+                  +{coinDetail.platforms.length - 3}개
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 탐색기 링크 - 전체 너비 차지 */}
+      {coinDetail.explorerUrl && coinDetail.explorerUrl.length > 0 && (
+        <div
+          style={{
+            gridColumn: '1 / -1',
+            marginTop: '0.5rem',
+            paddingTop: '0.75rem',
+            borderTop: `1px solid var(--border)`,
+          }}
+        >
+          <div style={{ marginBottom: '0.5rem' }}>
+            <span
+              style={{
+                color: 'var(--accent)',
+                fontSize: '0.75rem',
+                fontWeight: '600',
+              }}
+            >
+              탐색기 링크
+            </span>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+            {coinDetail.explorerUrl.map((url, index) => (
+              <a
+                key={index}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  color: 'var(--accent)',
+                  textDecoration: 'none',
+                  fontSize: '0.7rem',
+                  padding: '0.3rem 0.6rem',
+                  background: 'var(--accent-ring)',
+                  borderRadius: '4px',
+                  border: '1px solid var(--accent)',
+                  opacity: 0.8,
+                  transition: 'all 0.2s ease',
+                  fontWeight: '500',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = '1';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = '0.8';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                {new URL(url).hostname.replace('www.', '')}
+              </a>
             ))}
           </div>
         </div>
-
-        <div style={{ fontSize: '0.8rem', color: 'gray' }}>
-          <strong>마지막 업데이트:</strong>{' '}
-          {new Date(coinDetail.lastUpdated).toLocaleString('ko-KR')}
-        </div>
-      </div>
+      )}
     </div>
   )
 );
@@ -151,27 +354,30 @@ const getChangeRateStyle = (rate, change?) => {
   if ((rate > 0 && change === 'RISE') || rate > 0) {
     return { color: '#45E8BC' };
   } else if ((rate < 0 && change === 'FALL') || rate < 0) {
-    return { color: 'red' };
+    return { color: '#ef4444' };
   } else {
-    return { color: 'white' };
+    return { color: 'var(--text-primary)' };
   }
 };
 
 const priceChangeStyle = (prev: number, cur: number) => {
-  if (prev === undefined)
-    return { transition: 'background-color 0.4s ease-in-out' };
+  const baseStyle = {
+    transition: 'background-color 0.4s ease-in-out',
+    willChange: 'background-color',
+  };
+  if (prev === undefined) return baseStyle;
   if (prev < cur) {
     return {
-      backgroundColor: 'rgba(0, 255, 0, 0.3)',
-      transition: 'background-color 0.4s ease-in-out',
+      ...baseStyle,
+      backgroundColor: 'rgba(69, 232, 188, 0.2)',
     };
   } else if (prev > cur) {
     return {
-      backgroundColor: 'rgba(255, 0, 0, 0.3)',
-      transition: 'background-color 0.4s ease-in-out',
+      ...baseStyle,
+      backgroundColor: 'rgba(239, 68, 68, 0.2)',
     };
   } else {
-    return { transition: 'background-color 0.4s ease-in-out' };
+    return baseStyle;
   }
 };
 const TableRowComponent = React.memo(
@@ -185,57 +391,107 @@ const TableRowComponent = React.memo(
     coinDetail,
     loadingCoinDetail,
   }: TableRowProps) => {
+    // 무거운 계산들을 메모화하여 성능 최적화
+    const memoizedStyles = useMemo(
+      () => ({
+        priceChangeStyle: priceChangeStyle(
+          prevData?.trade_price,
+          data.trade_price
+        ),
+        kimpStyle: getChangeRateStyle(
+          rateCompareByOriginPrice(data.trade_price / data.secondPrice)
+        ),
+        changeRateStyle: getChangeRateStyle(data.change_rate, data.rate_change),
+        highestPriceStyle: getChangeRateStyle(
+          rateCompareByOriginPrice(data.trade_price / data.highest_price)
+        ),
+        lowestPriceStyle: getChangeRateStyle(
+          rateCompareByOriginPrice(data.trade_price / data.lowest_price)
+        ),
+      }),
+      [
+        prevData?.trade_price,
+        data.trade_price,
+        data.secondPrice,
+        data.change_rate,
+        data.rate_change,
+        data.highest_price,
+        data.lowest_price,
+      ]
+    );
+
+    // 포맷된 값들을 메모화
+    const memoizedValues = useMemo(
+      () => ({
+        formattedPrice: data.trade_price ? formatPrice(data.trade_price) : '',
+        formattedSecondPrice: data.secondPrice
+          ? formatPrice(data.secondPrice)
+          : '',
+        formattedKimp: formatPercentage(data.kimp),
+        formattedChangeRate: formatPercentage(data.change_rate / 10),
+        formattedOpeningPrice: data.opening_price
+          ? formatPrice(data.opening_price)
+          : '',
+        formattedHighestPrice:
+          data.highest_price !== 0
+            ? formatPrice(data.highest_price) + '원'
+            : '정보 없음',
+        formattedLowestPrice:
+          data.lowest_price !== 0
+            ? formatPrice(data.lowest_price) + '원'
+            : '정보 없음',
+        formattedAccTradePrice: numberToKorean(data.acc_trade_price24) + '원',
+        priceDiff: data.secondPrice
+          ? (() => {
+              const diff = Math.abs(data.trade_price - data.secondPrice);
+              return diff >= 1
+                ? diff.toFixed(2)
+                : parseFloat(diff.toPrecision(2)).toString();
+            })()
+          : '',
+        highestPricePercentage: data.highest_price
+          ? (
+              rateCompareByOriginPrice(data.trade_price / data.highest_price) *
+              100
+            ).toFixed(2) + '%'
+          : '',
+        lowestPricePercentage: data.lowest_price
+          ? (
+              rateCompareByOriginPrice(data.trade_price / data.lowest_price) *
+              100
+            ).toFixed(2) + '%'
+          : '',
+      }),
+      [data]
+    );
+
     return (
       <React.Fragment>
         <StyledTableRow
           $isExpanded={expandedRow === token}
           onClick={() => {
-            console.log('👆 Row clicked in TableRowComponent:', token);
             onRowClick(token);
           }}
           className={fadeOutClass || ''}
-          style={priceChangeStyle(prevData?.trade_price, data.trade_price)}
+          style={memoizedStyles.priceChangeStyle}
         >
           <TableCell>{data.token}</TableCell>
           {/* 코인 가격 */}
           <TableCell>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span>{data.trade_price?.toLocaleString()}</span>
-              <span style={{ color: 'gray' }}>
-                {data.secondPrice
-                  ? (() => {
-                      const decimalPlaces =
-                        data.trade_price.toString().split('.')[1]?.length || 1;
-                      return data.secondPrice.toLocaleString(undefined, {
-                        minimumFractionDigits: decimalPlaces,
-                        maximumFractionDigits: decimalPlaces,
-                      });
-                    })()
-                  : ''}
+              <span>{memoizedValues.formattedPrice}</span>
+              <span style={{ color: 'var(--text-muted)' }}>
+                {memoizedValues.formattedSecondPrice}
               </span>
             </div>
           </TableCell>
           {/* 김프 */}
-          <TableCell
-            style={getChangeRateStyle(
-              rateCompareByOriginPrice(data.trade_price / data.secondPrice)
-            )}
-          >
+          <TableCell style={memoizedStyles.kimpStyle}>
             {data.secondPrice ? (
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span>{(data.kimp * 100).toFixed(2)}%</span>
-                <span style={{ color: 'gray' }}>
-                  {(() => {
-                    const priceDiff = Math.abs(
-                      data.trade_price - data.secondPrice
-                    );
-
-                    if (priceDiff >= 1) {
-                      return priceDiff.toFixed(2);
-                    }
-
-                    return parseFloat(priceDiff.toPrecision(2)).toString();
-                  })()}
+                <span>{memoizedValues.formattedKimp}</span>
+                <span style={{ color: 'var(--text-muted)' }}>
+                  {memoizedValues.priceDiff}
                 </span>
               </div>
             ) : (
@@ -243,60 +499,30 @@ const TableRowComponent = React.memo(
             )}
           </TableCell>
           {/* 변동률 */}
-          <TableCell
-            style={getChangeRateStyle(data.change_rate, data.rate_change)}
-          >
+          <TableCell style={memoizedStyles.changeRateStyle}>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span>{(data.change_rate * 10).toFixed(2)}%</span>
-              <span style={{ color: 'gray' }}>
-                {data.opening_price?.toLocaleString()}
+              <span>{memoizedValues.formattedChangeRate}</span>
+              <span style={{ color: 'var(--text-muted)' }}>
+                {memoizedValues.formattedOpeningPrice}
               </span>
             </div>
           </TableCell>
           {/* 52주 고가 */}
           <TableCell>
-            <div>
-              {data.highest_price !== 0
-                ? data.highest_price.toLocaleString() + '원'
-                : '정보 없음'}
-            </div>
-            <div
-              style={getChangeRateStyle(
-                rateCompareByOriginPrice(data.trade_price / data.highest_price)
-              )}
-            >
-              {data.highest_price
-                ? (
-                    rateCompareByOriginPrice(
-                      data.trade_price / data.highest_price
-                    ) * 100
-                  ).toFixed(2) + '%'
-                : ''}
+            <div>{memoizedValues.formattedHighestPrice}</div>
+            <div style={memoizedStyles.highestPriceStyle}>
+              {memoizedValues.highestPricePercentage}
             </div>
           </TableCell>
           {/* 52주 저가 */}
           <TableCell>
-            <div>
-              {data.lowest_price !== 0
-                ? data.lowest_price.toLocaleString() + '원'
-                : '정보 없음'}
-            </div>
-            <div
-              style={getChangeRateStyle(
-                rateCompareByOriginPrice(data.trade_price / data.lowest_price)
-              )}
-            >
-              {data.lowest_price
-                ? (
-                    rateCompareByOriginPrice(
-                      data.trade_price / data.lowest_price
-                    ) * 100
-                  ).toFixed(2) + '%'
-                : ''}
+            <div>{memoizedValues.formattedLowestPrice}</div>
+            <div style={memoizedStyles.lowestPriceStyle}>
+              {memoizedValues.lowestPricePercentage}
             </div>
           </TableCell>
           <TableCell style={{ fontSize: '0.6rem', color: 'gray' }}>
-            {numberToKorean(data.acc_trade_price24) + '원'}
+            {memoizedValues.formattedAccTradePrice}
           </TableCell>
         </StyledTableRow>
         {expandedRow === token && (
@@ -304,9 +530,7 @@ const TableRowComponent = React.memo(
             <td colSpan={8}>
               <ExpandableContent $isExpanded={expandedRow === token}>
                 {loadingCoinDetail ? (
-                  <div style={{ padding: '20px', textAlign: 'center' }}>
-                    <p>코인 정보를 불러오는 중...</p>
-                  </div>
+                  <CoinDetailSkeleton />
                 ) : coinDetail ? (
                   <CoinDetailView coinDetail={coinDetail} />
                 ) : (

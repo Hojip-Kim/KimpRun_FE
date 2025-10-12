@@ -1,9 +1,4 @@
-import {
-  logout,
-  setGuestUser,
-  setIsAuthenticated,
-  setUser,
-} from '@/redux/reducer/authReducer';
+import { login, setGuestUser, setUuid } from '@/redux/reducer/authReducer';
 import { AppDispatch } from '@/redux/store';
 import { User } from '@/types';
 import { clientEnv } from '@/utils/env';
@@ -11,47 +6,48 @@ import { clientRequest } from '@/server/fetch';
 
 const statusUrl = clientEnv.STATUS_URL;
 
-interface ResponseAuth {
+export interface ResponseAuth {
   isAuthenticated: boolean;
   member: User;
+  uuid?: string;
 }
 
 export const checkAuth = async (dispatch: AppDispatch) => {
   try {
-    const response = await clientRequest.get(statusUrl, {
+    const response = await clientRequest.get<ResponseAuth>(statusUrl, {
       credentials: 'include',
     });
 
-    if (response.status === 401) {
-      dispatch(setGuestUser());
-      return;
-    }
+    if (response.success) {
+      if (response.data.uuid) {
+        dispatch(setUuid(response.data.uuid));
+      }
 
-    if (!response.success || !response.data) {
-      dispatch(setGuestUser());
-      return;
-    }
+      // 인증된 사용자인 경우 (member 정보가 있고 isAuthenticated가 true)
+      if (response.data.isAuthenticated === true && response.data.member) {
+        dispatch(login(response.data.member));
+        return;
+      }
 
-    // 응답이 문자열인 경우 JSON 파싱
-    let responseData = response.data;
-    if (typeof responseData === 'string') {
-      if (!responseData || responseData.trim() === '') {
+      // 인증되지 않은 사용자 (게스트)
+      if (response.data.isAuthenticated === false) {
         dispatch(setGuestUser());
         return;
       }
-      responseData = JSON.parse(responseData);
-    }
-
-    const responseJson: ResponseAuth = responseData;
-
-    if (responseJson.isAuthenticated === true) {
-      await dispatch(setIsAuthenticated());
-      await dispatch(setUser(responseJson.member));
     } else {
-      await dispatch(logout());
+      if (!response.success || !response.data) {
+        dispatch(setGuestUser());
+        return;
+      }
     }
+
+    // UUID 설정 (백엔드에서 이미 쿠키 설정함)
+
+    // 예상치 못한 상황
+    console.warn('⚠️ 예상치 못한 인증 응답:', response.data);
+    dispatch(setGuestUser());
   } catch (error) {
-    console.error('인증상태 확인 실패', error);
+    console.error('❌ 인증상태 확인 실패:', error);
     dispatch(setGuestUser());
   }
 };

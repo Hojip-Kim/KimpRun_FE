@@ -1,0 +1,25 @@
+User-agent: *
+Allow: /
+
+# 특정 디렉토리 제외
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /node_modules/
+Disallow: /profile
+
+Sitemap: https://kimprun.com/sitemap.xml
+
+# 크롤링 속도 제한
+
+Crawl-delay: 1
+
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+#DaumWebMasterTool:ab6b13589041fbefd3e0b4dc7d65c8371b8a7018e2a7ca4b4a7efd140c3c3c38:t3J0OiskvfWIs+AVrAYTAw==

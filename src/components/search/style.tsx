@@ -1,4 +1,5 @@
 import styled, { keyframes } from 'styled-components';
+import { palette } from '@/styles/palette';
 import { MdOutlineKeyboardArrowDown } from 'react-icons/md';
 const popIn = keyframes`
   0% {
@@ -16,10 +17,10 @@ export const StyledSelect = styled.select`
   padding-right: 32px;
   font-size: 14px;
   font-weight: 500;
-  border: 1px solid #333;
-  border-radius: 4px;
-  background-color: #1e1e1e;
-  color: #fff;
+  border: 1px solid ${palette.border};
+  border-radius: 10px;
+  background-color: ${palette.input};
+  color: ${palette.textPrimary};
   cursor: pointer;
   height: 36px;
   appearance: none;
@@ -28,23 +29,24 @@ export const StyledSelect = styled.select`
 
   &:focus {
     outline: none;
-    border-color: #444;
+    border-color: rgba(255, 215, 0, 0.45);
+    box-shadow: 0 0 0 3px ${palette.accentRing};
     transform: scale(1.02);
   }
 
   &:hover {
-    background-color: #2c2c2c;
+    background-color: ${palette.input};
   }
 
   option {
-    background-color: #1e1e1e;
-    color: #fff;
+    background-color: ${palette.input};
+    color: ${palette.textPrimary};
     padding: 8px;
     font-weight: 500;
     animation: ${popIn} 0.2s ease-out;
 
     &:hover {
-      background-color: #2c2c2c;
+      background-color: ${palette.input};
     }
   }
 `;
@@ -53,7 +55,10 @@ export const StyledSelect = styled.select`
 
 export const SearchContainer = styled.div`
   margin-bottom: 5px;
-  color: #e0e0e0;
+  color: ${palette.textPrimary};
+  @media (max-width: 768px) {
+    margin-bottom: 8px;
+  }
 `;
 
 export const SelectContainer = styled.div`
@@ -61,6 +66,12 @@ export const SelectContainer = styled.div`
   align-items: center;
   gap: 15px;
   margin-bottom: 10px;
+  @media (max-width: 768px) {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 8px;
+  }
 `;
 
 export const SelectWrapper = styled.div`
@@ -73,21 +84,30 @@ export const SearchInputContainer = styled.div`
   display: flex;
   align-items: stretch;
   gap: 8px;
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 6px;
+  }
 `;
 
 export const SearchInput = styled.input`
   flex: 1;
-  padding: 8px 12px;
+  padding: 10px 12px;
   font-size: 14px;
-  border: 1px solid #333;
-  border-radius: 4px;
-  background-color: #2c2c2c;
-  color: #e0e0e0;
+  border: 1px solid ${palette.border};
+  border-radius: 10px;
+  background-color: ${palette.input};
+  color: ${palette.textPrimary};
   height: 36px; // 고정된 높이 설정
 
   &:focus {
     outline: none;
-    border-color: #333;
+    border-color: ${palette.accent};
+    box-shadow: 0 0 0 3px ${palette.accentRing};
+  }
+  @media (max-width: 768px) {
+    height: 34px;
+    font-size: 13px;
   }
 `;
 
@@ -95,7 +115,7 @@ export const StyledArrowIcon = styled(MdOutlineKeyboardArrowDown)`
   position: absolute;
   right: 8px;
   pointer-events: none;
-  color: #888;
+  color: ${palette.textMuted};
   width: 20px;
   height: 20px;
 `;
@@ -103,10 +123,10 @@ export const StyledArrowIcon = styled(MdOutlineKeyboardArrowDown)`
 export const SearchButton = styled.button`
   padding: 0 16px;
   font-size: 14px;
-  background-color: #2c2c2c;
-  color: #e0e0e0;
-  border: 1px solid #333;
-  border-radius: 4px;
+  background-color: ${palette.input};
+  color: ${palette.textPrimary};
+  border: 1px solid ${palette.border};
+  border-radius: 10px;
   cursor: pointer;
   height: 36px;
   display: flex;
@@ -120,10 +140,15 @@ export const SearchButton = styled.button`
   }
 
   &:hover {
-    background-color: #333;
+    color: ${palette.accent};
+    background-color: ${palette.input};
   }
 
   &:active {
-    background-color: #2c2c2c;
+    background-color: ${palette.input};
+  }
+  @media (max-width: 768px) {
+    height: 34px;
+    font-size: 13px;
   }
 `;

@@ -1,21 +1,22 @@
 import { MarketType } from '@/types/marketType';
 import styled from 'styled-components';
+import { palette } from '@/styles/palette';
 
 export const NoticeContainer = styled.div`
   height: 100%;
   width: 100%;
   display: flex;
   flex-direction: column;
-  background-color: #1e1e1e;
-  border-radius: 8px;
-  border: 1px solid #333333;
-  overflow: hidden;
+  background: ${palette.card};
+  border-radius: 12px;
+  border: 1px solid ${palette.border};
+  overflow: visible;
 `;
 
 export const NoticeHeader = styled.div`
   padding: 15px 20px;
-  background-color: #2c2c2c;
-  border-bottom: 1px solid #333333;
+  background: ${palette.input};
+  border-bottom: 1px solid ${palette.border};
   position: sticky;
   top: 0;
   z-index: 1;
@@ -25,17 +26,18 @@ export const NoticeHeader = styled.div`
 `;
 
 export const NoticeTitle = styled.h3`
-  color: #ffd700;
+  color: ${palette.accent};
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   margin: 0;
   display: flex;
   align-items: center;
   gap: 8px;
 
   &::before {
-    content: '📢';
+    content: '🔔';
     font-size: 1.1rem;
+    filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.35));
   }
 `;
 
@@ -50,29 +52,30 @@ export const NoticeList = styled.div`
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.3);
+    background-color: var(--border);
     border-radius: 3px;
   }
 
   &::-webkit-scrollbar-track {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: var(--bg-container);
   }
 `;
 
+// background-color: #131722;
 export const NoticeItem = styled.div`
-  background-color: #131722;
-  border: 1px solid #333333;
-  border-radius: 6px;
+  background: ${palette.card};
+  border: 1px solid ${palette.border};
+  border-radius: 10px;
   margin-bottom: 8px;
   padding: 12px 15px;
   transition: all 0.2s ease;
   cursor: pointer;
 
   &:hover {
-    background-color: #1a1a2e;
-    border-color: #ffd700;
+    background-color: ${palette.input};
+    border-color: ${palette.accent};
     transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.1);
+    box-shadow: 0 2px 8px ${palette.accentRing};
   }
 
   &:last-child {
@@ -90,22 +93,29 @@ export const NoticeItemHeader = styled.div`
 export const ExchangeBadge = styled.span.withConfig({
   shouldForwardProp: (prop) => prop !== 'exchangeType',
 })<{ exchangeType: string }>`
-  background: #333;
-  color: #fff;
+  background: var(--bg-container);
+  color: var(--text-primary);
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 12px;
-  font-weight: bold;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border);
+  transition: background-color 0.3s ease, color 0.3s ease,
+    border-color 0.3s ease;
 `;
 
 export const NoticeDate = styled.span`
-  color: #888888;
+  color: var(--text-muted);
   font-size: 0.7rem;
   font-weight: 400;
+  transition: color 0.3s ease;
 `;
 
 export const NoticeItemTitle = styled.h4`
-  color: #e0e0e0;
+  color: ${palette.textPrimary};
   font-size: 0.8rem;
   font-weight: 500;
   margin: 0 0 8px 0;
@@ -117,24 +127,25 @@ export const NoticeItemTitle = styled.h4`
   text-overflow: ellipsis;
 
   &:hover {
-    color: #ffd700;
+    color: ${palette.accent};
   }
 `;
 
 export const NoticeUrl = styled.a`
-  color: #4a9eff;
+  color: var(--accent);
   font-size: 0.7rem;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
   gap: 4px;
   opacity: 0.8;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
 
   &:hover {
     opacity: 1;
-    color: #66b3ff;
+    color: var(--accent);
     text-decoration: underline;
+    transform: translateX(2px);
   }
 
   &::after {
@@ -165,7 +176,7 @@ export const LoadingSpinner = styled.div`
   align-items: center;
   justify-content: center;
   height: 100px;
-  color: #ffd700;
+  color: ${palette.accent};
   font-size: 0.9rem;
 
   &::before {
@@ -214,7 +225,7 @@ export const ErrorTitle = styled.h3`
 `;
 
 export const ErrorMessage = styled.p`
-  color: #e0e0e0;
+  color: ${palette.textSecondary};
   font-size: 0.8rem;
   margin: 5px 0;
   opacity: 0.8;
@@ -244,6 +255,14 @@ export const SelectorWrapper = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
+`;
+
+export const FixedSelectorWidth = styled.div`
+  width: 120px;
+
+  @media (max-width: 768px) {
+    width: 100px;
+  }
 `;
 
 export const ExchangeSelector = styled.select`
@@ -280,7 +299,7 @@ export const LoadingIndicator = styled.div`
   display: flex;
   justify-content: center;
   padding: 20px;
-  color: #ffd700;
+  color: ${palette.accent};
   font-size: 14px;
 `;
 
@@ -288,7 +307,7 @@ export const LoadingText = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #ffd700;
+  color: ${palette.accent};
   font-size: 14px;
 `;
 
@@ -308,15 +327,15 @@ export const AnimatedNoticeList = styled.div.withConfig({
 export const NewNoticeItem = styled.div.withConfig({
   shouldForwardProp: (prop) => !['isAnimating'].includes(prop),
 })<{ isAnimating?: boolean }>`
-  background: #1a1a1a;
-  border: 1px solid #333333;
+  background: ${palette.card};
+  border: 1px solid ${palette.border};
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  color: #ffffff;
+  box-shadow: ${palette.shadow};
+  color: ${palette.textPrimary};
 
   ${(props) =>
     props.isAnimating &&
@@ -326,8 +345,8 @@ export const NewNoticeItem = styled.div.withConfig({
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-    background: #2a2a2a;
+    box-shadow: ${palette.shadow};
+    background: ${palette.input};
   }
 
   @keyframes slideInFromTop {
@@ -435,6 +454,26 @@ export const NoticeModal = styled.div<{
     `
     visibility: hidden;
   `}
+
+  @media (max-width: 768px) {
+    width: calc(100vw - 32px);
+    max-width: 320px;
+    right: 16px;
+    top: 16px;
+    padding: 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 480px) {
+    width: calc(100vw - 24px);
+    max-width: 280px;
+    right: 12px;
+    top: 12px;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+  }
 `;
 
 export const ModalHeader = styled.div`
@@ -444,10 +483,20 @@ export const ModalHeader = styled.div`
   margin-bottom: 15px;
   padding-bottom: 10px;
   border-bottom: 1px solid #333;
+
+  @media (max-width: 768px) {
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+  }
+
+  @media (max-width: 480px) {
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+  }
 `;
 
 export const ModalTitle = styled.h3`
-  color: #ffd700;
+  color: ${palette.accent};
   font-size: 16px;
   font-weight: bold;
   margin: 0;
@@ -458,6 +507,24 @@ export const ModalTitle = styled.h3`
   &::before {
     content: '🔔';
     font-size: 18px;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 14px;
+    gap: 6px;
+    
+    &::before {
+      font-size: 16px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    font-size: 13px;
+    gap: 4px;
+    
+    &::before {
+      font-size: 14px;
+    }
   }
 `;
 
@@ -483,7 +550,7 @@ export const ModalCloseButton = styled.button`
 `;
 
 export const ModalContent = styled.div`
-  color: #e0e0e0;
+  color: ${palette.textSecondary};
 `;
 
 export const ModalExchangeBadge = styled.div<{ exchangeType: MarketType }>`
@@ -508,13 +575,27 @@ export const ModalExchangeBadge = styled.div<{ exchangeType: MarketType }>`
     }
   }};
   color: white;
+  transition: opacity 0.3s ease;
 `;
 
 export const ModalNoticeTitle = styled.h4`
-  color: #fff;
+  color: var(--text-primary);
   font-size: 14px;
   margin: 10px 0;
   line-height: 1.4;
+  transition: color 0.3s ease;
+
+  @media (max-width: 768px) {
+    font-size: 13px;
+    margin: 8px 0;
+    line-height: 1.3;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 12px;
+    margin: 6px 0;
+    line-height: 1.2;
+  }
 `;
 
 export const ModalActions = styled.div`
@@ -523,6 +604,19 @@ export const ModalActions = styled.div`
   margin-top: 15px;
   padding-top: 15px;
   border-top: 1px solid #333;
+
+  @media (max-width: 768px) {
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+  }
+
+  @media (max-width: 480px) {
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 10px;
+    flex-direction: column;
+  }
 `;
 
 export const ModalButton = styled.button<{ variant?: 'primary' | 'secondary' }>`
@@ -548,7 +642,7 @@ export const ModalButton = styled.button<{ variant?: 'primary' | 'secondary' }>`
   `
       : `
     background: rgba(255, 255, 255, 0.1);
-    color: #e0e0e0;
+    color: ${palette.textSecondary};
     border: 1px solid #333;
     
     &:hover {
@@ -556,6 +650,18 @@ export const ModalButton = styled.button<{ variant?: 'primary' | 'secondary' }>`
       border-color: #555;
     }
   `}
+
+  @media (max-width: 768px) {
+    padding: 7px 12px;
+    font-size: 13px;
+    border-radius: 5px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: 4px;
+  }
 `;
 
 export const ModalAutoCloseTimer = styled.div`
@@ -563,6 +669,16 @@ export const ModalAutoCloseTimer = styled.div`
   text-align: center;
   color: #888;
   font-size: 12px;
+
+  @media (max-width: 768px) {
+    margin-top: 8px;
+    font-size: 11px;
+  }
+
+  @media (max-width: 480px) {
+    margin-top: 6px;
+    font-size: 10px;
+  }
 `;
 
 export const TimerBar = styled.div<{ progress: number }>`

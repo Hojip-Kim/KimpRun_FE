@@ -5,10 +5,11 @@ export interface UserFetch {
     name: string;
     role: string;
   };
-};
+}
 
 export interface User {
   email: string;
   name: string;
   role: string;
+  memberId: number;
 }

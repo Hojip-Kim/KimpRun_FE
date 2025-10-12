@@ -5,13 +5,26 @@ const nextConfig = {
     styledComponents: true,
   },
   reactStrictMode: false,
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 's2.coinmarketcap.com',
+        port: '',
+        pathname: '/static/img/coins/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'assets.coingecko.com',
+        port: '',
+        pathname: '/coins/images/**',
+      },
+    ],
+    domains: ['s2.coinmarketcap.com', 'assets.coingecko.com'],
+  },
   webpack: (config, options) => {
-    // 프로덕션에서는 캐시 활성화
-    if (process.env.NODE_ENV === 'production') {
-      config.cache = {
-        type: 'filesystem',
-      };
-    } else {
+    // 개발 모드에서 캐시 문제 방지
+    if (process.env.NODE_ENV !== 'production') {
       config.cache = false;
     }
     return config;
@@ -28,6 +41,94 @@ const nextConfig = {
           {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/images/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=2592000, s-maxage=2592000',
+          },
+        ],
+      },
+      {
+        source: '/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=2592000, s-maxage=2592000',
+          },
+        ],
+      },
+      {
+        source: '/(favicon|icon|apple-icon|android-chrome):path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=604800, s-maxage=604800',
+          },
+        ],
+      },
+      {
+        source: '/:path*\.(woff|woff2|eot|ttf|otf)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/:path*\.(css|js)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+        ],
+      },
+      {
+        source: '/sitemap.xml',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400, s-maxage=86400',
+          },
+        ],
+      },
+      {
+        source: '/robots.txt',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400, s-maxage=86400',
           },
         ],
       },
