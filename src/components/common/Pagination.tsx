@@ -13,6 +13,7 @@ export interface PaginationProps {
   onPageSizeChange?: (size: number) => void;
   showPageSize?: boolean; // 페이지 크기 선택 표시 여부
   showInfo?: boolean; // 페이지 정보 표시 여부
+  simpleMode?: boolean; // 간단한 모드 (<<, <, >, >> 버튼만)
 }
 
 const PaginationContainer = styled.div`
@@ -157,6 +158,7 @@ const Pagination: React.FC<PaginationProps> = ({
   onPageSizeChange,
   showPageSize = false,
   showInfo = false,
+  simpleMode = false,
 }) => {
   // 모바일 여부 확인
   const [isMobile, setIsMobile] = React.useState(false);
@@ -201,6 +203,57 @@ const Pagination: React.FC<PaginationProps> = ({
   // 페이지가 1개 이하인 경우 - 정보 표시가 요청된 경우에만 표시
   if (totalPages <= 1 && !showInfo) {
     return null;
+  }
+
+  // <<, <, >, >> 버튼 표시
+  if (simpleMode) {
+    return (
+      <PaginationContainer>
+        {totalPages > 1 && (
+          <>
+            {/* 첫 페이지로 */}
+            <NavigationButton
+              onClick={() => handlePageChange(1)}
+              $isDisabled={currentPage === 1}
+              disabled={currentPage === 1}
+              title="첫 페이지"
+            >
+              &lt;&lt;
+            </NavigationButton>
+
+            {/* 이전 페이지 */}
+            <NavigationButton
+              onClick={() => handlePageChange(currentPage - 1)}
+              $isDisabled={currentPage === 1}
+              disabled={currentPage === 1}
+              title="이전 페이지"
+            >
+              &lt;
+            </NavigationButton>
+
+            {/* 다음 페이지 */}
+            <NavigationButton
+              onClick={() => handlePageChange(currentPage + 1)}
+              $isDisabled={currentPage === totalPages}
+              disabled={currentPage === totalPages}
+              title="다음 페이지"
+            >
+              &gt;
+            </NavigationButton>
+
+            {/* 마지막 페이지로 */}
+            <NavigationButton
+              onClick={() => handlePageChange(totalPages)}
+              $isDisabled={currentPage === totalPages}
+              disabled={currentPage === totalPages}
+              title="마지막 페이지"
+            >
+              &gt;&gt;
+            </NavigationButton>
+          </>
+        )}
+      </PaginationContainer>
+    );
   }
 
   return (
