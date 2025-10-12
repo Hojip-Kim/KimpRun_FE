@@ -1,0 +1,38 @@
+name: "FEAT: 신규 기능"
+description: 김프런 프론트엔드의 새로운 기능 개발을 위한 이슈입니다.
+title: "[FEAT] "
+labels: ["feature", "frontend"]
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: ✨ 요약
+      description: 이슈에 대한 간단한 설명
+      placeholder: 예) 거래소별 실시간 가격 알림 기능 추가
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 📌 배경 및 문제 정의
+      description: 왜 이 기능이 필요한가요? 어떤 문제가 있었나요?
+      placeholder: |
+        - 사용자가 특정 김프레미엄 조건을 설정하고 알림을 받고 싶어함
+        - 현재는 수동으로 화면을 계속 확인해야 함
+        - 실시간 WebSocket 데이터를 활용한 알림 시스템이 필요
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: ✅ 기대 결과
+      description: 이 기능이 완료되었을 때 어떻게 되어야 하나요?
+      placeholder: |
+        - 사용자가 알림 조건 설정 (예: BTC 김프 3% 이상)
+        - 조건 만족 시 브라우저 알림 또는 사운드 알림 발생
+        - Redux에서 알림 설정 상태 관리
+        - STOMP WebSocket 데이터와 연동하여 실시간 체크
+    validations:
+      required: true

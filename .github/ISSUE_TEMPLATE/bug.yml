@@ -1,0 +1,96 @@
+name: "BUG: 버그 리포트"
+description: 김프런 프론트엔드의 버그를 보고합니다.
+title: "[BUG] "
+labels: ["bug", "frontend"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: 🐛 버그 설명
+      description: 어떤 버그를 발견하셨나요? 명확하게 설명해주세요.
+      placeholder: |
+        - 업비트에서 바이낸스로 거래소를 변경할 때 이전 데이터가 잠시 보임
+        - 김프레미엄 계산이 음수일 때 색상이 올바르게 표시되지 않음
+        - 모바일에서 코인 상세 정보 클릭 시 화면이 뷰포트를 벗어남
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 📋 재현 방법
+      description: 버그를 재현하기 위한 단계를 자세히 설명해주세요.
+      placeholder: |
+        1. 메인 페이지에서 업비트/바이낸스 선택
+        2. BTC 코인의 상세 정보 확장
+        3. 비교 거래소를 코인원으로 변경
+        4. BTC의 가격 정보가 잠시 업비트 데이터를 표시함
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: ✅ 예상된 동작
+      description: 정상적으로 작동했다면 어떻게 되어야 했나요?
+      placeholder: |
+        - 거래소를 변경하면 즉시 새로운 거래소의 데이터만 표시되어야 함
+        - 이전 거래소의 데이터가 화면에 남아있으면 안 됨
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: ❌ 실제 동작
+      description: 실제로 어떤 일이 발생했나요?
+      placeholder: |
+        - 거래소 변경 후 약 1-2초 동안 이전 거래소 데이터가 표시됨
+        - 이후 올바른 데이터로 업데이트됨
+    validations:
+      required: true
+
+  - type: dropdown
+    id: browser
+    attributes:
+      label: 🌐 브라우저
+      description: 어떤 브라우저에서 발생했나요?
+      multiple: true
+      options:
+        - Chrome
+        - Firefox
+        - Safari
+        - Edge
+        - 기타
+    validations:
+      required: true
+
+  - type: dropdown
+    id: device
+    attributes:
+      label: 📱 디바이스
+      description: 어떤 환경에서 발생했나요?
+      options:
+        - 데스크톱
+        - 모바일
+        - 태블릿
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: 📸 스크린샷
+      description: 문제를 보여주는 스크린샷이나 녹화 영상이 있다면 첨부해주세요.
+      placeholder: 스크린샷을 드래그 앤 드롭하거나 붙여넣기 하세요.
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 💡 추가 정보
+      description: 버그 해결에 도움이 될 만한 추가 정보가 있다면 알려주세요.
+      placeholder: |
+        - 콘솔 에러 메시지
+        - 네트워크 요청 실패
+        - Redux DevTools에서 확인한 상태값
+        - 특정 조건에서만 발생하는 경우
