@@ -1,20 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  const url = request.nextUrl.clone();
-
-  // www 서브도메인을 apex 도메인으로 리다이렉트 (301 영구 리다이렉트)
-  if (url.hostname === 'www.kimprun.com') {
-    url.hostname = 'kimprun.com';
-
-    const response = NextResponse.redirect(url, 301);
-
-    response.headers.set('Cache-Control', 'public, max-age=31536000');
-    response.headers.set('Vary', 'Host');
-
-    return response;
-  }
-
   const response = NextResponse.next();
 
   if (process.env.NODE_ENV === 'production') {
