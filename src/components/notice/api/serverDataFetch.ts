@@ -1,8 +1,8 @@
-import { ProcessedApiResponse } from '@/server/type';
-import { NoticeParameter, NoticeResponse } from '../type';
-import { noticeEndPoint } from './noticeApi';
-import { createNoticeRequestConfig } from './noticeApi';
-import { serverRequest } from '@/server/fetch';
+import { ProcessedApiResponse } from "@/server/type";
+import { NoticeParameter, NoticeResponse } from "../type";
+import { noticeEndPoint } from "./noticeApi";
+import { createNoticeRequestConfig } from "./noticeApi";
+import { serverRequest } from "@/server/fetch";
 
 export const fetchServerNotice = async (
   parameter: NoticeParameter
@@ -16,12 +16,12 @@ export const fetchServerNotice = async (
     if (response.success && response.data) {
       return response;
     } else {
-      console.error('❌ 공지사항 서버 데이터 가져오기 실패:', response.error);
+      console.error("❌ 공지사항 서버 데이터 가져오기 실패:", response.error);
       return {
         success: false,
         data: {
           data: null,
-          absoluteUrl: '',
+          absoluteUrl: "",
           marketType: parameter.marketType,
         },
         error: response.error,
@@ -29,15 +29,15 @@ export const fetchServerNotice = async (
       };
     }
   } catch (error) {
-    console.error('❌ 공지사항 서버 요청 오류:', error);
+    console.error("❌ 공지사항 서버 요청 오류:", error);
     return {
       success: false,
       data: {
         data: null,
-        absoluteUrl: '',
+        absoluteUrl: "",
         marketType: parameter.marketType,
       },
-      error: error instanceof Error ? error.message : '알 수 없는 오류',
+      error: error instanceof Error ? error.message : "알 수 없는 오류",
       status: 500,
     };
   }
