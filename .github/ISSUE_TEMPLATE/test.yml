@@ -1,0 +1,81 @@
+name: "TEST: 테스트 추가/수정"
+description: 김프런 프론트엔드의 테스트 코드 추가 또는 개선
+title: "[TEST] "
+labels: ["test", "frontend"]
+body:
+  - type: textarea
+    id: target
+    attributes:
+      label: 🎯 테스트 대상
+      description: 어떤 컴포넌트/함수/기능을 테스트하나요?
+      placeholder: |
+        - TableRowComponent의 가격 포맷팅 함수
+        - Redux 거래소 선택 액션 및 리듀서
+        - WebSocket 연결 재시도 로직
+        - 김프레미엄 계산 유틸 함수
+    validations:
+      required: true
+
+  - type: dropdown
+    id: test-type
+    attributes:
+      label: 🧪 테스트 유형
+      description: 어떤 종류의 테스트인가요?
+      multiple: true
+      options:
+        - 단위 테스트 (Unit)
+        - 통합 테스트 (Integration)
+        - 컴포넌트 테스트 (Component)
+        - E2E 테스트
+        - 스냅샷 테스트
+    validations:
+      required: true
+
+  - type: textarea
+    id: test-cases
+    attributes:
+      label: 📝 테스트 케이스
+      description: 추가하거나 수정할 테스트 케이스들을 설명해주세요.
+      placeholder: |
+        - 정상 가격 포맷팅 (1234 → "1,234")
+        - 소수점 처리 (0.1234 → "0.1234")
+        - 음수 김프 표시 (빨간색 확인)
+        - WebSocket 연결 실패 시 3회 재시도
+        - 거래소 전환 시 이전 데이터 클리어 확인
+    validations:
+      required: true
+
+  - type: textarea
+    id: coverage
+    attributes:
+      label: 📊 커버리지 개선
+      description: 현재 커버리지와 목표 커버리지를 알려주세요.
+      placeholder: |
+        - 현재: 45% → 목표: 70%
+        - 주요 비즈니스 로직 위주로 커버리지 개선
+        - WebSocket 관련 코드는 mock 처리
+
+  - type: dropdown
+    id: framework
+    attributes:
+      label: 🛠️ 테스트 프레임워크
+      description: 사용할 테스트 도구는 무엇인가요?
+      multiple: true
+      options:
+        - Jest
+        - React Testing Library
+        - MSW (Mock Service Worker)
+        - Cypress
+        - Playwright
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ✅ 체크리스트
+      options:
+        - label: 테스트가 독립적으로 실행 가능
+        - label: Mock/Stub 적절히 사용
+        - label: 엣지 케이스 고려
+        - label: 테스트 실행 시간 적절 (< 5초)

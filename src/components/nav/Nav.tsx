@@ -327,26 +327,8 @@ const Nav = () => {
     }
   };
 
-  const handleAdminClick = async () => {
-    try {
-      const response = await clientRequest.get<ResponseUrl>(
-        clientEnv.ADMIN_URL,
-        {
-          credentials: 'include',
-        }
-      );
-
-      if (response.success && response.status === 200) {
-        if (response.data.response) {
-          window.location.href = response.data.response;
-        } else {
-          console.error('리다이렉션 URL을 찾을 수 없음.');
-        }
-      }
-    } catch (error) {
-      console.error('카테고리 페이지 접근 오류', error);
-      showError('카테고리 페이지 접근 중 오류 발생');
-    }
+  const handleAdminClick = () => {
+    router.push('/admin');
   };
 
   const handleNickname = () => {
@@ -384,7 +366,7 @@ const Nav = () => {
           <UserContainer>
             <UserRole role={user?.role}>
               {isAuthenticated ? (
-                user?.role === 'OPERATOR' ? (
+                user?.role === 'ROLE_OPERATOR' || user?.role === 'ROLE_MANAGER' ? (
                   <FaUserCog size={20} title="관리자" />
                 ) : (
                   <FaUser size={20} title="일반 사용자" />
@@ -399,8 +381,8 @@ const Nav = () => {
             <DesktopThemeToggle>
               <ThemeToggle />
             </DesktopThemeToggle>
-            {isAuthenticated && user?.role === 'OPERATOR' && (
-              <ActionButton onClick={handleAdminClick}>어드민</ActionButton>
+            {isAuthenticated && (user?.role === 'ROLE_OPERATOR' || user?.role === 'ROLE_MANAGER') && (
+              <ActionButton onClick={handleAdminClick}>관리자</ActionButton>
             )}
             {isAuthenticated && (
               <ActionButton onClick={handleProfileClick}>프로필</ActionButton>

@@ -12,6 +12,7 @@ import {
   ExchangeRankingError,
 } from '@/types/exchangeRanking';
 import { palette } from '@/styles/palette';
+import { parseDate } from '@/utils/dateUtils';
 
 const Container = styled.div`
   width: 100%;
@@ -258,7 +259,9 @@ export default function ExchangeRankingClientPage({
   const getLatestUpdateDate = () => {
     if (displayData?.[0]?.updatedAt) {
       try {
-        const date = new Date(displayData[0].updatedAt);
+        const date = parseDate(displayData[0].updatedAt);
+        if (!date) return null;
+
         return date.toLocaleString('ko-KR', {
           year: 'numeric',
           month: '2-digit',

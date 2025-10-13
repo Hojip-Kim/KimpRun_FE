@@ -1,0 +1,30 @@
+name: "REFACTOR: 코드 개선"
+description: 김프런 프론트엔드의 코드 품질 및 구조 개선을 위한 이슈입니다.
+title: "[REFACTOR] "
+labels: ["refactor", "frontend"]
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: 📌 문제 또는 배경
+      description: 리팩터링이 필요한 이유를 설명해주세요.
+      placeholder: |
+        - 거래소별 데이터 처리 로직이 여러 컴포넌트에 중복
+        - handleMarketData 함수가 너무 복잡하고 길음
+        - styled-components의 중첩 및 중복 스타일
+        - Redux 상태 구조가 평탄하지 않아 성능 이슈 발생
+    validations:
+      required: true
+
+  - type: textarea
+    id: change
+    attributes:
+      label: 🔧 변경 요약
+      description: 어떤 식으로 개선할 예정인지 명확하게 서술해주세요.
+      placeholder: |
+        - 거래소별 데이터 처리를 커스텀 훅으로 추상화
+        - 가격 포맷팅 로직을 util 함수로 분리
+        - TypeScript interface를 활용한 타입 안정성 강화
+        - React.memo로 믒필요한 리렌더링 방지
+    validations:
+      required: true

@@ -2,6 +2,7 @@ import { BoardData, Comment } from '../types';
 import { serverEnv } from '@/utils/env';
 import { ApiResponse } from '@/server/type';
 import { serverRequest, clientRequest } from '@/server/fetch';
+import { parseDate } from '@/utils/dateUtils';
 
 const boardUrl = serverEnv.BOARD_URL;
 const commentUrl = serverEnv.COMMENT_URL;
@@ -77,9 +78,9 @@ export async function deleteComment(commentId: number): Promise<boolean> {
   }
 }
 
-export const formatDate = (dateInput: string | Date) => {
-  const date = new Date(dateInput);
-  if (isNaN(date.getTime())) {
+export const formatDate = (dateInput: string | Date | number[]) => {
+  const date = parseDate(dateInput);
+  if (!date || isNaN(date.getTime())) {
     return '날짜 없음';
   }
   return date.toLocaleString('ko-KR', {

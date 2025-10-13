@@ -223,11 +223,11 @@ export const UserContainer = styled.div`
 
 export const UserRole = styled.span<{ role?: string }>`
   color: ${(props) =>
-    props.role === 'OPERATOR' || props.role === 'MANAGER'
+    props.role === 'ROLE_OPERATOR' || props.role === 'ROLE_MANAGER'
       ? 'var(--accent)'
       : 'var(--text-muted)'};
   font-weight: ${(props) =>
-    props.role === 'OPERATOR' || props.role === 'MANAGER' ? 'bold' : 'normal'};
+    props.role === 'ROLE_OPERATOR' || props.role === 'ROLE_MANAGER' ? 'bold' : 'normal'};
   transition: color 0.3s ease;
 `;
 

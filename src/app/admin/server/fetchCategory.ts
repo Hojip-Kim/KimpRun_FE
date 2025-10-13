@@ -1,10 +1,10 @@
 import { serverEnv } from '@/utils/env';
 import { ProcessedApiResponse, serverRequest } from '@/server/fetch';
-import { Category, CategoryResponse, CreateCategoryRequest } from '../type';
+import { Category, CreateCategoryRequest } from '../types';
 
 // 모든 카테고리 가져오기
 export async function fetchAllCategories(): Promise<
-  ProcessedApiResponse<CategoryResponse>
+  ProcessedApiResponse<Category[]>
 > {
   try {
     if (!serverEnv.CATEGORY_URL) {
@@ -12,11 +12,11 @@ export async function fetchAllCategories(): Promise<
         success: false,
         error: 'CATEGORY_URL not configured',
         status: 500,
-        data: { categories: [], total: 0 },
+        data: [],
       };
     }
 
-    const response = await serverRequest.get<CategoryResponse>(
+    const response = await serverRequest.get<Category[]>(
       serverEnv.CATEGORY_URL,
       {
         credentials: 'include',
@@ -32,7 +32,7 @@ export async function fetchAllCategories(): Promise<
         success: false,
         error: response.error || 'Failed to fetch categories',
         status: response.status || 500,
-        data: { categories: [], total: 0 },
+        data: [],
       };
     }
   } catch (error) {
@@ -41,7 +41,7 @@ export async function fetchAllCategories(): Promise<
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
       status: 500,
-      data: { categories: [], total: 0 },
+      data: [],
     };
   }
 }
@@ -49,7 +49,7 @@ export async function fetchAllCategories(): Promise<
 // 카테고리 생성
 export async function createCategory(
   categoryData: CreateCategoryRequest
-): Promise<ProcessedApiResponse<CategoryResponse>> {
+): Promise<ProcessedApiResponse<Category>> {
   try {
     if (!serverEnv.CATEGORY_URL) {
       console.warn('❌ CATEGORY_URL 환경변수가 설정되지 않았습니다.');
@@ -57,11 +57,11 @@ export async function createCategory(
         success: false,
         error: 'CATEGORY_URL not configured',
         status: 500,
-        data: { categories: [], total: 0 },
+        data: null,
       };
     }
 
-    const response = await serverRequest.post<CategoryResponse>(
+    const response = await serverRequest.post<Category>(
       serverEnv.CATEGORY_URL,
       categoryData,
       {
@@ -78,7 +78,7 @@ export async function createCategory(
         success: false,
         error: response.error || 'Failed to create category',
         status: response.status || 500,
-        data: { categories: [], total: 0 },
+        data: null,
       };
     }
   } catch (error) {
@@ -87,7 +87,7 @@ export async function createCategory(
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
       status: 500,
-      data: { categories: [], total: 0 },
+      data: null,
     };
   }
 }

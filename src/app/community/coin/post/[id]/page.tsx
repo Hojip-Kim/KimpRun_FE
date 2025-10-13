@@ -6,6 +6,7 @@ import { BoardData } from './types';
 import StructuredData, {
   createArticleStructuredData,
 } from '@/components/seo/StructuredData';
+import { parseDate } from '@/utils/dateUtils';
 
 // 캐시 비허용 설정 - 게시글은 실시간으로 변경될 수 있음
 export const revalidate = 0;
@@ -55,14 +56,8 @@ export async function generateMetadata({
         title,
         description,
         type: 'article',
-        publishedTime:
-          typeof boardData.createdAt === 'string'
-            ? boardData.createdAt
-            : boardData.createdAt.toISOString(),
-        modifiedTime:
-          typeof boardData.updatedAt === 'string'
-            ? boardData.updatedAt
-            : boardData.updatedAt.toISOString(),
+        publishedTime: parseDate(boardData.createdAt)?.toISOString() || undefined,
+        modifiedTime: parseDate(boardData.updatedAt)?.toISOString() || undefined,
         authors: [boardData.memberNickName],
         section: boardData.categoryName,
         tags: ['암호화폐', '김프런', boardData.categoryName],

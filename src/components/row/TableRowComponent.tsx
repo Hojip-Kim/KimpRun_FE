@@ -11,6 +11,7 @@ import {
 } from './styled';
 import { dataListType, CoinDetail } from './types';
 import { CoinDetailSkeleton } from '@/components/skeleton/Skeleton';
+import { parseDate } from '@/utils/dateUtils';
 
 // 코인 상세 정보 컴포넌트 (메모이제이션으로 성능 최적화)
 const CoinDetailView = React.memo(
@@ -236,7 +237,7 @@ const CoinDetailView = React.memo(
                 fontWeight: '600',
               }}
             >
-              {new Date(coinDetail.lastUpdated).toLocaleDateString('ko-KR')}
+              {parseDate(coinDetail.lastUpdated)?.toLocaleDateString('ko-KR') || '-'}
             </span>
           </div>
         </div>
