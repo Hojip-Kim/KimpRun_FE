@@ -40,8 +40,8 @@ Thumbs.db
 
 Dockerfile
 dockerfile.local
-.env.local
-.env.development
+.env*
+!.env.production
 .cache
 .parcel-cache
 yarn-error.log*
