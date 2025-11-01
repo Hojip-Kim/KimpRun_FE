@@ -352,7 +352,6 @@ const Nav = () => {
               <Icon src="/tether.png" alt="Tether" />
               테더: {tether}원
             </InfoItem>
-            <InfoItem>유저 수: {userCount}</InfoItem>
           </InfoContainer>
         </LeftSection>
 
@@ -366,7 +365,8 @@ const Nav = () => {
           <UserContainer>
             <UserRole role={user?.role}>
               {isAuthenticated ? (
-                user?.role === 'ROLE_OPERATOR' || user?.role === 'ROLE_MANAGER' ? (
+                user?.role === 'ROLE_OPERATOR' ||
+                user?.role === 'ROLE_MANAGER' ? (
                   <FaUserCog size={20} title="관리자" />
                 ) : (
                   <FaUser size={20} title="일반 사용자" />
@@ -381,9 +381,11 @@ const Nav = () => {
             <DesktopThemeToggle>
               <ThemeToggle />
             </DesktopThemeToggle>
-            {isAuthenticated && (user?.role === 'ROLE_OPERATOR' || user?.role === 'ROLE_MANAGER') && (
-              <ActionButton onClick={handleAdminClick}>관리자</ActionButton>
-            )}
+            {isAuthenticated &&
+              (user?.role === 'ROLE_OPERATOR' ||
+                user?.role === 'ROLE_MANAGER') && (
+                <ActionButton onClick={handleAdminClick}>관리자</ActionButton>
+              )}
             {isAuthenticated && (
               <ActionButton onClick={handleProfileClick}>프로필</ActionButton>
             )}
@@ -407,9 +409,7 @@ const Nav = () => {
           </NavMenuItem>
           <NavMenuItem
             onClick={() => {
-              router.push(
-                `${clientEnv.COMMUNITY_PAGE}/coin/1?page=1&size=15`
-              );
+              router.push(`${clientEnv.COMMUNITY_PAGE}/coin/1?page=1&size=15`);
             }}
           >
             커뮤니티
@@ -485,7 +485,7 @@ const Nav = () => {
             뉴스
           </NavMenuItem>
         </NavMenu>
-        
+
         {/* 코인 검색 */}
         <CoinSearchNav />
       </BottomSection>
