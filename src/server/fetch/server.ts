@@ -6,6 +6,7 @@ import {
   ProcessedApiResponse,
 } from '../type';
 import { createApiClient } from './request';
+import { serverEnv } from '@/utils/env';
 
 /* RequestInit : Fetch함수 호출 옵션 명확히 정의
   method: HTTP 요청 메서드 (예: "GET", "POST", "PUT", "DELETE" 등)
@@ -20,7 +21,7 @@ import { createApiClient } from './request';
   integrity: 서브 리소스 무결성 (SRI) 체크를 위한 문자열
 */
 
-const serverApi = createApiClient('', {
+const serverApi = createApiClient(serverEnv.API_BASE_URL, {
   headers: {
     'Content-Type': 'application/json',
     'User-Agent': 'NextJS-Server',

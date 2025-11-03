@@ -1,14 +1,10 @@
 import { BoardData, Comment } from '../types';
-import { serverEnv } from '@/utils/env';
 import { ApiResponse } from '@/server/type';
 import { serverRequest, clientRequest } from '@/server/fetch';
 import { parseDate } from '@/utils/dateUtils';
 
-const boardUrl = serverEnv.BOARD_URL;
-const commentUrl = serverEnv.COMMENT_URL;
-
 export async function getBoardData(id: string): Promise<BoardData | null> {
-  const boardRequestUrl = `${boardUrl}?boardId=${id}&commentPage=0`;
+  const boardRequestUrl = `/board?boardId=${id}&commentPage=0`;
   try {
     const response = await serverRequest.get<BoardData>(boardRequestUrl, {
       cache: 'no-store', // 캐시 비허용 - 항상 최신 데이터 가져오기
@@ -36,10 +32,10 @@ export async function createComment(
   parentCommentId: number
 ): Promise<Comment | null> {
   // URL 끝점만 사용하여 잘못된 URL 합성 방지
-  const endpoint = `/${boardId}/create`;
+  const endpoint = `/comment/${boardId}/create`;
   try {
     const response = await clientRequest.post<Comment>(
-      commentUrl + endpoint,
+      endpoint,
       {
         content,
         depth,
@@ -60,10 +56,10 @@ export async function createComment(
 }
 
 export async function deleteComment(commentId: number): Promise<boolean> {
-  const endpoint = `/${commentId}/soft`;
+  const endpoint = `/comment/${commentId}/soft`;
   try {
     const response = await clientRequest.delete(
-      commentUrl + endpoint
+      endpoint
     );
 
     if (response.success) {

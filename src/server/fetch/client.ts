@@ -4,13 +4,14 @@ import {
   ProcessedApiResponse,
 } from '../type';
 import { createApiClient } from './request';
+import { clientEnv } from '@/utils/env';
 
 // 지연 초기화를 위한 함수
 let clientApi: ReturnType<typeof createApiClient> | null = null;
 
 const getClientApi = () => {
   if (!clientApi) {
-    clientApi = createApiClient('', {
+    clientApi = createApiClient(clientEnv.API_BASE_URL, {
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',

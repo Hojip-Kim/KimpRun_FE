@@ -8,7 +8,6 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { FaEye, FaPencilAlt, FaCheck, FaImage } from 'react-icons/fa';
 import type ReactQuill from 'react-quill';
-import { serverEnv } from '@/utils/env';
 import { useGlobalAlert } from '@/providers/AlertProvider';
 
 const ReactQuillComponent = dynamic(
@@ -109,13 +108,11 @@ const WritePost: React.FC = () => {
     return Array.from(imgElements).map((img) => img.src);
   };
 
-  const boardUrl = serverEnv.BOARD_URL;
-
   const createPost = async () => {
     try {
       setIsSubmitting(true);
       const response = await clientRequest.post(
-        `${boardUrl}/${selectedCategory}/create`,
+        `/board/${selectedCategory}/create`,
         {
           title,
           content,
