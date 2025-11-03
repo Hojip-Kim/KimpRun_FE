@@ -33,7 +33,7 @@ export async function fetchAllNews(
       };
     }
 
-    const endpoint = `${serverEnv.API_BASE_URL}/news?page=${page}&size=${size}`;
+    const endpoint = `/news?page=${page}&size=${size}`;
 
     const response = await serverGet<NewsPageResponse>(endpoint, {
       headers: { 'Content-type': 'application/json' },
@@ -110,7 +110,7 @@ export async function fetchNewsBySource(
       };
     }
 
-    const endpoint = `${serverEnv.API_BASE_URL}/news/source/${newsSource}?page=${page}&size=${size}`;
+    const endpoint = `/news/source/${newsSource}?page=${page}&size=${size}`;
 
     const response = await serverGet<NewsPageResponse>(endpoint, {
       headers: { 'Content-type': 'application/json' },
@@ -186,7 +186,7 @@ export async function fetchHeadlines(
       };
     }
 
-    const endpoint = `${serverEnv.API_BASE_URL}/news/headlines?page=${page}&size=${size}`;
+    const endpoint = `/news/headlines?page=${page}&size=${size}`;
 
     const response = await serverGet<NewsPageResponse>(endpoint, {
       headers: { 'Content-type': 'application/json' },
