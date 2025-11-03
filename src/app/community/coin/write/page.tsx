@@ -1043,6 +1043,96 @@ const PreviewContainer = styled.div`
     font-size: 1.5rem;
   }
 
+  /* Quill 텍스트 포맷팅 */
+  .ql-bold {
+    font-weight: bold;
+  }
+
+  .ql-italic {
+    font-style: italic;
+  }
+
+  .ql-underline {
+    text-decoration: underline;
+  }
+
+  .ql-strike {
+    text-decoration: line-through;
+  }
+
+  /* Quill 폰트 패밀리 */
+  .ql-font-serif {
+    font-family: Georgia, Times New Roman, serif;
+  }
+
+  .ql-font-monospace {
+    font-family: Monaco, Courier New, monospace;
+  }
+
+  /* Quill 상첨자/하첨자 */
+  sub,
+  .ql-script-sub {
+    vertical-align: sub;
+    font-size: smaller;
+  }
+
+  sup,
+  .ql-script-super {
+    vertical-align: super;
+    font-size: smaller;
+  }
+
+  /* Quill 인덴트 */
+  .ql-indent-1 {
+    padding-left: 3em;
+  }
+  .ql-indent-2 {
+    padding-left: 6em;
+  }
+  .ql-indent-3 {
+    padding-left: 9em;
+  }
+  .ql-indent-4 {
+    padding-left: 12em;
+  }
+  .ql-indent-5 {
+    padding-left: 15em;
+  }
+  .ql-indent-6 {
+    padding-left: 18em;
+  }
+  .ql-indent-7 {
+    padding-left: 21em;
+  }
+  .ql-indent-8 {
+    padding-left: 24em;
+  }
+
+  /* Quill 방향 */
+  .ql-direction-rtl {
+    direction: rtl;
+    text-align: inherit;
+  }
+
+  /* Quill 비디오 */
+  .ql-video {
+    display: block;
+    max-width: 100%;
+  }
+
+  /* Quill 코드 블록 */
+  .ql-code-block-container {
+    margin: 0.5rem 0;
+  }
+
+  pre.ql-syntax {
+    background-color: ${palette.bgContainer};
+    color: ${palette.textPrimary};
+    overflow: visible;
+    padding: 1rem;
+    border-radius: 4px;
+  }
+
   @media (max-width: 768px) {
     padding: 1rem;
 
@@ -1058,6 +1148,32 @@ const PreviewContainer = styled.div`
     h2,
     .ql-size-large {
       font-size: 1.25rem;
+    }
+
+    /* 모바일에서 인덴트 줄이기 */
+    .ql-indent-1 {
+      padding-left: 2em;
+    }
+    .ql-indent-2 {
+      padding-left: 4em;
+    }
+    .ql-indent-3 {
+      padding-left: 6em;
+    }
+    .ql-indent-4 {
+      padding-left: 8em;
+    }
+    .ql-indent-5 {
+      padding-left: 10em;
+    }
+    .ql-indent-6 {
+      padding-left: 12em;
+    }
+    .ql-indent-7 {
+      padding-left: 14em;
+    }
+    .ql-indent-8 {
+      padding-left: 16em;
     }
   }
 `;

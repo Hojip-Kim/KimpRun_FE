@@ -157,77 +157,162 @@ export const Content = styled.div`
 
   /* Quill 기본 스타일 추가 */
   color: ${palette.textPrimary};
+  padding: 0;
+  border: none;
 
-  /* 헤더 스타일링 */
+  /* 헤더 스타일링 - PreviewContainer와 동일하게 */
   h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    margin-top: 1.2em;
-    margin-bottom: 0.5em;
+  .ql-size-huge {
+    font-size: 2rem;
+    font-weight: 700;
     color: ${palette.accent};
-    font-weight: 600;
+    margin: 1rem 0;
   }
 
-  h1 {
-    font-size: 1.3rem;
+  h2,
+  .ql-size-large {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: ${palette.textPrimary};
+    margin: 0.8rem 0;
   }
-  h2 {
-    font-size: 1.1rem;
-  }
+
   h3 {
-    font-size: 1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: ${palette.textSecondary};
+    margin: 0.6rem 0;
   }
+
   h4,
   h5,
   h6 {
-    font-size: 0.9rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: ${palette.textPrimary};
+    margin: 0.5rem 0;
   }
 
   /* 텍스트 스타일링 */
   p {
-    margin-bottom: 1em;
+    margin: 0.5rem 0;
+    line-height: 1.6;
     color: ${palette.textPrimary};
+  }
+
+  /* 강조 스타일 */
+  strong {
+    font-weight: 700;
+    color: ${palette.accent};
+  }
+
+  em {
+    font-style: italic;
+    color: ${palette.textSecondary};
+  }
+
+  u {
+    text-decoration: underline;
+  }
+
+  s {
+    text-decoration: line-through;
+    opacity: 0.7;
   }
 
   /* 리스트 스타일링 */
   ul,
   ol {
-    margin-bottom: 1em;
-    padding-left: 2em;
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
     color: ${palette.textPrimary};
   }
 
   li {
-    margin-bottom: 0.5em;
+    margin: 0.25rem 0;
   }
 
-  /* Quill 특별 스타일 */
+  /* 인용문 스타일 */
+  blockquote {
+    border-left: 4px solid ${palette.accent};
+    margin: 1rem 0;
+    padding: 0.5rem 1rem;
+    background: ${palette.accentRing};
+    font-style: italic;
+    color: ${palette.textSecondary};
+  }
+
+  /* 코드 블록 스타일 */
+  pre {
+    background: ${palette.bgContainer};
+    border: 1px solid ${palette.border};
+    border-radius: 4px;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    overflow-x: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+  }
+
+  code {
+    background: ${palette.bgContainer};
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    color: ${palette.textPrimary};
+  }
+
+  /* 링크 스타일 */
+  a {
+    color: ${palette.accent};
+    text-decoration: underline;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+
+  /* 이미지 스타일 */
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    margin: 0.5rem 0;
+    display: block;
+  }
+
+  /* Quill 정렬 스타일 */
   .ql-align-center {
     text-align: center;
   }
-  
+
   .ql-align-right {
     text-align: right;
   }
-  
-  .ql-align-left {
-    text-align: left;
-  }
-  
+
   .ql-align-justify {
     text-align: justify;
   }
 
-  /* 텍스트 포맷팅 */
-  strong,
+  /* Quill 폰트 크기 스타일 */
+  .ql-size-small {
+    font-size: 0.8rem;
+  }
+
+  .ql-size-large {
+    font-size: 1.2rem;
+  }
+
+  .ql-size-huge {
+    font-size: 1.5rem;
+  }
+
+  /* Quill 텍스트 포맷팅 */
   .ql-bold {
     font-weight: bold;
   }
 
-  em,
   .ql-italic {
     font-style: italic;
   }
@@ -240,81 +325,77 @@ export const Content = styled.div`
     text-decoration: line-through;
   }
 
-  /* 코드 블록 */
-  code {
-    background-color: ${palette.input};
-    padding: 0.2em 0.4em;
-    border-radius: 3px;
-    color: ${palette.accent};
-    font-family: 'Courier New', monospace;
+  /* Quill 폰트 패밀리 */
+  .ql-font-serif {
+    font-family: Georgia, Times New Roman, serif;
   }
 
-  pre {
-    background-color: ${palette.input};
-    padding: 1em;
-    overflow-x: auto;
-    border-radius: 3px;
-    border: 1px solid ${palette.border};
+  .ql-font-monospace {
+    font-family: Monaco, Courier New, monospace;
   }
 
-  .ql-code-block {
-    background-color: ${palette.input};
-    padding: 1em;
-    border-radius: 3px;
-    border: 1px solid ${palette.border};
-    font-family: 'Courier New', monospace;
-    color: ${palette.textPrimary};
-    margin: 1em 0;
+  /* Quill 상첨자/하첨자 */
+  sub,
+  .ql-script-sub {
+    vertical-align: sub;
+    font-size: smaller;
   }
 
-  /* 인용구 */
-  blockquote {
-    border-left: 4px solid ${palette.accent};
-    padding-left: 1em;
-    margin: 1em 0;
-    color: ${palette.textMuted};
-    background-color: ${palette.input};
-    border-radius: 0 3px 3px 0;
-    padding: 0.5em 1em;
+  sup,
+  .ql-script-super {
+    vertical-align: super;
+    font-size: smaller;
   }
 
-  /* 링크 */
-  a {
-    color: ${palette.accent};
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-
-  /* 이미지 */
-  img {
-    max-width: 100%;
-    width: auto;
-    height: auto;
-    border-radius: 4px;
-    margin: 1em auto;
-    display: block;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    
-    /* 데스크톱에서 최대 크기 제한 */
-    @media (min-width: 769px) {
-      max-width: 80%;
-      max-height: 600px;
-      object-fit: contain;
-    }
-  }
-
-  /* Quill 에디터에서 생성되는 특수 클래스들 */
+  /* Quill 인덴트 */
   .ql-indent-1 {
-    padding-left: 2em;
+    padding-left: 3em;
   }
   .ql-indent-2 {
-    padding-left: 4em;
+    padding-left: 6em;
   }
   .ql-indent-3 {
-    padding-left: 6em;
+    padding-left: 9em;
+  }
+  .ql-indent-4 {
+    padding-left: 12em;
+  }
+  .ql-indent-5 {
+    padding-left: 15em;
+  }
+  .ql-indent-6 {
+    padding-left: 18em;
+  }
+  .ql-indent-7 {
+    padding-left: 21em;
+  }
+  .ql-indent-8 {
+    padding-left: 24em;
+  }
+
+  /* Quill 방향 */
+  .ql-direction-rtl {
+    direction: rtl;
+    text-align: inherit;
+  }
+
+  /* Quill 비디오 */
+  .ql-video {
+    display: block;
+    max-width: 100%;
+  }
+
+  /* Quill 코드 블록 */
+  .ql-code-block-container {
+    margin: 0.5rem 0;
+  }
+
+  pre.ql-syntax {
+    background-color: ${palette.bgContainer};
+    color: ${palette.textPrimary};
+    overflow: visible;
+    padding: 1rem;
+    border-radius: 4px;
   }
 
   /* 줄바꿈 처리 */
@@ -327,14 +408,18 @@ export const Content = styled.div`
   @media (max-width: 768px) {
     font-size: 0.7rem;
 
-    h1 {
-      font-size: 0.9rem;
+    h1,
+    .ql-size-huge {
+      font-size: 1.5rem;
     }
-    h2 {
-      font-size: 0.85rem;
+
+    h2,
+    .ql-size-large {
+      font-size: 1.25rem;
     }
+
     h3 {
-      font-size: 0.8rem;
+      font-size: 1rem;
     }
 
     .ql-code-block,
@@ -354,6 +439,32 @@ export const Content = styled.div`
       object-fit: contain;
       border-radius: 3px;
       margin: 0.75em auto;
+    }
+
+    /* 모바일에서 인덴트 줄이기 */
+    .ql-indent-1 {
+      padding-left: 2em;
+    }
+    .ql-indent-2 {
+      padding-left: 4em;
+    }
+    .ql-indent-3 {
+      padding-left: 6em;
+    }
+    .ql-indent-4 {
+      padding-left: 8em;
+    }
+    .ql-indent-5 {
+      padding-left: 10em;
+    }
+    .ql-indent-6 {
+      padding-left: 12em;
+    }
+    .ql-indent-7 {
+      padding-left: 14em;
+    }
+    .ql-indent-8 {
+      padding-left: 16em;
     }
   }
 
@@ -793,56 +904,239 @@ export const EditContentContainer = styled.div`
       opacity: 0.6;
     }
 
+    /* 헤더 스타일 */
     h1,
-    h2,
-    h3 {
-      color: ${palette.textPrimary};
-      margin: 1.5rem 0 1rem 0;
-      font-weight: 600;
-    }
-
-    p {
-      margin: 0.75rem 0;
-    }
-
-    blockquote {
-      border-left: 4px solid ${palette.accent};
-      background: ${palette.bgPage};
-      margin: 1rem 0;
-      padding: 1rem 1.5rem;
-      border-radius: 0 8px 8px 0;
-    }
-
-    code {
-      background: ${palette.bgPage};
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
-      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-    }
-
-    pre {
-      background: ${palette.bgPage};
-      padding: 1rem;
-      border-radius: 8px;
-      overflow-x: auto;
-    }
-
-    a {
+    .ql-size-huge {
+      font-size: 2rem;
+      font-weight: 700;
       color: ${palette.accent};
-      text-decoration: none;
-
-      &:hover {
-        text-decoration: underline;
-      }
+      margin: 1rem 0;
     }
 
+    h2,
+    .ql-size-large {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: ${palette.textPrimary};
+      margin: 0.8rem 0;
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: ${palette.textSecondary};
+      margin: 0.6rem 0;
+    }
+
+    h4,
+    h5,
+    h6 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: ${palette.textPrimary};
+      margin: 0.5rem 0;
+    }
+
+    /* 텍스트 스타일 */
+    p {
+      margin: 0.5rem 0;
+      line-height: 1.6;
+    }
+
+    /* 강조 스타일 */
+    strong {
+      font-weight: 700;
+      color: ${palette.accent};
+    }
+
+    em {
+      font-style: italic;
+      color: ${palette.textSecondary};
+    }
+
+    u {
+      text-decoration: underline;
+    }
+
+    s {
+      text-decoration: line-through;
+      opacity: 0.7;
+    }
+
+    /* 리스트 */
     ul,
     ol {
+      margin: 0.5rem 0;
       padding-left: 1.5rem;
     }
 
     li {
+      margin: 0.25rem 0;
+    }
+
+    /* 인용구 */
+    blockquote {
+      border-left: 4px solid ${palette.accent};
+      margin: 1rem 0;
+      padding: 0.5rem 1rem;
+      background: ${palette.accentRing};
+      font-style: italic;
+      color: ${palette.textSecondary};
+    }
+
+    /* 코드 블록 */
+    pre {
+      background: ${palette.bgContainer};
+      border: 1px solid ${palette.border};
+      border-radius: 4px;
+      padding: 1rem;
       margin: 0.5rem 0;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+    }
+
+    code {
+      background: ${palette.bgContainer};
+      padding: 0.2rem 0.4rem;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+    }
+
+    /* 링크 */
+    a {
+      color: ${palette.accent};
+      text-decoration: underline;
+
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+
+    /* 이미지 */
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+      margin: 0.5rem 0;
+      display: block;
+    }
+
+    /* Quill 정렬 스타일 */
+    .ql-align-center {
+      text-align: center;
+    }
+
+    .ql-align-right {
+      text-align: right;
+    }
+
+    .ql-align-justify {
+      text-align: justify;
+    }
+
+    /* Quill 폰트 크기 스타일 */
+    .ql-size-small {
+      font-size: 0.8rem;
+    }
+
+    .ql-size-large {
+      font-size: 1.2rem;
+    }
+
+    .ql-size-huge {
+      font-size: 1.5rem;
+    }
+
+    /* Quill 텍스트 포맷팅 */
+    .ql-bold {
+      font-weight: bold;
+    }
+
+    .ql-italic {
+      font-style: italic;
+    }
+
+    .ql-underline {
+      text-decoration: underline;
+    }
+
+    .ql-strike {
+      text-decoration: line-through;
+    }
+
+    /* Quill 폰트 패밀리 */
+    .ql-font-serif {
+      font-family: Georgia, Times New Roman, serif;
+    }
+
+    .ql-font-monospace {
+      font-family: Monaco, Courier New, monospace;
+    }
+
+    /* Quill 상첨자/하첨자 */
+    sub,
+    .ql-script-sub {
+      vertical-align: sub;
+      font-size: smaller;
+    }
+
+    sup,
+    .ql-script-super {
+      vertical-align: super;
+      font-size: smaller;
+    }
+
+    /* Quill 인덴트 */
+    .ql-indent-1 {
+      padding-left: 3em;
+    }
+    .ql-indent-2 {
+      padding-left: 6em;
+    }
+    .ql-indent-3 {
+      padding-left: 9em;
+    }
+    .ql-indent-4 {
+      padding-left: 12em;
+    }
+    .ql-indent-5 {
+      padding-left: 15em;
+    }
+    .ql-indent-6 {
+      padding-left: 18em;
+    }
+    .ql-indent-7 {
+      padding-left: 21em;
+    }
+    .ql-indent-8 {
+      padding-left: 24em;
+    }
+
+    /* Quill 방향 */
+    .ql-direction-rtl {
+      direction: rtl;
+      text-align: inherit;
+    }
+
+    /* Quill 비디오 */
+    .ql-video {
+      display: block;
+      max-width: 100%;
+    }
+
+    /* Quill 코드 블록 */
+    .ql-code-block-container {
+      margin: 0.5rem 0;
+    }
+
+    pre.ql-syntax {
+      background-color: ${palette.bgContainer};
+      color: ${palette.textPrimary};
+      overflow: visible;
+      padding: 1rem;
+      border-radius: 4px;
     }
   }
 
@@ -856,6 +1150,46 @@ export const EditContentContainer = styled.div`
     .ql-editor {
       min-height: 300px;
       padding: 1.5rem 1rem;
+
+      h1,
+      .ql-size-huge {
+        font-size: 1.5rem;
+      }
+
+      h2,
+      .ql-size-large {
+        font-size: 1.25rem;
+      }
+
+      h3 {
+        font-size: 1rem;
+      }
+
+      /* 모바일에서 인덴트 줄이기 */
+      .ql-indent-1 {
+        padding-left: 2em;
+      }
+      .ql-indent-2 {
+        padding-left: 4em;
+      }
+      .ql-indent-3 {
+        padding-left: 6em;
+      }
+      .ql-indent-4 {
+        padding-left: 8em;
+      }
+      .ql-indent-5 {
+        padding-left: 10em;
+      }
+      .ql-indent-6 {
+        padding-left: 12em;
+      }
+      .ql-indent-7 {
+        padding-left: 14em;
+      }
+      .ql-indent-8 {
+        padding-left: 16em;
+      }
     }
   }
 `;
