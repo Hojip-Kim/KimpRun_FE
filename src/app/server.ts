@@ -15,13 +15,10 @@ let secondMarketList: string[] = [];
 
 export async function getTokenNames(firstMarket: MarketType, secondMarket: MarketType) {
   try {
-    const url = serverEnv.MARKET_FIRST_NAME;
+    const params = new URLSearchParams({ first: firstMarket, second: secondMarket });
+    const url = `${serverEnv.MARKET_FIRST_NAME}?${params.toString()}`;
 
-    const requestUrl = new URL(url);
-    requestUrl.searchParams.set('first', firstMarket);
-    requestUrl.searchParams.set('second', secondMarket);
-
-    const response = await serverRequest.get(requestUrl.toString(), {
+    const response = await serverRequest.get(url, {
       credentials: 'include',
       headers: { 'Content-type': 'application/json' },
     });
@@ -64,11 +61,10 @@ export async function getCombinedTokenData(
   secondMarket: MarketType
 ) {
   try {
-    const url = new URL(serverEnv.MARKET_COMBINE_DATA);
-    url.searchParams.set('first', firstMarket);
-    url.searchParams.set('second', secondMarket);
+    const params = new URLSearchParams({ first: firstMarket, second: secondMarket });
+    const url = `${serverEnv.MARKET_COMBINE_DATA}?${params.toString()}`;
 
-    const response = await serverRequest.get(url.toString(), {
+    const response = await serverRequest.get(url, {
       credentials: 'include',
       headers: { 'Content-type': 'application/json' },
     });
@@ -90,11 +86,13 @@ export async function getCombinedTokenData(
 
 export async function getCombineTokenData() {
   try {
-    const url = new URL(serverEnv.MARKET_COMBINE_DATA);
-    url.searchParams.set('first', firstMarketList.join(','));
-    url.searchParams.set('second', secondMarketList.join(','));
+    const params = new URLSearchParams({
+      first: firstMarketList.join(','),
+      second: secondMarketList.join(',')
+    });
+    const url = `${serverEnv.MARKET_COMBINE_DATA}?${params.toString()}`;
 
-    const response = await serverRequest.get(url.toString(), {
+    const response = await serverRequest.get(url, {
       credentials: 'include',
       headers: { 'Content-type': 'application/json' },
     });

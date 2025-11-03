@@ -26,9 +26,9 @@ export async function getAllPosts(
       };
     }
 
-    const url = new URL(`${serverEnv.BOARD_URL}/1?page=${page}&size=15`);
+    const url = `${serverEnv.BOARD_URL}/1?page=${page}&size=15`;
 
-    return await serverGet<AllPostData>(url.toString(), {
+    return await serverGet<AllPostData>(url, {
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
     });
@@ -59,11 +59,13 @@ export async function getPostsByCategory(
       };
     }
 
-    const url = new URL(`${serverEnv.BOARD_URL}/${category}`);
-    url.searchParams.set('page', page.toString());
-    url.searchParams.set('size', size.toString());
+    const params = new URLSearchParams({
+      page: page.toString(),
+      size: size.toString()
+    });
+    const url = `${serverEnv.BOARD_URL}/${category}?${params.toString()}`;
 
-    return await serverGet<AllPostData>(url.toString(), {
+    return await serverGet<AllPostData>(url, {
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
     });

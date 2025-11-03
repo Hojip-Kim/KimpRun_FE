@@ -30,11 +30,10 @@ export async function getCombinedTokenData(
   secondMarket: string
 ) {
   try {
-    const url = new URL(serverEnv.MARKET_COMBINE_DATA);
-    url.searchParams.set('first', firstMarket);
-    url.searchParams.set('second', secondMarket);
+    const params = new URLSearchParams({ first: firstMarket, second: secondMarket });
+    const url = `${serverEnv.MARKET_COMBINE_DATA}?${params.toString()}`;
 
-    const response = await serverRequest.get(url.toString(), {
+    const response = await serverRequest.get(url, {
       credentials: 'include',
       headers: { 'Content-type': 'application/json' },
     });
@@ -57,10 +56,10 @@ export async function getCombinedTokenData(
 // 단일 마켓 토큰 데이터 가져오기
 export async function getSingleMarketData(market: MarketType) {
   try {
-    const url = new URL(serverEnv.MARKET_SINGLE_DATA);
-    url.searchParams.set('market', market);
+    const params = new URLSearchParams({ market });
+    const url = `${serverEnv.MARKET_SINGLE_DATA}?${params.toString()}`;
 
-    const response = await serverRequest.get(url.toString(), {
+    const response = await serverRequest.get(url, {
       credentials: 'include',
       headers: { 'Content-type': 'application/json' },
     });

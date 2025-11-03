@@ -16,9 +16,9 @@ export const fetchAllPostData = async (
       };
     }
 
-    const url = new URL(`${serverEnv.BOARD_URL}/1?page=${page}&size=15`);
+    const url = `${serverEnv.BOARD_URL}/1?page=${page}&size=15`;
 
-    const response = await serverGet<AllPostData>(url.toString(), {
+    const response = await serverGet<AllPostData>(url, {
       credentials: 'include',
       headers: { 'Content-type': 'application/json' },
     });
@@ -102,9 +102,9 @@ export async function getCommunityData(
       };
     }
 
-    const url = new URL(`${serverEnv.BOARD_URL}/1?page=${page}&size=15`);
+    const url = `${serverEnv.BOARD_URL}/1?page=${page}&size=15`;
 
-    const response = await serverGet<AllPostData>(url.toString(), {
+    const response = await serverGet<AllPostData>(url, {
       credentials: 'include',
       headers: { 'Content-type': 'application/json' },
     });

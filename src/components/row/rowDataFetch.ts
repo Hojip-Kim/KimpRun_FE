@@ -31,11 +31,11 @@ export async function getRowData(
 export async function getCoinDetail(
   coinId: string
 ): Promise<CoinDetail | null> {
-  const url = new URL(clientEnv.CMC_SINGLE_COIN_URL);
-  url.searchParams.set('coinId', coinId);
+  const params = new URLSearchParams({ coinId });
+  const url = `${clientEnv.CMC_SINGLE_COIN_URL}?${params.toString()}`;
 
   try {
-    const response = await clientRequest.get<CoinDetail>(url.toString(), {
+    const response = await clientRequest.get<CoinDetail>(url, {
       credentials: 'include',
       headers: { 'Content-type': 'application/json' },
     });

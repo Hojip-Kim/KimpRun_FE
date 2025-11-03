@@ -9,11 +9,10 @@ export async function getClientTokenMapping(
   secondMarket: MarketType
 ): Promise<TokenNameMapping | null> {
   try {
-    const url = new URL(clientEnv.MARKET_TOKEN_NAMES_URL);
-    url.searchParams.set('first', firstMarket);
-    url.searchParams.set('second', secondMarket);
+    const params = new URLSearchParams({ first: firstMarket, second: secondMarket });
+    const url = `${clientEnv.MARKET_TOKEN_NAMES_URL}?${params.toString()}`;
 
-    const response = await clientRequest.get<TokenNameMapping>(url.toString(), {
+    const response = await clientRequest.get<TokenNameMapping>(url, {
       credentials: 'include',
       headers: { 'Content-type': 'application/json' },
       cache: 'no-store',
@@ -37,11 +36,10 @@ export async function getClientTokenNames(
   secondMarket: MarketType
 ) {
   try {
-    const url = new URL(clientEnv.MARKET_TOKEN_NAMES_URL);
-    url.searchParams.set('first', firstMarket);
-    url.searchParams.set('second', secondMarket);
+    const params = new URLSearchParams({ first: firstMarket, second: secondMarket });
+    const url = `${clientEnv.MARKET_TOKEN_NAMES_URL}?${params.toString()}`;
 
-    const response = await clientRequest.get<tokenNameList>(url.toString(), {
+    const response = await clientRequest.get<tokenNameList>(url, {
       credentials: 'include',
       headers: { 'Content-type': 'application/json' },
     });
@@ -61,10 +59,10 @@ export async function getClientTokenNames(
 // 단일 거래소의 마켓 데이터 가져오기
 export async function getClientSingleMarketData(market: MarketType) {
   try {
-    const url = new URL(clientEnv.MARKET_SINGLE_DATA);
-    url.searchParams.set('market', market);
+    const params = new URLSearchParams({ market });
+    const url = `${clientEnv.MARKET_SINGLE_DATA}?${params.toString()}`;
 
-    const response = await clientRequest.get(url.toString(), {
+    const response = await clientRequest.get(url, {
       credentials: 'include',
       headers: { 'Content-type': 'application/json' },
     });
@@ -104,11 +102,10 @@ export async function getClientCombinedTokenData(
   secondMarket: MarketType
 ) {
   try {
-    const url = new URL(clientEnv.MARKET_COMBINED_DATA_URL);
-    url.searchParams.set('first', firstMarket);
-    url.searchParams.set('second', secondMarket);
+    const params = new URLSearchParams({ first: firstMarket, second: secondMarket });
+    const url = `${clientEnv.MARKET_COMBINED_DATA_URL}?${params.toString()}`;
 
-    const response = await clientRequest.get(url.toString(), {
+    const response = await clientRequest.get(url, {
       credentials: 'include',
       headers: { 'Content-type': 'application/json' },
     });
