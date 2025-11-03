@@ -29,39 +29,39 @@ export const clientEnv = {
   getAbsoluteUrl: (path: string): string => `${getOrigin()}${path}`,
 
   // Auth Endpoints
-  LOGIN_URL: `${CLIENT_API_BASE_URL}/login`,
-  LOGOUT_URL: `${CLIENT_API_BASE_URL}/logout`,
-  STATUS_URL: `${CLIENT_API_BASE_URL}/auth/status`,
+  LOGIN_URL: '/login',
+  LOGOUT_URL: '/logout',
+  STATUS_URL: '/auth/status',
 
   // Google OAuth
   GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
-  GOOGLE_REDIRECT_URL: `${CLIENT_API_BASE_URL}/login/oauth2/code/google`,
-  GOOGLE_LOGIN_URL: `${CLIENT_API_BASE_URL}/oauth2/authorization/google`,
+  GOOGLE_REDIRECT_URL: '/login/oauth2/code/google',
+  GOOGLE_LOGIN_URL: '/oauth2/authorization/google',
 
   // User Endpoints
-  SIGNUP_URL: `${CLIENT_API_BASE_URL}/user/sign-up`,
-  VERIFY_EMAIL_URL: `${CLIENT_API_BASE_URL}/user/email/verify`,
-  SEND_VERIFICATION_CODE_EMAIL_URL: `${CLIENT_API_BASE_URL}/user/email/new`,
-  UPDATE_NICKNAME_URL: `${CLIENT_API_BASE_URL}/user/update/nickname`,
-  USER_INFO_URL: `${CLIENT_API_BASE_URL}/user`,
+  SIGNUP_URL: '/user/sign-up',
+  VERIFY_EMAIL_URL: '/user/email/verify',
+  SEND_VERIFICATION_CODE_EMAIL_URL: '/user/email/new',
+  UPDATE_NICKNAME_URL: '/user/update/nickname',
+  USER_INFO_URL: '/user',
 
   // Market Info Endpoints
-  DOLLAR_API_URL: `${CLIENT_API_BASE_URL}/marketInfo/dollar`,
-  TETHER_API_URL: `${CLIENT_API_BASE_URL}/marketInfo/tether`,
+  DOLLAR_API_URL: '/marketInfo/dollar',
+  TETHER_API_URL: '/marketInfo/tether',
 
   // Chat Endpoints
-  CHAT_LOG_URL: `${CLIENT_API_BASE_URL}/chat/allLog`,
+  CHAT_LOG_URL: '/chat/allLog',
 
   // Notice Endpoints
-  NOTICE_URL: `${CLIENT_API_BASE_URL}/notice`,
+  NOTICE_URL: '/notice',
 
   // Market Data Endpoints
-  MARKET_TOKEN_NAMES_URL: `${CLIENT_API_BASE_URL}/market/first/name`,
-  MARKET_COMBINED_DATA_URL: `${CLIENT_API_BASE_URL}/market/first/combine/data`,
-  MARKET_SINGLE_DATA: `${CLIENT_API_BASE_URL}/market/first/single/data`,
+  MARKET_TOKEN_NAMES_URL: '/market/first/name',
+  MARKET_COMBINED_DATA_URL: '/market/first/combine/data',
+  MARKET_SINGLE_DATA: '/market/first/single/data',
 
   // CMC Endpoints
-  CMC_SINGLE_COIN_URL: `${CLIENT_API_BASE_URL}/cmc/coin`,
+  CMC_SINGLE_COIN_URL: '/cmc/coin',
 };
 
 // 서버 환경 변수 - 서버 사이드에서만 사용
@@ -70,17 +70,17 @@ export const serverEnv = {
   API_BASE_URL: SERVER_API_BASE_URL,
 
   // Market Endpoints
-  MARKET_FIRST_NAME: `${SERVER_API_BASE_URL}/market/first/name`,
-  MARKET_COMBINE_DATA: `${SERVER_API_BASE_URL}/market/first/combine/data`,
-  MARKET_DATA: `${SERVER_API_BASE_URL}/market/first/combine/data`,
-  MARKET_SINGLE_DATA: `${SERVER_API_BASE_URL}/market/first/single/data`,
+  MARKET_FIRST_NAME: '/market/first/name',
+  MARKET_COMBINE_DATA: '/market/first/combine/data',
+  MARKET_DATA: '/market/first/combine/data',
+  MARKET_SINGLE_DATA: '/market/first/single/data',
 
   // Notice Endpoints
-  NOTICE_URL: `${SERVER_API_BASE_URL}/notice`,
+  NOTICE_URL: '/notice',
 
   // Board/Community Endpoints
-  BOARD_URL: `${SERVER_API_BASE_URL}/board`,
-  ALL_POSTS_URL: `${SERVER_API_BASE_URL}/board/all/`,
-  CATEGORY_URL: `${SERVER_API_BASE_URL}/category`,
-  COMMENT_URL: `${SERVER_API_BASE_URL}/comment`,
+  BOARD_URL: '/board',
+  ALL_POSTS_URL: '/board/all/',
+  CATEGORY_URL: '/category',
+  COMMENT_URL: '/comment',
 };

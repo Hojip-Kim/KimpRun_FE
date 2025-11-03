@@ -18,7 +18,7 @@ import { serverEnv } from '@/utils/env';
   redirect: 리디렉션 모드 (예: "follow", "manual", "error")
   referrer: 리퍼러 정보 (예: URL 또는 "no-referrer")
   referrerPolicy: 리퍼러 정책 (예: "no-referrer", "no-referrer-when-downgrade", "origin", "origin-when-cross-origin", "unsafe-url")
-  integrity: 서브 리소스 무결성 (SRI) 체크를 위한 문자열
+  integrity: 서브 리소스 무결성 (SRI) 체크를 위한 문자열 
 */
 
 const serverApi = createApiClient(serverEnv.API_BASE_URL, {
