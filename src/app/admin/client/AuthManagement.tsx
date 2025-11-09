@@ -43,7 +43,7 @@ const AuthManagement: React.FC = () => {
     setIsLoading(true);
     try {
       const response = await clientRequest.get<RoleInfo[]>(
-        `${clientEnv.API_BASE_URL}/role`
+        `/role`
       );
 
       if (response.success && response.data) {
@@ -67,7 +67,7 @@ const AuthManagement: React.FC = () => {
 
     try {
       const response = await clientRequest.get(
-        `${clientEnv.API_BASE_URL}/user/${userSearchId}`
+        `/user/${userSearchId}`
       );
 
       if (response.success && response.data) {
@@ -96,7 +96,7 @@ const AuthManagement: React.FC = () => {
 
     try {
       const response = await clientRequest.patch(
-        `${clientEnv.API_BASE_URL}/user/update/role`,
+        `/user/update/role`,
         {
           userId: parseInt(selectedUserId),
           role: selectedRole,
@@ -130,7 +130,7 @@ const AuthManagement: React.FC = () => {
 
     try {
       const response = await clientRequest.post(
-        `${clientEnv.API_BASE_URL}/user/delete`,
+        `/user/delete`,
         {
           userId: parseInt(selectedUserId),
         }

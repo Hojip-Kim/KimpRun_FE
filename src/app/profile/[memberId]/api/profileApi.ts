@@ -25,7 +25,7 @@ export async function updateNickname(
 ): Promise<UpdateNicknameResponse | null> {
   try {
     const response = await clientRequest.patch<UpdateNicknameResponse>(
-      `${clientEnv.API_BASE_URL}/user/update/nickname`,
+      `/user/update/nickname`,
       { nickname }
     );
 
@@ -69,7 +69,7 @@ export async function updateProfileImage(imageFile: File): Promise<boolean> {
 export async function deleteMember(password: string): Promise<boolean> {
   try {
     const response = await clientRequest.delete<boolean>(
-      `${clientEnv.API_BASE_URL}/user/softDelete`,
+      `/user/softDelete`,
       { body: JSON.stringify({ password }) }
     );
 

@@ -70,7 +70,7 @@ const BatchManagement: React.FC = () => {
   const fetchJobHistory = async () => {
     try {
       const response = await clientRequest.get<BatchJobHistory>(
-        `${clientEnv.API_BASE_URL}/batch/cmc/history?limit=10`
+        `/batch/cmc/history?limit=10`
       );
 
       if (response.success && response.data) {
@@ -85,7 +85,7 @@ const BatchManagement: React.FC = () => {
   const fetchRunningJobs = async () => {
     try {
       const response = await clientRequest.get<RunningJobs>(
-        `${clientEnv.API_BASE_URL}/batch/cmc/running`
+        `/batch/cmc/running`
       );
 
       if (response.success && response.data) {
@@ -100,7 +100,7 @@ const BatchManagement: React.FC = () => {
   const fetchBatchHealth = async () => {
     try {
       const response = await clientRequest.get<BatchHealth>(
-        `${clientEnv.API_BASE_URL}/batch/cmc/health`
+        `/batch/cmc/health`
       );
 
       if (response.success && response.data) {
@@ -115,7 +115,7 @@ const BatchManagement: React.FC = () => {
   const fetchRateLimitStatus = async () => {
     try {
       const response = await clientRequest.get<RateLimitStatus>(
-        `${clientEnv.API_BASE_URL}/batch/cmc/rate-limit-status`
+        `/batch/cmc/rate-limit-status`
       );
 
       if (response.success && response.data) {
@@ -130,7 +130,7 @@ const BatchManagement: React.FC = () => {
   const fetchCmcApiStatus = async () => {
     try {
       const response = await clientRequest.get<CmcApiStatus>(
-        `${clientEnv.API_BASE_URL}/batch/cmc/api-status`
+        `/batch/cmc/api-status`
       );
 
       if (response.success && response.data) {
@@ -154,7 +154,7 @@ const BatchManagement: React.FC = () => {
     setIsSyncing(true);
     try {
       const response = await clientRequest.post(
-        `${clientEnv.API_BASE_URL}/batch/cmc/sync?mode=manual`
+        `/batch/cmc/sync?mode=manual`
       );
 
       if (response.success) {
@@ -182,7 +182,7 @@ const BatchManagement: React.FC = () => {
 
     try {
       const response = await clientRequest.post(
-        `${clientEnv.API_BASE_URL}/batch/cmc/reset-rate-limit`
+        `/batch/cmc/reset-rate-limit`
       );
 
       if (response.success) {
@@ -206,7 +206,7 @@ const BatchManagement: React.FC = () => {
 
     try {
       const response = await clientRequest.post(
-        `${clientEnv.API_BASE_URL}/batch/cmc/unlock`
+        `/batch/cmc/unlock`
       );
 
       if (response.success) {

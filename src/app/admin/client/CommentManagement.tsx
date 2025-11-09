@@ -58,7 +58,7 @@ const CommentManagement: React.FC = () => {
     setIsLoading(true);
     try {
       const response = await clientRequest.get(
-        `${clientEnv.API_BASE_URL}/comment?boardId=${boardId}&page=${page}`
+        `/comment?boardId=${boardId}&page=${page}`
       );
 
       if (response.success && response.data) {
@@ -95,7 +95,7 @@ const CommentManagement: React.FC = () => {
     setIsLoading(true);
     try {
       const response = await clientRequest.get(
-        `${clientEnv.API_BASE_URL}/board/member/${memberId}/comments?page=${page}&size=${pageSize}`
+        `/board/member/${memberId}/comments?page=${page}&size=${pageSize}`
       );
 
       if (response.success && response.data) {
@@ -154,7 +154,7 @@ const CommentManagement: React.FC = () => {
 
     try {
       const response = await clientRequest.post(
-        `${clientEnv.API_BASE_URL}/comment/${commentId}/soft`
+        `/comment/${commentId}/soft`
       );
 
       if (response.success) {

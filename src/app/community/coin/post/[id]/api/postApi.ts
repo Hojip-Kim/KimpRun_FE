@@ -16,7 +16,7 @@ export async function likePost(boardId: number): Promise<{
 }> {
   try {
     const response = await clientRequest.patch<boolean>(
-      `${clientEnv.API_BASE_URL}/board/like`,
+      `/board/like`,
       { boardId }
     );
 
@@ -65,7 +65,7 @@ export async function deletePost(boardId: number): Promise<{
 }> {
   try {
     const response = await clientRequest.delete(
-      `${clientEnv.API_BASE_URL}/${boardId}/soft`
+      `/${boardId}/soft`
     );
 
     if (response.success && response.status === 200) {
@@ -105,7 +105,7 @@ export async function updatePost(
 }> {
   try {
     const response = await clientRequest.patch(
-      `${clientEnv.API_BASE_URL}/board/${boardId}`,
+      `/board/${boardId}`,
       { title, content }
     );
 
@@ -137,7 +137,7 @@ export async function updatePost(
 export async function incrementViewCount(boardId: number): Promise<boolean> {
   try {
     const response = await clientRequest.patch(
-      `${clientEnv.API_BASE_URL}/board/view/${boardId}`
+      `/board/view/${boardId}`
     );
 
     return response.success;

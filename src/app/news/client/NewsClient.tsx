@@ -64,10 +64,10 @@ const NewsClientPage: React.FC<NewsClientPageProps> = ({
       let endpoint: string;
 
       if (source === 'All') {
-        endpoint = `${clientEnv.API_BASE_URL}/news?page=${page}&size=${pageSize}`;
+        endpoint = `/news?page=${page}&size=${pageSize}`;
       } else {
         const sourceCode = NEWS_SOURCES[source].code;
-        endpoint = `${clientEnv.API_BASE_URL}/news/source/${sourceCode}?page=${page}&size=${pageSize}`;
+        endpoint = `/news/source/${sourceCode}?page=${page}&size=${pageSize}`;
       }
 
       const response = await clientRequest.get<NewsPageResponse>(endpoint, {

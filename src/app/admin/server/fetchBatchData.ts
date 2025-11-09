@@ -28,7 +28,7 @@ export async function triggerCmcBatchSync(
       };
     }
 
-    const endpoint = `${serverEnv.API_BASE_URL}/batch/cmc/sync?mode=${mode}`;
+    const endpoint = `/batch/cmc/sync?mode=${mode}`;
     const response = await serverPost<any>(endpoint);
 
     return response;
@@ -59,7 +59,7 @@ export async function getBatchJobHistory(
       };
     }
 
-    const endpoint = `${serverEnv.API_BASE_URL}/batch/cmc/history?limit=${limit}`;
+    const endpoint = `/batch/cmc/history?limit=${limit}`;
     const response = await serverGet<BatchJobHistory>(endpoint);
 
     return response;
@@ -90,7 +90,7 @@ export async function getRunningBatchJobs(): Promise<
       };
     }
 
-    const endpoint = `${serverEnv.API_BASE_URL}/batch/cmc/running`;
+    const endpoint = `/batch/cmc/running`;
     const response = await serverGet<RunningJobs>(endpoint);
 
     return response;
@@ -127,7 +127,7 @@ export async function getBatchHealth(): Promise<
       };
     }
 
-    const endpoint = `${serverEnv.API_BASE_URL}/batch/cmc/health`;
+    const endpoint = `/batch/cmc/health`;
     const response = await serverGet<BatchHealth>(endpoint);
 
     return response;
@@ -169,7 +169,7 @@ export async function getRateLimitStatus(): Promise<
       };
     }
 
-    const endpoint = `${serverEnv.API_BASE_URL}/batch/cmc/rate-limit-status`;
+    const endpoint = `/batch/cmc/rate-limit-status`;
     const response = await serverGet<RateLimitStatus>(endpoint);
 
     return response;
@@ -208,7 +208,7 @@ export async function getCmcApiStatus(): Promise<
       };
     }
 
-    const endpoint = `${serverEnv.API_BASE_URL}/batch/cmc/api-status`;
+    const endpoint = `/batch/cmc/api-status`;
     const response = await serverGet<CmcApiStatus>(endpoint);
 
     return response;
@@ -240,7 +240,7 @@ export async function resetRateLimit(): Promise<ProcessedApiResponse<any>> {
       };
     }
 
-    const endpoint = `${serverEnv.API_BASE_URL}/batch/cmc/reset-rate-limit`;
+    const endpoint = `/batch/cmc/reset-rate-limit`;
     const response = await serverPost<any>(endpoint);
 
     return response;
@@ -269,7 +269,7 @@ export async function forceUnlockBatch(): Promise<ProcessedApiResponse<any>> {
       };
     }
 
-    const endpoint = `${serverEnv.API_BASE_URL}/batch/cmc/unlock`;
+    const endpoint = `/batch/cmc/unlock`;
     const response = await serverPost<any>(endpoint);
 
     return response;
@@ -300,7 +300,7 @@ export async function getJobExecutionStatus(
       };
     }
 
-    const endpoint = `${serverEnv.API_BASE_URL}/batch/cmc/status/${jobExecutionId}`;
+    const endpoint = `/batch/cmc/status/${jobExecutionId}`;
     const response = await serverGet<BatchJobStatus>(endpoint);
 
     return response;

@@ -34,9 +34,9 @@ export async function getDashboardStats(): Promise<
     // 여러 데이터 소스를 병렬로 가져오기
     const [categoriesResponse, runningJobsResponse, chatLogResponse] =
       await Promise.allSettled([
-        serverGet(`${serverEnv.API_BASE_URL}/category`),
-        serverGet(`${serverEnv.API_BASE_URL}/batch/cmc/running`),
-        serverGet(`${serverEnv.API_BASE_URL}/chat/allLog?page=1&size=10`),
+        serverGet(`/category`),
+        serverGet(`/batch/cmc/running`),
+        serverGet(`/chat/allLog?page=1&size=10`),
       ]);
 
     // Extract data safely

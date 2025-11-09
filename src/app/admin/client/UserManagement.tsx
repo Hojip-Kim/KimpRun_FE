@@ -69,7 +69,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ initialTab = 'roles' })
   const fetchRoles = async () => {
     setIsLoading(true);
     try {
-      const response = await clientRequest.get(`${clientEnv.API_BASE_URL}/role`);
+      const response = await clientRequest.get(`/role`);
 
       if (response.success && response.data) {
         setRoles(response.data);
@@ -89,7 +89,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ initialTab = 'roles' })
     setIsLoading(true);
     try {
       const response = await clientRequest.get(
-        `${clientEnv.API_BASE_URL}/declaration?page=${page}&size=20`
+        `/declaration?page=${page}&size=20`
       );
 
       if (response.success && response.data) {
@@ -126,7 +126,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ initialTab = 'roles' })
 
     try {
       const response = await clientRequest.get(
-        `${clientEnv.API_BASE_URL}/user/${parseInt(searchUserId)}`
+        `/user/${parseInt(searchUserId)}`
       );
 
       if (response.success && response.data) {
@@ -156,7 +156,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ initialTab = 'roles' })
     }
 
     try {
-      const response = await clientRequest.patch(`${clientEnv.API_BASE_URL}/user/update/role`, {
+      const response = await clientRequest.patch(`/user/update/role`, {
         userId: parseInt(searchUserId),
         role: selectedRole,
       });
@@ -189,7 +189,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ initialTab = 'roles' })
     }
 
     try {
-      const response = await clientRequest.delete(`${clientEnv.API_BASE_URL}/user/delete`, {
+      const response = await clientRequest.delete(`/user/delete`, {
         body: JSON.stringify({ userId: parseInt(searchUserId) }),
       });
 
@@ -214,7 +214,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ initialTab = 'roles' })
     }
 
     try {
-      const response = await clientRequest.post(`${clientEnv.API_BASE_URL}/role`, {
+      const response = await clientRequest.post(`/role`, {
         roleKey: newRoleKey,
         roleName: newRoleName,
       });
@@ -243,7 +243,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ initialTab = 'roles' })
 
     try {
       const response = await clientRequest.put(
-        `${clientEnv.API_BASE_URL}/role/${updatingRole.id}`,
+        `/role/${updatingRole.id}`,
         {
           roleName: newRoleName,
         }
@@ -271,7 +271,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ initialTab = 'roles' })
     }
 
     try {
-      const response = await clientRequest.delete(`${clientEnv.API_BASE_URL}/role/${roleId}`);
+      const response = await clientRequest.delete(`/role/${roleId}`);
 
       if (response.success) {
         showSuccess('권한이 삭제되었습니다');

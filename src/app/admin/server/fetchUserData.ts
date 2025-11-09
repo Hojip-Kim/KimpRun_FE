@@ -20,7 +20,7 @@ export async function getUserById(
   userId: number
 ): Promise<ProcessedApiResponse<UserDetailInfo>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/user/${userId}`;
+    const endpoint = `/user/${userId}`;
     const response = await serverGet<UserDetailInfo>(endpoint);
     return response;
   } catch (error) {
@@ -41,7 +41,7 @@ export async function updateUserRole(
   request: UpdateUserRoleRequest
 ): Promise<ProcessedApiResponse<UserDetailInfo>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/user/update/role`;
+    const endpoint = `/user/update/role`;
     const response = await serverPatch<UserDetailInfo>(endpoint, {
       userId: request.userId,
       role: request.role,
@@ -65,7 +65,7 @@ export async function deleteUser(
   request: DeleteUserRequest
 ): Promise<ProcessedApiResponse<boolean>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/user/delete`;
+    const endpoint = `/user/delete`;
     const response = await serverDelete<boolean>(endpoint, {
       body: JSON.stringify({ userId: request.userId }),
     });
@@ -86,7 +86,7 @@ export async function deleteUser(
  */
 export async function getAllRoles(): Promise<ProcessedApiResponse<RoleInfo[]>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/role`;
+    const endpoint = `/role`;
     const response = await serverGet<RoleInfo[]>(endpoint);
     return response;
   } catch (error) {
@@ -107,7 +107,7 @@ export async function getRoleById(
   roleId: number
 ): Promise<ProcessedApiResponse<RoleInfo>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/role/${roleId}`;
+    const endpoint = `/role/${roleId}`;
     const response = await serverGet<RoleInfo>(endpoint);
     return response;
   } catch (error) {
@@ -128,7 +128,7 @@ export async function getRoleByKey(
   roleKey: string
 ): Promise<ProcessedApiResponse<RoleInfo>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/role/key/${roleKey}`;
+    const endpoint = `/role/key/${roleKey}`;
     const response = await serverGet<RoleInfo>(endpoint);
     return response;
   } catch (error) {
@@ -149,7 +149,7 @@ export async function createRole(
   request: CreateRoleRequest
 ): Promise<ProcessedApiResponse<RoleInfo>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/role`;
+    const endpoint = `/role`;
     const response = await serverPost<RoleInfo>(endpoint, request);
     return response;
   } catch (error) {
@@ -170,7 +170,7 @@ export async function updateRole(
   request: UpdateRoleRequest
 ): Promise<ProcessedApiResponse<RoleInfo>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/role/${request.roleId}`;
+    const endpoint = `/role/${request.roleId}`;
     const response = await serverPost<RoleInfo>(endpoint, {
       roleName: request.roleName,
     });
@@ -191,7 +191,7 @@ export async function updateRole(
  */
 export async function deleteRole(roleId: number): Promise<ProcessedApiResponse<boolean>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/role/${roleId}`;
+    const endpoint = `/role/${roleId}`;
     const response = await serverDelete<boolean>(endpoint);
     return response;
   } catch (error) {
@@ -213,7 +213,7 @@ export async function getDeclarations(
   size: number = 20
 ): Promise<ProcessedApiResponse<DeclarationPage>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/declaration?page=${page}&size=${size}`;
+    const endpoint = `/declaration?page=${page}&size=${size}`;
     const response = await serverGet<DeclarationPage>(endpoint);
     return response;
   } catch (error) {

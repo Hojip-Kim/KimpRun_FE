@@ -17,7 +17,7 @@ export const profileServerApi = {
   async getProfile(memberId: number): Promise<ProfileInfo | null> {
     try {
       const response = await serverRequest.get<ProfileInfo>(
-        `${serverEnv.API_BASE_URL}/profile/${memberId}`,
+        `/profile/${memberId}`,
         {
           cache: 'no-store',
         }
@@ -36,7 +36,7 @@ export const profileServerApi = {
     size: number = 15
   ): Promise<PageResponse<FollowerInfo> | null> {
     try {
-      const url = `${serverEnv.API_BASE_URL}/profile/${memberId}/followers?page=${page}&size=${size}`;
+      const url = `/profile/${memberId}/followers?page=${page}&size=${size}`;
       const response = await serverRequest.get<PageResponse<FollowerInfo>>(
         url,
         {
@@ -57,7 +57,7 @@ export const profileServerApi = {
     size: number = 15
   ): Promise<PageResponse<FollowingInfo> | null> {
     try {
-      const url = `${serverEnv.API_BASE_URL}/profile/${memberId}/following?page=${page}&size=${size}`;
+      const url = `/profile/${memberId}/following?page=${page}&size=${size}`;
       const response = await serverRequest.get<PageResponse<FollowingInfo>>(
         url,
         {
@@ -78,7 +78,7 @@ export const profileServerApi = {
     size: number = 15
   ): Promise<PageResponse<UserPost> | null> {
     try {
-      const url = `${serverEnv.API_BASE_URL}/board/member/${memberId}?page=${page}&size=${size}`;
+      const url = `/board/member/${memberId}?page=${page}&size=${size}`;
       const response = await serverRequest.get<PageResponse<UserPost>>(url, {
         cache: 'no-store',
       });
@@ -96,7 +96,7 @@ export const profileServerApi = {
     size: number = 15
   ): Promise<PageResponse<UserComment> | null> {
     try {
-      const url = `${serverEnv.API_BASE_URL}/board/member/${memberId}/comments?page=${page}&size=${size}`;
+      const url = `/board/member/${memberId}/comments?page=${page}&size=${size}`;
       const response = await serverRequest.get<PageResponse<UserComment>>(url, {
         cache: 'no-store',
       });
@@ -114,7 +114,7 @@ export const profileClientApi = {
   async getProfile(memberId: number): Promise<ProfileInfo | null> {
     try {
       const response = await clientRequest.get<ProfileInfo>(
-        `${clientEnv.API_BASE_URL}/profile/${memberId}`,
+        `/profile/${memberId}`,
         {
           credentials: 'include',
           cache: 'no-store',
@@ -133,7 +133,7 @@ export const profileClientApi = {
   ): Promise<{ success: boolean; message?: string }> {
     try {
       const response = await clientRequest.post(
-        `${clientEnv.API_BASE_URL}/profile/follow`,
+        `/profile/follow`,
         { followingId },
         { credentials: 'include' }
       );
@@ -155,7 +155,7 @@ export const profileClientApi = {
   ): Promise<{ success: boolean; message?: string }> {
     try {
       const response = await clientRequest.delete(
-        `${clientEnv.API_BASE_URL}/profile/follow/${followingId}`,
+        `/profile/follow/${followingId}`,
         {
           credentials: 'include',
         }
@@ -179,7 +179,7 @@ export const profileClientApi = {
   async getFollowStatus(followingId: number): Promise<boolean> {
     try {
       const response = await clientRequest.get<boolean>(
-        `${clientEnv.API_BASE_URL}/profile/follow-status/${followingId}`,
+        `/profile/follow-status/${followingId}`,
         {
           credentials: 'include',
           cache: 'no-store',
@@ -199,7 +199,7 @@ export const profileClientApi = {
     size: number = 15
   ): Promise<PageResponse<FollowerInfo> | null> {
     try {
-      const url = `${clientEnv.API_BASE_URL}/profile/${memberId}/followers?page=${page}&size=${size}`;
+      const url = `/profile/${memberId}/followers?page=${page}&size=${size}`;
       const response = await clientRequest.get<PageResponse<FollowerInfo>>(
         url,
         {
@@ -221,7 +221,7 @@ export const profileClientApi = {
     size: number = 15
   ): Promise<PageResponse<FollowingInfo> | null> {
     try {
-      const url = `${clientEnv.API_BASE_URL}/profile/${memberId}/following?page=${page}&size=${size}`;
+      const url = `/profile/${memberId}/following?page=${page}&size=${size}`;
       const response = await clientRequest.get<PageResponse<FollowingInfo>>(
         url,
         {
@@ -243,7 +243,7 @@ export const profileClientApi = {
     size: number = 15
   ): Promise<PageResponse<UserPost> | null> {
     try {
-      const url = `${clientEnv.API_BASE_URL}/board/member/${memberId}?page=${page}&size=${size}`;
+      const url = `/board/member/${memberId}?page=${page}&size=${size}`;
       const response = await clientRequest.get<PageResponse<UserPost>>(url, {
         credentials: 'include',
         cache: 'no-store',
@@ -262,7 +262,7 @@ export const profileClientApi = {
     size: number = 15
   ): Promise<PageResponse<UserComment> | null> {
     try {
-      const url = `${clientEnv.API_BASE_URL}/board/member/${memberId}/comments?page=${page}&size=${size}`;
+      const url = `/board/member/${memberId}/comments?page=${page}&size=${size}`;
       const response = await clientRequest.get<PageResponse<UserComment>>(url, {
         credentials: 'include',
         cache: 'no-store',

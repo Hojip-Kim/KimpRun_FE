@@ -9,7 +9,7 @@ import { boardListUtils } from '../../../hooks/useBoardListData';
 // 게시글 데이터 fetcher 함수
 const fetchBoardData = async (boardId: string): Promise<BoardData> => {
   const response = await clientRequest.get<BoardData>(
-    `${clientEnv.API_BASE_URL}/board?boardId=${boardId}&commentPage=1`
+    `/board?boardId=${boardId}&commentPage=1`
   );
 
   if (response.success && response.data) {
@@ -28,7 +28,7 @@ const likePostApi = async (
   message: string;
 }> => {
   const response = await clientRequest.patch<boolean>(
-    `${clientEnv.API_BASE_URL}/board/like`,
+    `/board/like`,
     { boardId }
   );
 
@@ -57,7 +57,7 @@ const updatePostApi = async (
   message: string;
 }> => {
   const response = await clientRequest.patch(
-    `${clientEnv.API_BASE_URL}/board/${boardId}`,
+    `/board/${boardId}`,
     { title, content }
   );
 
@@ -79,7 +79,7 @@ const deletePostApi = async (
   message: string;
 }> => {
   const response = await clientRequest.delete(
-    `${clientEnv.API_BASE_URL}/board/${boardId}/soft`
+    `/board/${boardId}/soft`
   );
 
   if (response.success && response.status === 200) {

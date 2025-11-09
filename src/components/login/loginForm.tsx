@@ -22,7 +22,7 @@ interface LoginFormProps {
   hideInlineFooter?: boolean;
 }
 
-const googleLoginUrl = clientEnv.GOOGLE_LOGIN_URL;
+const googleLoginUrl = `${clientEnv.API_BASE_URL}${clientEnv.GOOGLE_LOGIN_URL}`;
 
 const LoginForm: React.FC<LoginFormProps> = ({
   closeModal,

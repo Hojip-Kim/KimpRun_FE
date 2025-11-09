@@ -52,7 +52,7 @@ const ChatManagement: React.FC = () => {
     setIsLoading(true);
     try {
       const response = await clientRequest.get<ChatLogPage>(
-        `${clientEnv.API_BASE_URL}/chat/allLog?page=${page}&size=${pageSize}`
+        `/chat/allLog?page=${page}&size=${pageSize}`
       );
 
       if (response.success && response.data) {
@@ -97,7 +97,7 @@ const ChatManagement: React.FC = () => {
 
     try {
       const response = await clientRequest.post(
-        `${clientEnv.API_BASE_URL}/chat/admin`,
+        `/chat/admin`,
         {
           inherenceId,
         }

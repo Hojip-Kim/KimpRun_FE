@@ -12,7 +12,7 @@ export async function getAllRoles(): Promise<
   ProcessedApiResponse<RoleInfo[]>
 > {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/role`;
+    const endpoint = `/role`;
     const response = await serverGet<RoleInfo[]>(endpoint);
     return response;
   } catch (error) {
@@ -33,7 +33,7 @@ export async function getRoleById(
   id: number
 ): Promise<ProcessedApiResponse<RoleInfo>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/role/${id}`;
+    const endpoint = `/role/${id}`;
     const response = await serverGet<RoleInfo>(endpoint);
     return response;
   } catch (error) {
@@ -54,7 +54,7 @@ export async function getUserById(
   id: number
 ): Promise<ProcessedApiResponse<any>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/user/${id}`;
+    const endpoint = `/user/${id}`;
     const response = await serverGet<any>(endpoint);
     return response;
   } catch (error) {
@@ -75,7 +75,7 @@ export async function updateUserRole(
   request: UpdateUserRoleRequest
 ): Promise<ProcessedApiResponse<any>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/user/update/role`;
+    const endpoint = `/user/update/role`;
     const response = await serverPatch<any>(endpoint, {
       userId: request.userId,
       role: request.role,
@@ -99,7 +99,7 @@ export async function deleteUser(
   request: DeleteUserRequest
 ): Promise<ProcessedApiResponse<boolean>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/user/delete`;
+    const endpoint = `/user/delete`;
     const response = await serverPost<boolean>(endpoint, {
       userId: request.userId,
     });

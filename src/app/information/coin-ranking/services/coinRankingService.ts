@@ -51,7 +51,7 @@ export const getCoinRankingClient = async (
 ): Promise<CoinRankingResponse> => {
   try {
     const response = await clientRequest.get<CoinRankingResponse>(
-      `${clientEnv.API_BASE_URL}/cmc/coin/all?page=${page}&size=${size}`,
+      `/cmc/coin/all?page=${page}&size=${size}`,
       {
         cache: 'no-store',
       }
@@ -118,7 +118,7 @@ export const searchCoinBySymbolClient = async (
 ): Promise<CoinRankingResponse> => {
   try {
     const response = await clientRequest.get<CoinRankingResponse>(
-      `${clientEnv.API_BASE_URL}/cmc/coin/${symbol}?page=${page}&size=${size}`,
+      `/cmc/coin/${symbol}?page=${page}&size=${size}`,
       {
         cache: 'no-store',
       }

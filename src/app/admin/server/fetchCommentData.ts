@@ -13,7 +13,7 @@ export async function getCommentsByBoard(
   page: number = 1
 ): Promise<ProcessedApiResponse<CommentPage>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/comment?boardId=${boardId}&page=${page}`;
+    const endpoint = `/comment?boardId=${boardId}&page=${page}`;
     const response = await serverGet<CommentPage>(endpoint);
     return response;
   } catch (error) {
@@ -42,7 +42,7 @@ export async function getCommentsByMember(
   size: number = 15
 ): Promise<ProcessedApiResponse<CommentPage>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/board/member/${memberId}/comments?page=${page}&size=${size}`;
+    const endpoint = `/board/member/${memberId}/comments?page=${page}&size=${size}`;
     const response = await serverGet<CommentPage>(endpoint);
     return response;
   } catch (error) {
@@ -69,7 +69,7 @@ export async function softDeleteComment(
   commentId: number
 ): Promise<ProcessedApiResponse<void>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/comment/${commentId}/soft`;
+    const endpoint = `/comment/${commentId}/soft`;
     const response = await serverPost<void>(endpoint);
     return response;
   } catch (error) {

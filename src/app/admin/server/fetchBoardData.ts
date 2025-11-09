@@ -20,7 +20,7 @@ export async function getBoardsByCategory(
   size: number = 20
 ): Promise<ProcessedApiResponse<BoardPage>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/board/${categoryId}?page=${page}&size=${size}`;
+    const endpoint = `/board/${categoryId}?page=${page}&size=${size}`;
     const response = await serverGet<BoardPage>(endpoint);
     return response;
   } catch (error) {
@@ -48,7 +48,7 @@ export async function getBoardById(
   commentPage: number = 1
 ): Promise<ProcessedApiResponse<any>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/board?boardId=${boardId}&commentPage=${commentPage}`;
+    const endpoint = `/board?boardId=${boardId}&commentPage=${commentPage}`;
     const response = await serverGet<any>(endpoint);
     return response;
   } catch (error) {
@@ -71,7 +71,7 @@ export async function getBoardsByMember(
   size: number = 15
 ): Promise<ProcessedApiResponse<BoardPage>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/board/member/${memberId}?page=${page}&size=${size}`;
+    const endpoint = `/board/member/${memberId}?page=${page}&size=${size}`;
     const response = await serverGet<BoardPage>(endpoint);
     return response;
   } catch (error) {
@@ -98,7 +98,7 @@ export async function softDeleteBoard(
   boardId: number
 ): Promise<ProcessedApiResponse<void>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/board/${boardId}/soft`;
+    const endpoint = `/board/${boardId}/soft`;
     const response = await serverPost<void>(endpoint);
     return response;
   } catch (error) {
@@ -119,7 +119,7 @@ export async function activateBoardPin(
   request: PinBoardRequest
 ): Promise<ProcessedApiResponse<boolean>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/board/activate`;
+    const endpoint = `/board/activate`;
     const response = await serverPatch<boolean>(endpoint, request);
     return response;
   } catch (error) {
@@ -140,7 +140,7 @@ export async function deactivateBoardPin(
   request: PinBoardRequest
 ): Promise<ProcessedApiResponse<boolean>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/board/deActivate`;
+    const endpoint = `/board/deActivate`;
     const response = await serverPatch<boolean>(endpoint, request);
     return response;
   } catch (error) {
@@ -161,7 +161,7 @@ export async function batchHardDelete(
   request: BatchHardDeleteRequest
 ): Promise<ProcessedApiResponse<BatchHardDeleteResponse>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/board/batch/hard-delete`;
+    const endpoint = `/board/batch/hard-delete`;
     const response = await serverPost<BatchHardDeleteResponse>(endpoint, request);
     return response;
   } catch (error) {

@@ -18,7 +18,7 @@ export async function getExpertApplications(
   size: number = 20
 ): Promise<ProcessedApiResponse<ExpertApplicationPage>> {
   try {
-    let endpoint = `${serverEnv.API_BASE_URL}/community/expert/admin/applications?page=${page}&size=${size}`;
+    let endpoint = `/community/expert/admin/applications?page=${page}&size=${size}`;
     if (status) {
       endpoint += `&status=${status}`;
     }
@@ -49,7 +49,7 @@ export async function getExpertProfiles(
   size: number = 20
 ): Promise<ProcessedApiResponse<ExpertProfilePage>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/community/expert/admin/profiles?page=${page}&size=${size}`;
+    const endpoint = `/community/expert/admin/profiles?page=${page}&size=${size}`;
     const response = await serverGet<ExpertProfilePage>(endpoint);
     return response;
   } catch (error) {
@@ -76,7 +76,7 @@ export async function approveExpertApplication(
   applicationId: number
 ): Promise<ProcessedApiResponse<void>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/community/expert/admin/applications/${applicationId}/approve`;
+    const endpoint = `/community/expert/admin/applications/${applicationId}/approve`;
     const response = await serverPost<void>(endpoint);
     return response;
   } catch (error) {
@@ -98,7 +98,7 @@ export async function rejectExpertApplication(
   rejectionReason: string
 ): Promise<ProcessedApiResponse<void>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/community/expert/admin/applications/${applicationId}/reject`;
+    const endpoint = `/community/expert/admin/applications/${applicationId}/reject`;
     const response = await serverPost<void>(endpoint, {
       rejectionReason,
     });
@@ -121,7 +121,7 @@ export async function activateExpertProfile(
   profileId: number
 ): Promise<ProcessedApiResponse<void>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/community/expert/admin/profiles/${profileId}/activate`;
+    const endpoint = `/community/expert/admin/profiles/${profileId}/activate`;
     const response = await serverPost<void>(endpoint);
     return response;
   } catch (error) {
@@ -142,7 +142,7 @@ export async function deactivateExpertProfile(
   profileId: number
 ): Promise<ProcessedApiResponse<void>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/community/expert/admin/profiles/${profileId}/deactivate`;
+    const endpoint = `/community/expert/admin/profiles/${profileId}/deactivate`;
     const response = await serverPost<void>(endpoint);
     return response;
   } catch (error) {
@@ -163,7 +163,7 @@ export async function revokeExpertStatus(
   memberId: number
 ): Promise<ProcessedApiResponse<void>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/community/expert/admin/members/${memberId}/revoke`;
+    const endpoint = `/community/expert/admin/members/${memberId}/revoke`;
     const response = await serverPost<void>(endpoint);
     return response;
   } catch (error) {

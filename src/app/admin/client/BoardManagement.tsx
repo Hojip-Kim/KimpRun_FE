@@ -74,7 +74,7 @@ const BoardManagement: React.FC = () => {
   const fetchCategories = async () => {
     try {
       const response = await clientRequest.get(
-        `${clientEnv.API_BASE_URL}/category`
+        `/category`
       );
       if (response.success && response.data) {
         setCategories(response.data);
@@ -89,7 +89,7 @@ const BoardManagement: React.FC = () => {
     setIsLoading(true);
     try {
       const response = await clientRequest.get<BoardPage>(
-        `${clientEnv.API_BASE_URL}/board/${categoryId}?page=${page}&size=${pageSize}`
+        `/board/${categoryId}?page=${page}&size=${pageSize}`
       );
 
       if (response.success && response.data) {
@@ -135,7 +135,7 @@ const BoardManagement: React.FC = () => {
 
     try {
       const response = await clientRequest.get(
-        `${clientEnv.API_BASE_URL}/board?boardId=${searchBoardId}&commentPage=1`
+        `/board?boardId=${searchBoardId}&commentPage=1`
       );
 
       if (response.success && response.data) {
@@ -161,7 +161,7 @@ const BoardManagement: React.FC = () => {
 
     try {
       const response = await clientRequest.get<BoardPage>(
-        `${clientEnv.API_BASE_URL}/board/member/${searchMemberId}?page=1&size=${pageSize}`
+        `/board/member/${searchMemberId}?page=1&size=${pageSize}`
       );
 
       if (response.success && response.data) {
@@ -186,7 +186,7 @@ const BoardManagement: React.FC = () => {
 
     try {
       const response = await clientRequest.post(
-        `${clientEnv.API_BASE_URL}/board/${boardId}/soft`
+        `/board/${boardId}/soft`
       );
 
       if (response.success) {
@@ -210,8 +210,8 @@ const BoardManagement: React.FC = () => {
 
     try {
       const endpoint = currentPinStatus
-        ? `${clientEnv.API_BASE_URL}/board/deActivate`
-        : `${clientEnv.API_BASE_URL}/board/activate`;
+        ? `/board/deActivate`
+        : `/board/activate`;
 
       const response = await clientRequest.patch(endpoint, {
         boardIds: [boardId],
@@ -243,8 +243,8 @@ const BoardManagement: React.FC = () => {
 
     try {
       const endpoint = activate
-        ? `${clientEnv.API_BASE_URL}/board/activate`
-        : `${clientEnv.API_BASE_URL}/board/deActivate`;
+        ? `/board/activate`
+        : `/board/deActivate`;
 
       const response = await clientRequest.patch(endpoint, {
         boardIds: selectedBoards,
@@ -278,7 +278,7 @@ const BoardManagement: React.FC = () => {
 
     try {
       const response = await clientRequest.post(
-        `${clientEnv.API_BASE_URL}/board/batch/hard-delete`,
+        `/board/batch/hard-delete`,
         request
       );
 
@@ -322,7 +322,7 @@ const BoardManagement: React.FC = () => {
 
     try {
       const response = await clientRequest.post(
-        `${clientEnv.API_BASE_URL}/board/batch/hard-delete`,
+        `/board/batch/hard-delete`,
         request
       );
 

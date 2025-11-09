@@ -16,10 +16,10 @@ const fetchBoardList = async (
 
   if (categoryId === 1) {
     // 전체 게시글 - SSR과 동일한 엔드포인트 사용
-    endpoint = `${clientEnv.API_BASE_URL}/board/1?page=${page}&size=${size}`;
+    endpoint = `/board/1?page=${page}&size=${size}`;
   } else {
     // 카테고리별 게시글 - API는 1-based 페이지 사용
-    endpoint = `${clientEnv.API_BASE_URL}/board/${categoryId}?page=${page}&size=${size}`;
+    endpoint = `/board/${categoryId}?page=${page}&size=${size}`;
   }
 
   const response = await clientRequest.get<AllPostData>(endpoint, {

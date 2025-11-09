@@ -17,7 +17,7 @@ export async function updateGuestNickname(
 ): Promise<UpdateGuestNicknameResponse | null> {
   try {
     const response = await clientRequest.put<UpdateGuestNicknameResponse>(
-      `${clientEnv.API_BASE_URL}/anonymous/member/nickname`,
+      `/anonymous/member/nickname`,
       {
         uuid,
         nickname,

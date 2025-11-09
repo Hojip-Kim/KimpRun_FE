@@ -73,7 +73,7 @@ const ExpertManagement: React.FC = () => {
   const fetchApplications = async (page: number = 0) => {
     setIsLoading(true);
     try {
-      let endpoint = `${clientEnv.API_BASE_URL}/community/expert/admin/applications?page=${page}&size=20`;
+      let endpoint = `/community/expert/admin/applications?page=${page}&size=20`;
       if (selectedStatus) {
         endpoint += `&status=${selectedStatus}`;
       }
@@ -100,7 +100,7 @@ const ExpertManagement: React.FC = () => {
   const fetchProfiles = async (page: number = 0) => {
     setIsLoading(true);
     try {
-      const endpoint = `${clientEnv.API_BASE_URL}/community/expert/admin/profiles?page=${page}&size=20`;
+      const endpoint = `/community/expert/admin/profiles?page=${page}&size=20`;
       const response = await clientRequest.get(endpoint);
 
       if (response.success && response.data) {
@@ -124,13 +124,13 @@ const ExpertManagement: React.FC = () => {
     try {
       const [pendingRes, approvedRes, rejectedRes] = await Promise.all([
         clientRequest.get(
-          `${clientEnv.API_BASE_URL}/community/expert/admin/applications?status=PENDING&page=0&size=1`
+          `/community/expert/admin/applications?status=PENDING&page=0&size=1`
         ),
         clientRequest.get(
-          `${clientEnv.API_BASE_URL}/community/expert/admin/applications?status=APPROVED&page=0&size=1`
+          `/community/expert/admin/applications?status=APPROVED&page=0&size=1`
         ),
         clientRequest.get(
-          `${clientEnv.API_BASE_URL}/community/expert/admin/applications?status=REJECTED&page=0&size=1`
+          `/community/expert/admin/applications?status=REJECTED&page=0&size=1`
         ),
       ]);
 
@@ -166,7 +166,7 @@ const ExpertManagement: React.FC = () => {
 
     try {
       const response = await clientRequest.post(
-        `${clientEnv.API_BASE_URL}/community/expert/admin/applications/${applicationId}/approve`
+        `/community/expert/admin/applications/${applicationId}/approve`
       );
 
       if (response.success) {
@@ -199,7 +199,7 @@ const ExpertManagement: React.FC = () => {
 
     try {
       const response = await clientRequest.post(
-        `${clientEnv.API_BASE_URL}/community/expert/admin/applications/${rejectingApplicationId}/reject`,
+        `/community/expert/admin/applications/${rejectingApplicationId}/reject`,
         { rejectionReason }
       );
 
@@ -226,7 +226,7 @@ const ExpertManagement: React.FC = () => {
 
     try {
       const response = await clientRequest.post(
-        `${clientEnv.API_BASE_URL}/community/expert/admin/profiles/${profileId}/activate`
+        `/community/expert/admin/profiles/${profileId}/activate`
       );
 
       if (response.success) {
@@ -249,7 +249,7 @@ const ExpertManagement: React.FC = () => {
 
     try {
       const response = await clientRequest.post(
-        `${clientEnv.API_BASE_URL}/community/expert/admin/profiles/${profileId}/deactivate`
+        `/community/expert/admin/profiles/${profileId}/deactivate`
       );
 
       if (response.success) {
@@ -272,7 +272,7 @@ const ExpertManagement: React.FC = () => {
 
     try {
       const response = await clientRequest.post(
-        `${clientEnv.API_BASE_URL}/community/expert/admin/members/${memberId}/revoke`
+        `/community/expert/admin/members/${memberId}/revoke`
       );
 
       if (response.success) {

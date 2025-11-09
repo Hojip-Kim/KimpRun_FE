@@ -75,9 +75,9 @@ const Board: React.FC<BoardProps> = ({
     try {
       let endpoint: string;
       if (categoryId === 1) {
-        endpoint = `${clientEnv.API_BASE_URL}/board/1?page=${page}&size=${size}`;
+        endpoint = `/board/1?page=${page}&size=${size}`;
       } else {
-        endpoint = `${clientEnv.API_BASE_URL}/board/${categoryId}?page=${page}&size=${size}`;
+        endpoint = `/board/${categoryId}?page=${page}&size=${size}`;
       }
 
       const response = await clientRequest.get<AllPostData>(endpoint, {

@@ -13,7 +13,7 @@ export async function getChatLogs(
   size: number = 20
 ): Promise<ProcessedApiResponse<ChatLogPage>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/chat/allLog?page=${page}&size=${size}`;
+    const endpoint = `/chat/allLog?page=${page}&size=${size}`;
     const response = await serverGet<ChatLogPage>(endpoint);
     return response;
   } catch (error) {
@@ -40,7 +40,7 @@ export async function deleteChatAsAdmin(
   request: DeleteChatRequest
 ): Promise<ProcessedApiResponse<void>> {
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/chat/admin`;
+    const endpoint = `/chat/admin`;
     const response = await serverPost<void>(endpoint, {
       inherenceId: request.inherenceId,
     });

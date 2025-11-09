@@ -72,9 +72,9 @@ const Dashboard: React.FC = () => {
   const fetchStats = async () => {
     try {
       const [categoriesRes, runningJobsRes, chatLogRes] = await Promise.all([
-        clientRequest.get(`${clientEnv.API_BASE_URL}/category`),
-        clientRequest.get(`${clientEnv.API_BASE_URL}/batch/cmc/running`),
-        clientRequest.get(`${clientEnv.API_BASE_URL}/chat/allLog?page=1&size=1`),
+        clientRequest.get(`/category`),
+        clientRequest.get(`/batch/cmc/running`),
+        clientRequest.get(`/chat/allLog?page=1&size=1`),
       ]);
 
       const totalCategories =
@@ -115,7 +115,7 @@ const Dashboard: React.FC = () => {
   const fetchBatchHealth = async () => {
     try {
       const response = await clientRequest.get<BatchHealth>(
-        `${clientEnv.API_BASE_URL}/batch/cmc/health`
+        `/batch/cmc/health`
       );
 
       if (response.success && response.data) {
@@ -129,7 +129,7 @@ const Dashboard: React.FC = () => {
   const fetchRunningJobs = async () => {
     try {
       const response = await clientRequest.get<RunningJobs>(
-        `${clientEnv.API_BASE_URL}/batch/cmc/running`
+        `/batch/cmc/running`
       );
 
       if (response.success && response.data) {
@@ -143,7 +143,7 @@ const Dashboard: React.FC = () => {
   const fetchRateLimitStatus = async () => {
     try {
       const response = await clientRequest.get<RateLimitStatus>(
-        `${clientEnv.API_BASE_URL}/batch/cmc/rate-limit-status`
+        `/batch/cmc/rate-limit-status`
       );
 
       if (response.success && response.data) {
@@ -157,7 +157,7 @@ const Dashboard: React.FC = () => {
   const fetchRecentChats = async () => {
     try {
       const response = await clientRequest.get<ChatLogPage>(
-        `${clientEnv.API_BASE_URL}/chat/allLog?page=1&size=5`
+        `/chat/allLog?page=1&size=5`
       );
 
       if (response.success && response.data) {
@@ -171,7 +171,7 @@ const Dashboard: React.FC = () => {
   const fetchRecentJobHistory = async () => {
     try {
       const response = await clientRequest.get(
-        `${clientEnv.API_BASE_URL}/batch/cmc/history?limit=5`
+        `/batch/cmc/history?limit=5`
       );
 
       if (response.success && response.data) {
