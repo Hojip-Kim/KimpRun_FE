@@ -52,7 +52,7 @@ class CsrfTokenManager {
     try {
       // 기존 HTTP 클라이언트를 사용하여 세션 일관성 보장
       const apiResponse = await clientRequest.get(
-        `${clientEnv.API_BASE_URL}/csrf/token`,
+        `/csrf/token`,
         {
           headers: {
             // Cache-Control 헤더 추가로 캐시 방지
