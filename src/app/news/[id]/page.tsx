@@ -23,7 +23,7 @@ export async function generateMetadata({
 }: NewsDetailPageProps): Promise<Metadata> {
   try {
     const newsId = params.id;
-    const endpoint = `${serverEnv.API_BASE_URL}/news/${newsId}`;
+    const endpoint = `/news/${newsId}`;
     const response = await serverGet<NewsItem>(endpoint);
 
     if (response.success && response.data) {
@@ -55,7 +55,7 @@ const NewsDetailPage = async ({ params }: NewsDetailPageProps) => {
   const newsId = params.id;
 
   try {
-    const endpoint = `${serverEnv.API_BASE_URL}/news/${newsId}`;
+    const endpoint = `/news/${newsId}`;
     const response = await serverGet<NewsItem>(endpoint, {
       headers: { 'Content-type': 'application/json' },
     });
